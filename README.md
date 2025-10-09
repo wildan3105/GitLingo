@@ -59,7 +59,7 @@ You can see the feature progress / bug report and pick up some issues in the [is
 Check out this [page](CONTRIBUTING.md)
 ## Other similar projects:
 - [Githut](https://github.com/madnight/githut)
-- [Hacktoberfest Checker](https://github.com/jenkoian/hacktoberfest-checker) (unfortunately it's now archived)
+- [Hacktoberfest Checker](https://github.com/jenkoian/hacktoberfest-checker) (it's now archived)
 
 ## License :
 
