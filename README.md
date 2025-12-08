@@ -14,7 +14,7 @@
 
 ## Why does this project exist?
 
-So people can see the stats of programming language being used in their repositories easily.
+So people and/or organization can see the stats of programming language being used in their repositories easily.
 
 ## Key features
 - Show statistics of repo's programming language (overall) from a given github account
