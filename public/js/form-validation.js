@@ -3,17 +3,16 @@
 // Form validation for GitHub username search
 document.getElementById('search-form').onsubmit = function() {
     const inputField = document.getElementById('username');
-    const username = inputField.value.trim();
+    // Auto-remove all spaces from the username
+    const username = inputField.value.replace(/\s/g, '');
 
     if (username === '') {
-        alert('Username cannot be empty or contain only spaces.');
+        alert('Username cannot be empty.');
         return false; // Prevent form submission
     }
 
-    if (/\s/.test(inputField.value)) {
-        alert('Username cannot contain any spaces.');
-        return false;
-    }
+    // Update the input field with the cleaned value
+    inputField.value = username;
 
     showLoader();
     return true; // Allow form submission
