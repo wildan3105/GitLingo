@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global showLoader */
 
 // Form validation for GitHub username search
 document.getElementById('search-form').onsubmit = function() {
@@ -10,7 +10,7 @@ document.getElementById('search-form').onsubmit = function() {
         return false; // Prevent form submission
     }
 
-    if (/\s/.test(inputField.value)) {
+    if (/\s/.test(username)) {
         alert('Username cannot contain any spaces.');
         return false;
     }
