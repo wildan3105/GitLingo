@@ -10,7 +10,7 @@ document.getElementById('search-form').onsubmit = function() {
         return false; // Prevent form submission
     }
 
-    if (/\s/.test(username)) {
+    if (/\s/.test(inputField.value)) {
         alert('Username cannot contain any spaces.');
         return false;
     }
