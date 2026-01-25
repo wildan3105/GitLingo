@@ -29,22 +29,21 @@ So people and/or organization can see the stats of programming language being us
 ### Supported environment:
 * Prerequisite: 
 ```bash
-Node >= v18.18.0
-NPM >= 9.5.0
+Node >= 20.6.0+ (to enable .env support)
+NPM >= 9.8.1
 ```
 
 * [Generate access token (classic)](https://github.com/settings/tokens/new) with `repo` scope to ensure you don't get rate limited API call.
 
-* Define environment variable with the following values:
+* Copy `.env.example` to `.env` and fill in the required environment variables:
 ```
-TOKEN=your-access-token
 ENV=local
+TOKEN=your_github_access_token_here
+PORT=3000
 ```
-
-An example of environment variable is provided [here](.env.example)
 
 * Install dependency: `npm install`
-* Start the app `<list-of-env-and-values> npm run start` and go to `http://localhost:3000`
+* Start the app `npm run start:local` and go to `http://localhost:3000`
 
 ## Running with hot-reload
 ```bash

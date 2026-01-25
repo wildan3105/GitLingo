@@ -4,12 +4,13 @@
   "type": "module",
   "description": "show programming language based on the repos of github's account",
   "engines": {
-    "node": "18.18.0",
+    "node": "20.6.0",
     "npm": "9.5.0"
   },
   "main": "index.js",
   "scripts": {
     "start": "node src/api/app.js | gulp",
+    "start:local": "node --env-file=.env src/api/app.js | gulp",
     "dev": "concurrently \"node src/api/app.js\" \"gulp watch\"",
     "lint": "eslint '**/*.js' --ignore-pattern src/utils/*.js",
     "lint:fix": "eslint --fix '**/*.js' --ignore-pattern node_modules/",
