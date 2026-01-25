@@ -10,11 +10,11 @@
     <div class="container">
       <div class="row">
         <div class="order-md-2 col-md-6">
-          <form id="search-form" method="get" action="#">
+          <form id="search-form" action="" method="get" action="#">
             <div class="input-group">
-              <input type="text" class="form-control" autofocus="autofocus" id="username" name="username" placeholder="GitHub username"
+              <input type="text" class="form-control" autofocus="autofocus" id="username" name="username" placeholder="Github username"
                 required title="Username cannot be empty or contain only spaces" maxlength="39">
-              <button type="submit" class="btn" name="" aria-label="Search GitHub user">
+              <button type="submit" class="input-group-addon btn" name="" onClick="return validateInput();">
                 <i class="fa fa-search"></i>
               </button>
             </div>
@@ -101,6 +101,17 @@
 </center>
 
 <script src="public/js/spinner.js"></script>
-<script src="public/js/form-validation.js"></script>
 <div id="fb-root"></div>
 <script src="public/js/social.js"></script>
+
+<script>
+  function validateInput() {
+    const inputField = document.getElementById("username");
+    if (/\s/.test(inputField.value)) {
+      alert("Username cannot contain any spaces.");
+      return false;
+    }
+    showLoader();
+    return true;
+  }
+</script>
