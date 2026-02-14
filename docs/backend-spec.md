@@ -136,7 +136,8 @@ For now, let's only provide single endpoint for frontend to interact with backen
   "profile": {
     "username": "octocat",
     "type": "user",
-    "providerUserId": "1"
+    "providerUserId": "1",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/583231?v=4"
   },
   "series": [
     { "key": "JavaScript", "label": "JavaScript", "value": 100, "color": "#f1e05a" },

@@ -44,6 +44,7 @@ export interface GitHubRepositoryConnection {
 export interface GitHubUser {
   login: string;
   id: string;
+  avatarUrl: string;
   repositories: GitHubRepositoryConnection;
 }
 

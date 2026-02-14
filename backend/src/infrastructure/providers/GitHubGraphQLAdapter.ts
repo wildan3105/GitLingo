@@ -62,6 +62,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             username: account.login,
             type: response.user ? 'user' : 'organization',
             providerUserId: account.id,
+            avatarUrl: account.avatarUrl,
           };
         }
 
@@ -107,6 +108,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
         user(login: $username) {
           login
           id
+          avatarUrl
           repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
             nodes {
               name
@@ -125,6 +127,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
         organization(login: $username) {
           login
           id
+          avatarUrl
           repositories(first: 100, after: $cursor) {
             nodes {
               name

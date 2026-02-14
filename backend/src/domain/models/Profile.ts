@@ -18,4 +18,9 @@ export interface Profile {
    * Provider-specific user ID
    */
   providerUserId: string;
+
+  /**
+   * Optional avatar URL for the profile
+   */
+  avatarUrl?: string;
 }
