@@ -6,14 +6,17 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 
+const MINIMUM_USERNAME_LENGTH = 1;
+const MAXIMUM_USERNAME_LENGTH = 39;
+
 /**
  * Zod schema for search query parameters
  */
 export const searchQuerySchema = z.object({
   username: z
     .string()
-    .min(1, 'Username is required')
-    .max(39, 'Username must be 39 characters or less')
+    .min(MINIMUM_USERNAME_LENGTH, 'Username is required')
+    .max(MAXIMUM_USERNAME_LENGTH, 'Username must be 39 characters or less')
     .regex(/^[A-Za-z0-9-]+$/, 'Username can only contain letters, numbers, and hyphens'),
 
   provider: z.enum(['github', 'gitlab', 'bitbucket']).default('github').optional(),
