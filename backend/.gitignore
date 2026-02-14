@@ -35,3 +35,4 @@ coverage/
 *.tmp
 *.temp
 .cache/
+debug/

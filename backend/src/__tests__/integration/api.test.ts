@@ -159,6 +159,18 @@ describe('API Integration Tests', () => {
             user: null,
             organization: null,
           },
+          errors: [
+            {
+              type: 'NOT_FOUND',
+              path: ['user'],
+              message: "Could not resolve to a User with the login of 'nonexistent'.",
+            },
+            {
+              type: 'NOT_FOUND',
+              path: ['organization'],
+              message: "Could not resolve to an Organization with the login of 'nonexistent'.",
+            },
+          ],
         });
 
       const response = await request(app).get('/api/v1/search?username=nonexistent');

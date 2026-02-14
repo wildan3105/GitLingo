@@ -52,5 +52,11 @@ At the moment, it's still emtpy as we want to focus on the backend first.
 
 Let's make small, incremental, but "proven" changes so that we can test it one-by-one before committing the code. Keep this principle across changes and always confirm with me **before** making changes.
 
+**Rules of thumb**
+1. Make changes
+2. Manual test
+3. Add/update unit and integration test
+4. Confirm it works
+
 # Notes
 TBD

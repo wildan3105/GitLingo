@@ -143,6 +143,18 @@ describe('GitHubGraphQLAdapter', () => {
             user: null,
             organization: null,
           },
+          errors: [
+            {
+              type: 'NOT_FOUND',
+              path: ['user'],
+              message: "Could not resolve to a User with the login of 'nonexistent'.",
+            },
+            {
+              type: 'NOT_FOUND',
+              path: ['organization'],
+              message: "Could not resolve to an Organization with the login of 'nonexistent'.",
+            },
+          ],
         });
 
       await expect(adapter.fetchRepositories('nonexistent')).rejects.toThrow(ProviderError);

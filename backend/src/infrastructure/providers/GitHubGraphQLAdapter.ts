@@ -179,19 +179,46 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       status?: number;
     };
 
-    // Rate limiting
+    // Check for GraphQL errors array with type field (structured errors)
+    if (err.errors && Array.isArray(err.errors)) {
+      // User not found: Check if all errors are NOT_FOUND type
+      const allNotFound = err.errors.every((e) => e.type === 'NOT_FOUND');
+      if (allNotFound && err.errors.length > 0) {
+        return new ProviderError({
+          code: 'USER_NOT_FOUND',
+          message: `GitHub user or organization '${username}' not found`,
+          details: { username },
+          cause: err,
+        });
+      }
+
+      // Rate limiting: Check for RATE_LIMITED type
+      const hasRateLimit = err.errors.some(
+        (e) => e.type === 'RATE_LIMITED' || e.message?.toLowerCase().includes('rate limit')
+      );
+      if (hasRateLimit) {
+        return new ProviderError({
+          code: 'RATE_LIMITED',
+          message: 'GitHub API rate limit exceeded',
+          retryAfter: 60,
+          details: { username },
+          cause: err,
+        });
+      }
+    }
+
+    // Fallback: HTTP status-based detection
     if (err.status === 403 || err.message?.toLowerCase().includes('rate limit')) {
       return new ProviderError({
         code: 'RATE_LIMITED',
         message: 'GitHub API rate limit exceeded',
-        retryAfter: 60, // Default 1 minute, could parse from headers
+        retryAfter: 60,
         details: { username },
         cause: err,
       });
     }
 
-    // User not found (404)
-    if (err.status === 404 || err.message?.toLowerCase().includes('not found')) {
+    if (err.status === 404) {
       return new ProviderError({
         code: 'USER_NOT_FOUND',
         message: `GitHub user or organization '${username}' not found`,
