@@ -3,6 +3,7 @@
  * Radar chart showing top languages
  */
 
+import { memo, useMemo } from 'react'
 import { Radar } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { radarChartOptions } from '../../config/chartDefaults'
@@ -32,49 +33,61 @@ export type RadarChartViewProps = {
  * <RadarChartView series={languageSeries} isLoading={false} />
  * ```
  */
-export function RadarChartView({ series, isLoading = false }: RadarChartViewProps) {
-  if (isLoading) {
-    return <LoadingState variant="chart" />
-  }
+export const RadarChartView = memo(function RadarChartView({
+  series,
+  isLoading = false,
+}: RadarChartViewProps) {
+  // Memoize normalized data
+  const { labels, values, colors } = useMemo(
+    () => normalizeSeries(series, { excludeForks: true, maxItems: 8 }),
+    [series]
+  )
 
-  const { labels, values, colors } = normalizeSeries(series, {
-    excludeForks: true, // Exclude forks from radar
-    maxItems: 8, // Limit to top 8 to avoid clutter
-  })
+  // Memoize chart data
+  const data = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          label: 'Repositories',
+          data: values,
+          backgroundColor: colors.map((color) => `${color}33`),
+          borderColor: colors,
+          borderWidth: 2,
+          pointBackgroundColor: colors,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        },
+      ],
+    }),
+    [labels, values, colors]
+  )
 
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Repositories',
-        data: values,
-        backgroundColor: colors.map((color) => `${color}33`), // 20% opacity
-        borderColor: colors,
-        borderWidth: 2,
-        pointBackgroundColor: colors,
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      },
-    ],
-  }
-
-  const options = {
-    ...radarChartOptions,
-    plugins: {
-      ...radarChartOptions.plugins,
-      tooltip: {
-        ...radarChartOptions.plugins?.tooltip,
-        callbacks: {
-          label: (context: TooltipItem<'radar'>) => {
-            const label = context.dataset.label || ''
-            const value = context.parsed.r || 0
-            return `${label}: ${value} repositories`
+  // Memoize chart options
+  const options = useMemo(
+    () => ({
+      ...radarChartOptions,
+      plugins: {
+        ...radarChartOptions.plugins,
+        tooltip: {
+          ...radarChartOptions.plugins?.tooltip,
+          callbacks: {
+            label: (context: TooltipItem<'radar'>) => {
+              const label = context.dataset.label || ''
+              const value = context.parsed.r || 0
+              return `${label}: ${value} repositories`
+            },
           },
         },
       },
-    },
+    }),
+    []
+  )
+
+  if (isLoading) {
+    return <LoadingState variant="chart" />
   }
 
   return (
@@ -82,4 +95,4 @@ export function RadarChartView({ series, isLoading = false }: RadarChartViewProp
       <Radar data={data} options={options} />
     </div>
   )
-}
+})

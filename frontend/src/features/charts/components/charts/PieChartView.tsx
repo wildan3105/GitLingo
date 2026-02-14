@@ -3,6 +3,7 @@
  * Pie chart showing language distribution
  */
 
+import { memo, useMemo } from 'react'
 import { Pie } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { pieChartOptions } from '../../config/chartDefaults'
@@ -32,47 +33,60 @@ export type PieChartViewProps = {
  * <PieChartView series={languageSeries} isLoading={false} />
  * ```
  */
-export function PieChartView({ series, isLoading = false }: PieChartViewProps) {
-  if (isLoading) {
-    return <LoadingState variant="chart" />
-  }
-
-  const { labels, values, colors } = normalizeSeries(series, {
-    excludeForks: true, // Pie charts look cleaner without forks
-  })
+export const PieChartView = memo(function PieChartView({
+  series,
+  isLoading = false,
+}: PieChartViewProps) {
+  // Memoize normalized data
+  const { labels, values, colors } = useMemo(
+    () => normalizeSeries(series, { excludeForks: true }),
+    [series]
+  )
 
   // Calculate total for percentages
-  const total = values.reduce((sum, value) => sum + value, 0)
+  const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
 
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Repositories',
-        data: values,
-        backgroundColor: colors,
-        borderColor: '#ffffff',
-        borderWidth: 2,
-      },
-    ],
-  }
+  // Memoize chart data
+  const data = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          label: 'Repositories',
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    }),
+    [labels, values, colors]
+  )
 
-  const options = {
-    ...pieChartOptions,
-    plugins: {
-      ...pieChartOptions.plugins,
-      tooltip: {
-        ...pieChartOptions.plugins?.tooltip,
-        callbacks: {
-          label: (context: TooltipItem<'pie'>) => {
-            const label = context.label || ''
-            const value = context.parsed || 0
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
-            return `${label}: ${value} repositories (${percentage}%)`
+  // Memoize chart options
+  const options = useMemo(
+    () => ({
+      ...pieChartOptions,
+      plugins: {
+        ...pieChartOptions.plugins,
+        tooltip: {
+          ...pieChartOptions.plugins?.tooltip,
+          callbacks: {
+            label: (context: TooltipItem<'pie'>) => {
+              const label = context.label || ''
+              const value = context.parsed || 0
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
+              return `${label}: ${value} repositories (${percentage}%)`
+            },
           },
         },
       },
-    },
+    }),
+    [total]
+  )
+
+  if (isLoading) {
+    return <LoadingState variant="chart" />
   }
 
   return (
@@ -80,4 +94,4 @@ export function PieChartView({ series, isLoading = false }: PieChartViewProps) {
       <Pie data={data} options={options} />
     </div>
   )
-}
+})

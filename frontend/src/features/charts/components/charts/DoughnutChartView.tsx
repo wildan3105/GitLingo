@@ -3,6 +3,7 @@
  * Doughnut chart (pie with center hole) showing language distribution
  */
 
+import { memo, useMemo } from 'react'
 import { Doughnut } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { doughnutChartOptions } from '../../config/chartDefaults'
@@ -33,47 +34,60 @@ export type DoughnutChartViewProps = {
  * <DoughnutChartView series={languageSeries} isLoading={false} />
  * ```
  */
-export function DoughnutChartView({ series, isLoading = false }: DoughnutChartViewProps) {
-  if (isLoading) {
-    return <LoadingState variant="chart" />
-  }
-
-  const { labels, values, colors } = normalizeSeries(series, {
-    excludeForks: true, // Doughnut charts look cleaner without forks
-  })
+export const DoughnutChartView = memo(function DoughnutChartView({
+  series,
+  isLoading = false,
+}: DoughnutChartViewProps) {
+  // Memoize normalized data
+  const { labels, values, colors } = useMemo(
+    () => normalizeSeries(series, { excludeForks: true }),
+    [series]
+  )
 
   // Calculate total for percentages
-  const total = values.reduce((sum, value) => sum + value, 0)
+  const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
 
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Repositories',
-        data: values,
-        backgroundColor: colors,
-        borderColor: '#ffffff',
-        borderWidth: 2,
-      },
-    ],
-  }
+  // Memoize chart data
+  const data = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          label: 'Repositories',
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    }),
+    [labels, values, colors]
+  )
 
-  const options = {
-    ...doughnutChartOptions,
-    plugins: {
-      ...doughnutChartOptions.plugins,
-      tooltip: {
-        ...doughnutChartOptions.plugins?.tooltip,
-        callbacks: {
-          label: (context: TooltipItem<'doughnut'>) => {
-            const label = context.label || ''
-            const value = context.parsed || 0
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
-            return `${label}: ${value} repositories (${percentage}%)`
+  // Memoize chart options
+  const options = useMemo(
+    () => ({
+      ...doughnutChartOptions,
+      plugins: {
+        ...doughnutChartOptions.plugins,
+        tooltip: {
+          ...doughnutChartOptions.plugins?.tooltip,
+          callbacks: {
+            label: (context: TooltipItem<'doughnut'>) => {
+              const label = context.label || ''
+              const value = context.parsed || 0
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
+              return `${label}: ${value} repositories (${percentage}%)`
+            },
           },
         },
       },
-    },
+    }),
+    [total]
+  )
+
+  if (isLoading) {
+    return <LoadingState variant="chart" />
   }
 
   return (
@@ -81,4 +95,4 @@ export function DoughnutChartView({ series, isLoading = false }: DoughnutChartVi
       <Doughnut data={data} options={options} />
     </div>
   )
-}
+})

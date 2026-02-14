@@ -3,7 +3,7 @@
  * Text input for username search with client-side validation
  */
 
-import { useState, KeyboardEvent, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, KeyboardEvent, ChangeEvent } from 'react'
 import { validateUsername } from '../utils/validation'
 
 export type SearchBarProps = {
@@ -22,6 +22,12 @@ export type SearchBarProps = {
 export function SearchBar({ value, onChange, onSubmit, isLoading = false, error }: SearchBarProps) {
   const [touched, setTouched] = useState(false)
   const [validationError, setValidationError] = useState<string | undefined>()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-focus input on mount for better UX
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
@@ -76,6 +82,7 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
 
       <div className="relative">
         <input
+          ref={inputRef}
           id="username-search"
           type="text"
           value={value}

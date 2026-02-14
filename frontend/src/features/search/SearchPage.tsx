@@ -165,29 +165,28 @@ export function SearchPage() {
             </div>
           </Card>
 
-          {/* Results */}
-          {hasData && data && (
-            <>
-              {/* Profile Header */}
-              <Card padding="lg">
-                <ResultHeader
-                  profile={data.profile}
-                  totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
-                  provider={provider}
-                />
-              </Card>
-
-              {/* Chart Panel */}
-              <ChartPanel
-                series={data.series}
-                username={username}
+          {/* Profile Header - Show for any successful search */}
+          {data && !isLoading && (
+            <Card padding="lg">
+              <ResultHeader
+                profile={data.profile}
+                totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
                 provider={provider}
-                isLoading={isLoading}
               />
-            </>
+            </Card>
           )}
 
-          {/* No Repositories State */}
+          {/* Chart Panel - Only show if user has repositories */}
+          {hasData && data && (
+            <ChartPanel
+              series={data.series}
+              username={username}
+              provider={provider}
+              isLoading={isLoading}
+            />
+          )}
+
+          {/* No Repositories State - Show after profile if no repos */}
           {data && !hasData && !isLoading && (
             <Card>
               <EmptyState
