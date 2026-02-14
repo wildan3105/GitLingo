@@ -11,6 +11,12 @@ const MINIMUM_USERNAME_LENGTH = 1;
 const MAXIMUM_USERNAME_LENGTH = 39;
 
 /**
+ * Extract provider values from the enum with proper typing for zod.enum()
+ * Cast to [string, ...string[]] to satisfy zod's type requirements
+ */
+const providerValues = Object.values(Providers) as [string, ...string[]];
+
+/**
  * Zod schema for search query parameters
  */
 export const searchQuerySchema = z.object({
@@ -20,7 +26,7 @@ export const searchQuerySchema = z.object({
     .max(MAXIMUM_USERNAME_LENGTH, 'Username must be 39 characters or less')
     .regex(/^[A-Za-z0-9-]+$/, 'Username can only contain letters, numbers, and hyphens'),
 
-  provider: z.enum(Object.values(Providers)).default(DEFAULT_PROVIDER).optional(),
+  provider: z.enum(providerValues).default(DEFAULT_PROVIDER).optional(),
 });
 
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
