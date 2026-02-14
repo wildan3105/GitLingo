@@ -143,8 +143,33 @@ Get language statistics for a GitHub user.
 | `validation_error` | 400 | Invalid query parameters |
 | `user_not_found` | 404 | GitHub user not found |
 | `rate_limited` | 429 | API rate limit exceeded |
+| `timeout` | 504 | Request timeout (>90s) |
 | `network_error` | 503 | Network issues |
 | `provider_error` | 500 | GitHub API error |
+
+## Fork Handling
+
+**Important:** This API handles forked repositories differently from GitHub's REST API.
+
+### How It Works
+
+**Forked repositories are counted separately**, not included in language statistics:
+
+```json
+{
+  "series": [
+    { "key": "Go", "value": 15 },           // Non-forked repos only
+    { "key": "__forks__", "value": 9 }      // All forks counted here
+  ]
+}
+```
+
+### Why?
+
+This design provides **more accurate statistics** about a user's original work:
+- Language counts reflect **repos the user created/owns**
+- Forks are tracked separately to show contribution activity
+- Prevents inflated statistics from forked repositories
 
 ## Docker
 
