@@ -4,7 +4,7 @@
 
 GitLingo is a full-stack web application that analyzes GitHub user repositories and visualizes their programming language distribution through interactive charts. Built with modern web technologies and following domain-driven design principles.
 
-![GitLingo Screenshot](./docs/screenshots/current-state.png)
+![GitLingo Screenshot](./images/homepage.png)
 
 ## Features
 
