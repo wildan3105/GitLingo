@@ -6,7 +6,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SearchService } from '../../application/services/SearchService';
 import { SearchQuery } from '../validation/searchSchema';
-import { DEFAULT_PROVIDER } from 'shared/constants/providers';
+import { DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 export class SearchController {
   private readonly searchService: SearchService;
