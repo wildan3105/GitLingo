@@ -59,7 +59,7 @@ export function ChartTypeSelect({ value, onChange }: ChartTypeSelectProps) {
     <div
       role="tablist"
       aria-label="Chart type selection"
-      className="flex gap-2 overflow-x-auto pb-2"
+      className="flex gap-2 overflow-x-auto p-2"
     >
       {CHART_TYPES.map((chartType) => {
         const isActive = value === chartType.value
