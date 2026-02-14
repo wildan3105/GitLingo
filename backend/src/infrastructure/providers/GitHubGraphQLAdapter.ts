@@ -5,7 +5,8 @@
 
 import { graphql } from '@octokit/graphql';
 import { Repository } from '../../domain/models/Repository';
-import { ProviderPort } from '../../domain/ports/ProviderPort';
+import { Profile } from '../../domain/models/Profile';
+import { ProviderPort, AccountData } from '../../domain/ports/ProviderPort';
 import { ProviderError } from '../errors/ProviderError';
 import { GitHubUserQueryResponse, GitHubRepository } from './types/GitHubTypes';
 
@@ -24,13 +25,14 @@ export class GitHubGraphQLAdapter implements ProviderPort {
   }
 
   /**
-   * Fetch all repositories for a GitHub user or organization
+   * Fetch all repositories and profile for a GitHub user or organization
    */
-  public async fetchRepositories(username: string): Promise<Repository[]> {
+  public async fetchRepositories(username: string): Promise<AccountData> {
     try {
       const allRepos: GitHubRepository[] = [];
       let hasNextPage = true;
       let cursor: string | null = null;
+      let accountProfile: Profile | null = null;
 
       // Paginate through all repositories
       while (hasNextPage) {
@@ -53,6 +55,15 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           });
         }
 
+        // Extract profile on first page
+        if (!accountProfile) {
+          accountProfile = {
+            username: account.login,
+            type: response.user ? 'user' : 'organization',
+            providerUserId: account.id,
+          };
+        }
+
         const { nodes, pageInfo } = account.repositories;
 
         allRepos.push(...nodes);
@@ -61,7 +72,10 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       }
 
       // Map GitHub repositories to domain models
-      return this.mapToDomainRepositories(allRepos);
+      return {
+        profile: accountProfile!,
+        repositories: this.mapToDomainRepositories(allRepos),
+      };
     } catch (error) {
       // Already a ProviderError, re-throw
       if (error instanceof ProviderError) {

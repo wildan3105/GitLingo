@@ -32,6 +32,11 @@ export interface SearchError {
      * Additional error context
      */
     details?: Record<string, unknown>;
+
+    /**
+     * Seconds to wait before retrying (for rate limit errors)
+     */
+    retry_after_seconds?: number;
   };
 
   /**

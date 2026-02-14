@@ -10,6 +10,7 @@ module.exports = {
     '!src/**/*.test.ts',
     '!src/**/manual-test.ts',
     '!src/index.ts', // Entry point, tested via integration tests
+    '!src/**/index.ts', // Re-export files
   ],
   coverageThreshold: {
     global: {

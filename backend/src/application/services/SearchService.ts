@@ -6,7 +6,6 @@
 import { ProviderPort } from '../../domain/ports/ProviderPort';
 import { Repository } from '../../domain/models/Repository';
 import { LanguageStatistic } from '../../domain/models/LanguageStatistic';
-import { Profile } from '../../domain/models/Profile';
 import { getLanguageColor, FORK_COLOR } from '../../shared/constants/languageColors';
 import { ProviderError } from '../../infrastructure/errors/ProviderError';
 import { SearchResult } from '../types/SearchResult';
@@ -24,16 +23,13 @@ export class SearchService {
    */
   public async searchLanguageStatistics(username: string): Promise<SearchResult | SearchError> {
     try {
-      // 1. Fetch repositories from provider
-      const repositories = await this.provider.fetchRepositories(username);
+      // 1. Fetch repositories and profile from provider
+      const { profile, repositories } = await this.provider.fetchRepositories(username);
 
-      // 2. Extract profile information
-      const profile = this.extractProfile(username, repositories);
-
-      // 3. Aggregate and count repositories by language
+      // 2. Aggregate and count repositories by language
       const series = this.aggregateLanguageStatistics(repositories);
 
-      // 4. Return successful result
+      // 3. Return successful result
       return {
         ok: true,
         provider: this.provider.getProviderName(),
@@ -49,19 +45,6 @@ export class SearchService {
       // Transform provider errors to search errors
       return this.handleError(error, username);
     }
-  }
-
-  /**
-   * Extract profile information from repositories or username
-   */
-  private extractProfile(username: string, _repositories: Repository[]): Profile {
-    // For now, we'll create a basic profile
-    // In a real implementation, we might fetch this from the provider
-    return {
-      username,
-      type: 'user', // Default to user; could be enhanced to detect organization
-      providerUserId: username, // Provider-specific ID would come from API
-    };
   }
 
   /**
@@ -128,6 +111,7 @@ export class SearchService {
           code: error.code.toLowerCase(),
           message: error.message,
           details: error.details ?? { username },
+          ...(error.retryAfter !== undefined && { retry_after_seconds: error.retryAfter }),
         },
         meta: {
           generatedAt,

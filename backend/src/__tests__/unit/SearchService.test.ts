@@ -3,7 +3,7 @@
  */
 
 import { SearchService } from '../../application/services/SearchService';
-import { ProviderPort } from '../../domain/ports/ProviderPort';
+import { ProviderPort, AccountData } from '../../domain/ports/ProviderPort';
 import { Repository } from '../../domain/models/Repository';
 import { ProviderError } from '../../infrastructure/errors/ProviderError';
 
@@ -11,8 +11,15 @@ import { ProviderError } from '../../infrastructure/errors/ProviderError';
 class MockProvider implements ProviderPort {
   constructor(private mockRepos: Repository[] = []) {}
 
-  async fetchRepositories(_username: string): Promise<Repository[]> {
-    return this.mockRepos;
+  async fetchRepositories(username: string): Promise<AccountData> {
+    return {
+      profile: {
+        username,
+        type: 'user',
+        providerUserId: 'mock-id-123',
+      },
+      repositories: this.mockRepos,
+    };
   }
 
   getProviderName(): string {
@@ -159,7 +166,7 @@ describe('SearchService', () => {
 
     it('should transform ProviderError to SearchError', async () => {
       class FailingProvider implements ProviderPort {
-        async fetchRepositories(_username: string): Promise<Repository[]> {
+        async fetchRepositories(_username: string): Promise<AccountData> {
           throw new ProviderError({
             code: 'USER_NOT_FOUND',
             message: 'User not found',

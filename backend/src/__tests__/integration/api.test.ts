@@ -93,6 +93,7 @@ describe('API Integration Tests', () => {
         profile: {
           username: 'testuser',
           type: 'user',
+          providerUserId: '123',
         },
         series: expect.arrayContaining([
           expect.objectContaining({
@@ -146,6 +147,40 @@ describe('API Integration Tests', () => {
       });
     });
 
+    it('should accept provider query parameter with default github', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '456',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Rust' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      // Test with explicit provider=github
+      const response = await request(app).get('/api/v1/search?username=testuser&provider=github');
+
+      expect(response.status).toBe(200);
+      expect(response.body.provider).toBe('github');
+    });
+
+    it('should return 400 for invalid provider', async () => {
+      const response = await request(app).get('/api/v1/search?username=testuser&provider=invalid');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 'validation_error',
+          message: 'Invalid query parameters',
+        },
+      });
+    });
+
     it('should return 404 for non-existent user', async () => {
       const error: any = new Error('GraphQL Error: NOT_FOUND');
       error.errors = [
@@ -185,6 +220,7 @@ describe('API Integration Tests', () => {
         ok: false,
         error: {
           code: 'rate_limited',
+          retry_after_seconds: 60,
         },
       });
     });

@@ -41,15 +41,20 @@ describe('GitHubGraphQLAdapter', () => {
         organization: null,
       });
 
-      const repos = await adapter.fetchRepositories('testuser');
+      const result = await adapter.fetchRepositories('testuser');
 
-      expect(repos).toHaveLength(2);
-      expect(repos[0]).toEqual({
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+      });
+      expect(result.repositories).toHaveLength(2);
+      expect(result.repositories[0]).toEqual({
         name: 'repo1',
         language: 'JavaScript',
         isFork: false,
       });
-      expect(repos[1]).toEqual({
+      expect(result.repositories[1]).toEqual({
         name: 'repo2',
         language: 'Python',
         isFork: false,
@@ -72,10 +77,10 @@ describe('GitHubGraphQLAdapter', () => {
         organization: null,
       });
 
-      const repos = await adapter.fetchRepositories('testuser');
+      const result = await adapter.fetchRepositories('testuser');
 
-      expect(repos).toHaveLength(1);
-      expect(repos[0]?.language).toBeNull();
+      expect(result.repositories).toHaveLength(1);
+      expect(result.repositories[0]?.language).toBeNull();
     });
 
     it('should handle pagination correctly', async () => {
@@ -109,11 +114,11 @@ describe('GitHubGraphQLAdapter', () => {
         organization: null,
       });
 
-      const repos = await adapter.fetchRepositories('testuser');
+      const result = await adapter.fetchRepositories('testuser');
 
-      expect(repos).toHaveLength(2);
-      expect(repos[0]?.name).toBe('repo1');
-      expect(repos[1]?.name).toBe('repo2');
+      expect(result.repositories).toHaveLength(2);
+      expect(result.repositories[0]?.name).toBe('repo1');
+      expect(result.repositories[1]?.name).toBe('repo2');
     });
 
     it('should throw USER_NOT_FOUND error when user does not exist', async () => {
@@ -161,6 +166,32 @@ describe('GitHubGraphQLAdapter', () => {
     it('should return provider name as github', () => {
       const adapter = new GitHubGraphQLAdapter();
       expect(adapter.getProviderName()).toBe('github');
+    });
+
+    it('should handle organization accounts', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          id: '456',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('testorg');
+
+      expect(result.profile).toEqual({
+        username: 'testorg',
+        type: 'organization',
+        providerUserId: '456',
+      });
+      expect(result.repositories).toHaveLength(1);
     });
   });
 });
