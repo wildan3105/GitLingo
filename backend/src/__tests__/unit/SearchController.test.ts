@@ -136,5 +136,72 @@ describe('SearchController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
       expect(statusMock).not.toHaveBeenCalled();
     });
+
+    it('should return 501 for unimplemented provider (gitlab)', async () => {
+      mockRequest.query = { username: 'testuser', provider: 'gitlab' };
+
+      const controller = new SearchController(mockSearchService);
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(statusMock).toHaveBeenCalledWith(501);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ok: false,
+          provider: 'gitlab',
+          error: expect.objectContaining({
+            code: 'not_implemented',
+            message: expect.stringContaining('gitlab'),
+          }),
+        })
+      );
+      expect(mockSearchService.searchLanguageStatistics).not.toHaveBeenCalled();
+    });
+
+    it('should return 501 for unimplemented provider (bitbucket)', async () => {
+      mockRequest.query = { username: 'testuser', provider: 'bitbucket' };
+
+      const controller = new SearchController(mockSearchService);
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(statusMock).toHaveBeenCalledWith(501);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ok: false,
+          provider: 'bitbucket',
+          error: expect.objectContaining({
+            code: 'not_implemented',
+          }),
+        })
+      );
+      expect(mockSearchService.searchLanguageStatistics).not.toHaveBeenCalled();
+    });
+
+    it('should work with github provider (default)', async () => {
+      mockRequest.query = { username: 'testuser', provider: 'github' };
+
+      const successResult = {
+        ok: true as const,
+        provider: 'github',
+        profile: {
+          username: 'testuser',
+          type: 'user' as const,
+          providerUserId: '123',
+        },
+        series: [],
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          unit: 'repos' as const,
+          limit: 0,
+        },
+      };
+
+      mockSearchService.searchLanguageStatistics.mockResolvedValue(successResult);
+
+      const controller = new SearchController(mockSearchService);
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(mockSearchService.searchLanguageStatistics).toHaveBeenCalledWith('testuser');
+    });
   });
 });

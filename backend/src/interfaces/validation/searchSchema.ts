@@ -5,6 +5,7 @@
 
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
+import { Providers, DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 const MINIMUM_USERNAME_LENGTH = 1;
 const MAXIMUM_USERNAME_LENGTH = 39;
@@ -19,7 +20,7 @@ export const searchQuerySchema = z.object({
     .max(MAXIMUM_USERNAME_LENGTH, 'Username must be 39 characters or less')
     .regex(/^[A-Za-z0-9-]+$/, 'Username can only contain letters, numbers, and hyphens'),
 
-  provider: z.enum(['github', 'gitlab', 'bitbucket']).default('github').optional(),
+  provider: z.enum(Object.values(Providers)).default(DEFAULT_PROVIDER).optional(),
 });
 
 export type SearchQuery = z.infer<typeof searchQuerySchema>;

@@ -1,3 +1,5 @@
+import { Providers } from '../constants/providers';
+
 /**
  * Common Types
  * Shared type definitions used across the application
@@ -6,7 +8,7 @@
 /**
  * Supported version control providers
  */
-export type Provider = 'github' | 'gitlab' | 'bitbucket';
+export type Provider = Providers.GITHUB | Providers.GITLAB | Providers.BITBUCKET;
 
 /**
  * Environment modes

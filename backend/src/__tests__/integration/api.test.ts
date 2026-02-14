@@ -181,6 +181,40 @@ describe('API Integration Tests', () => {
       });
     });
 
+    it('should return 501 for unimplemented provider (gitlab)', async () => {
+      const response = await request(app).get('/api/v1/search?username=testuser&provider=gitlab');
+
+      expect(response.status).toBe(501);
+      expect(response.body).toMatchObject({
+        ok: false,
+        provider: 'gitlab',
+        error: {
+          code: 'not_implemented',
+          message: expect.stringContaining('gitlab'),
+          details: {
+            provider: 'gitlab',
+            supportedProviders: ['github'],
+          },
+        },
+      });
+    });
+
+    it('should return 501 for unimplemented provider (bitbucket)', async () => {
+      const response = await request(app).get(
+        '/api/v1/search?username=testuser&provider=bitbucket'
+      );
+
+      expect(response.status).toBe(501);
+      expect(response.body).toMatchObject({
+        ok: false,
+        provider: 'bitbucket',
+        error: {
+          code: 'not_implemented',
+          message: expect.stringContaining('bitbucket'),
+        },
+      });
+    });
+
     it('should return 404 for non-existent user', async () => {
       const error: any = new Error('GraphQL Error: NOT_FOUND');
       error.errors = [

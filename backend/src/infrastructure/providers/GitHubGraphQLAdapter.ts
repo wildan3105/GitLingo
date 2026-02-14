@@ -9,6 +9,7 @@ import { Profile } from '../../domain/models/Profile';
 import { ProviderPort, AccountData } from '../../domain/ports/ProviderPort';
 import { ProviderError } from '../errors/ProviderError';
 import { GitHubUserQueryResponse, GitHubRepository } from './types/GitHubTypes';
+import { Providers } from '../../shared/constants/providers';
 
 export class GitHubGraphQLAdapter implements ProviderPort {
   private readonly graphqlClient: typeof graphql;
@@ -91,7 +92,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
    * Get provider name
    */
   public getProviderName(): string {
-    return 'github';
+    return Providers.GITHUB;
   }
 
   /**
