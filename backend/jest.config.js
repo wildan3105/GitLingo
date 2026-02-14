@@ -22,8 +22,6 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    'GitHubAdapter.test.ts', // Skip due to ES module mocking issues
-    'api.test.ts', // Skip due to ES module mocking issues
   ],
   coverageDirectory: 'coverage',
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],

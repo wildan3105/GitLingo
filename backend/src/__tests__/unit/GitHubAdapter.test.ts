@@ -2,14 +2,13 @@
  * GitHubGraphQLAdapter Unit Tests
  */
 
-import nock from 'nock';
 import { ProviderError } from '../../infrastructure/errors/ProviderError';
 
-// Mock @octokit/graphql to avoid ES module issues
-const mockGraphql = jest.fn() as jest.Mock & {
-  defaults: jest.Mock;
-};
-(mockGraphql as any).defaults = jest.fn(() => mockGraphql);
+// Create a mock graphql function that can be controlled in tests
+const mockGraphqlFn = jest.fn();
+const mockGraphql: any = Object.assign(mockGraphqlFn, {
+  defaults: jest.fn(() => mockGraphql),
+});
 
 jest.mock('@octokit/graphql', () => ({
   graphql: mockGraphql,
@@ -19,32 +18,28 @@ import { GitHubGraphQLAdapter } from '../../infrastructure/providers/GitHubGraph
 
 describe('GitHubGraphQLAdapter', () => {
   afterEach(() => {
-    nock.cleanAll();
+    jest.clearAllMocks();
   });
 
   describe('fetchRepositories', () => {
     it('should fetch repositories successfully', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: {
-              login: 'testuser',
-              id: '123',
-              repositories: {
-                nodes: [
-                  { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
-                  { name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false },
-                ],
-                pageInfo: { hasNextPage: false, endCursor: null },
-                totalCount: 2,
-              },
-            },
-            organization: null,
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
           },
-        });
+        },
+        organization: null,
+      });
 
       const repos = await adapter.fetchRepositories('testuser');
 
@@ -64,22 +59,18 @@ describe('GitHubGraphQLAdapter', () => {
     it('should handle repositories without language', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: {
-              login: 'testuser',
-              id: '123',
-              repositories: {
-                nodes: [{ name: 'repo1', primaryLanguage: null, isFork: false }],
-                pageInfo: { hasNextPage: false, endCursor: null },
-                totalCount: 1,
-              },
-            },
-            organization: null,
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: null, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
           },
-        });
+        },
+        organization: null,
+      });
 
       const repos = await adapter.fetchRepositories('testuser');
 
@@ -91,40 +82,32 @@ describe('GitHubGraphQLAdapter', () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
       // First page
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: {
-              login: 'testuser',
-              id: '123',
-              repositories: {
-                nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
-                pageInfo: { hasNextPage: true, endCursor: 'cursor1' },
-                totalCount: 2,
-              },
-            },
-            organization: null,
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: true, endCursor: 'cursor1' },
+            totalCount: 2,
           },
-        });
+        },
+        organization: null,
+      });
 
       // Second page
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: {
-              login: 'testuser',
-              id: '123',
-              repositories: {
-                nodes: [{ name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false }],
-                pageInfo: { hasNextPage: false, endCursor: null },
-                totalCount: 2,
-              },
-            },
-            organization: null,
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [{ name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
           },
-        });
+        },
+        organization: null,
+      });
 
       const repos = await adapter.fetchRepositories('testuser');
 
@@ -136,26 +119,22 @@ describe('GitHubGraphQLAdapter', () => {
     it('should throw USER_NOT_FOUND error when user does not exist', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: null,
-            organization: null,
-          },
-          errors: [
-            {
-              type: 'NOT_FOUND',
-              path: ['user'],
-              message: "Could not resolve to a User with the login of 'nonexistent'.",
-            },
-            {
-              type: 'NOT_FOUND',
-              path: ['organization'],
-              message: "Could not resolve to an Organization with the login of 'nonexistent'.",
-            },
-          ],
-        });
+      // Mock the exact structure that @octokit/graphql throws for NOT_FOUND
+      const error: any = new Error('GraphQL Error: NOT_FOUND');
+      error.errors = [
+        {
+          type: 'NOT_FOUND',
+          path: ['user'],
+          message: "Could not resolve to a User with the login of 'nonexistent'.",
+        },
+        {
+          type: 'NOT_FOUND',
+          path: ['organization'],
+          message: "Could not resolve to an Organization with the login of 'nonexistent'.",
+        },
+      ];
+
+      mockGraphqlFn.mockRejectedValue(error); // Use mockRejectedValue instead of Once
 
       await expect(adapter.fetchRepositories('nonexistent')).rejects.toThrow(ProviderError);
       await expect(adapter.fetchRepositories('nonexistent')).rejects.toMatchObject({
@@ -167,11 +146,10 @@ describe('GitHubGraphQLAdapter', () => {
     it('should throw RATE_LIMITED error on 403 status', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(403, {
-          message: 'API rate limit exceeded',
-        });
+      const error: any = new Error('API rate limit exceeded');
+      error.status = 403;
+
+      mockGraphqlFn.mockRejectedValue(error); // Use mockRejectedValue instead of Once
 
       await expect(adapter.fetchRepositories('testuser')).rejects.toThrow(ProviderError);
       await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({

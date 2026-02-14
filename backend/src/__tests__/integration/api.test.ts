@@ -3,16 +3,15 @@
  */
 
 import request from 'supertest';
-import nock from 'nock';
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 
-// Mock @octokit/graphql to avoid ES module issues
-const mockGraphql = jest.fn() as jest.Mock & {
-  defaults: jest.Mock;
-};
-(mockGraphql as any).defaults = jest.fn(() => mockGraphql);
+// Create a mock graphql function that can be controlled in tests
+const mockGraphqlFn = jest.fn();
+const mockGraphql: any = Object.assign(mockGraphqlFn, {
+  defaults: jest.fn(() => mockGraphql),
+});
 
 jest.mock('@octokit/graphql', () => ({
   graphql: mockGraphql,
@@ -49,7 +48,7 @@ describe('API Integration Tests', () => {
   });
 
   afterEach(() => {
-    nock.cleanAll();
+    jest.clearAllMocks();
   });
 
   describe('GET /health', () => {
@@ -67,27 +66,23 @@ describe('API Integration Tests', () => {
 
   describe('GET /api/v1/search', () => {
     it('should return language statistics for valid user', async () => {
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: {
-              login: 'testuser',
-              id: '123',
-              repositories: {
-                nodes: [
-                  { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
-                  { name: 'repo2', primaryLanguage: { name: 'JavaScript' }, isFork: false },
-                  { name: 'repo3', primaryLanguage: { name: 'Python' }, isFork: false },
-                  { name: 'fork1', primaryLanguage: { name: 'Ruby' }, isFork: true },
-                ],
-                pageInfo: { hasNextPage: false, endCursor: null },
-                totalCount: 4,
-              },
-            },
-            organization: null,
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo3', primaryLanguage: { name: 'Python' }, isFork: false },
+              { name: 'fork1', primaryLanguage: { name: 'Ruby' }, isFork: true },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 4,
           },
-        });
+        },
+        organization: null,
+      });
 
       const response = await request(app).get('/api/v1/search?username=testuser');
 
@@ -152,26 +147,20 @@ describe('API Integration Tests', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            user: null,
-            organization: null,
-          },
-          errors: [
-            {
-              type: 'NOT_FOUND',
-              path: ['user'],
-              message: "Could not resolve to a User with the login of 'nonexistent'.",
-            },
-            {
-              type: 'NOT_FOUND',
-              path: ['organization'],
-              message: "Could not resolve to an Organization with the login of 'nonexistent'.",
-            },
-          ],
-        });
+      const error: any = new Error('GraphQL Error: NOT_FOUND');
+      error.errors = [
+        {
+          type: 'NOT_FOUND',
+          path: ['user'],
+          message: "Could not resolve to a User with the login of 'nonexistent'.",
+        },
+        {
+          type: 'NOT_FOUND',
+          path: ['organization'],
+          message: "Could not resolve to an Organization with the login of 'nonexistent'.",
+        },
+      ];
+      mockGraphqlFn.mockRejectedValueOnce(error);
 
       const response = await request(app).get('/api/v1/search?username=nonexistent');
 
@@ -185,11 +174,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should return 429 for rate limit exceeded', async () => {
-      nock('https://api.github.com')
-        .post('/graphql')
-        .reply(403, {
-          message: 'API rate limit exceeded',
-        });
+      const error: any = new Error('API rate limit exceeded');
+      error.status = 403;
+      mockGraphqlFn.mockRejectedValueOnce(error);
 
       const response = await request(app).get('/api/v1/search?username=testuser');
 
@@ -203,7 +190,8 @@ describe('API Integration Tests', () => {
     });
 
     it('should handle network errors gracefully', async () => {
-      nock('https://api.github.com').post('/graphql').replyWithError('Network error');
+      const error = new Error('Network error');
+      mockGraphqlFn.mockRejectedValueOnce(error);
 
       const response = await request(app).get('/api/v1/search?username=testuser');
 
