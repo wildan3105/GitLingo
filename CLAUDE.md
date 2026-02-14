@@ -37,7 +37,7 @@ This serves as a foundational block for the core functionalities of the app.
 
 As the name suggested, it's more of the functionalities that users can see and experience. Thus it is super important too to read and understand so that you can implement the instruction correctly and without any issue/misunderstanding.
 
-At the moment, it's still emtpy as we want to focus on the backend first.
+I've created the frontend-spec.md so you could follow along nicely. 
 
 # Development
 
@@ -57,6 +57,3 @@ Let's make small, incremental, but "proven" changes so that we can test it one-b
 2. Manual test
 3. Add/update unit and integration test
 4. Confirm it works
-
-# Notes
-TBD
