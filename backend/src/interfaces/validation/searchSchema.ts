@@ -1,0 +1,58 @@
+/**
+ * Search Validation Schema
+ * Validates query parameters for the search endpoint
+ */
+
+import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
+
+/**
+ * Zod schema for search query parameters
+ */
+export const searchQuerySchema = z.object({
+  username: z
+    .string()
+    .min(1, 'Username is required')
+    .max(39, 'Username must be 39 characters or less')
+    .regex(/^[A-Za-z0-9-]+$/, 'Username can only contain letters, numbers, and hyphens'),
+
+  provider: z.enum(['github', 'gitlab', 'bitbucket']).default('github').optional(),
+});
+
+export type SearchQuery = z.infer<typeof searchQuerySchema>;
+
+/**
+ * Validation middleware for search endpoint
+ */
+export function validateSearchQuery(req: Request, res: Response, next: NextFunction): void {
+  try {
+    // Validate query parameters (throws if invalid)
+    searchQuerySchema.parse(req.query);
+
+    // If validation passes, continue to controller
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        ok: false,
+        provider: 'unknown',
+        error: {
+          code: 'validation_error',
+          message: 'Invalid query parameters',
+          details: {
+            errors: error.issues.map((issue) => ({
+              field: issue.path.join('.'),
+              message: issue.message,
+            })),
+          },
+        },
+        meta: {
+          generatedAt: new Date().toISOString(),
+        },
+      });
+      return;
+    }
+
+    next(error);
+  }
+}

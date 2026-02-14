@@ -80,12 +80,54 @@ Create a `.env` file in the backend directory:
 PORT=3001
 NODE_ENV=development
 
-# GitHub (if using authenticated API)
+# GitHub Token (OPTIONAL but RECOMMENDED)
+# See "GitHub Token & Rate Limits" section below
 GITHUB_TOKEN=your_github_token_here
 
 # Logging
 LOG_LEVEL=info
 ```
+
+### GitHub Token & Rate Limits
+
+**IMPORTANT: The GitHub token is OPTIONAL but HIGHLY RECOMMENDED.**
+
+#### Without Authentication (No Token)
+- **Rate Limit**: 60 requests per hour per IP address
+- **Use Case**: Testing, local development with limited queries
+- The API will work, but you'll hit rate limits quickly
+
+#### With Authentication (Token Provided)
+- **Rate Limit**: 5,000 requests per hour
+- **Use Case**: Production, heavy development, automated testing
+- **83x more requests** compared to unauthenticated access
+
+#### How to Get a GitHub Token
+
+1. Go to GitHub Settings → [Developer Settings → Personal Access Tokens → Tokens (classic)](https://github.com/settings/tokens)
+2. Click "Generate new token (classic)"
+3. Give it a descriptive name (e.g., "GitLingo Backend")
+4. Select scopes:
+   - ✅ `repo` (Full control of private repositories) - **Required** for public repo access
+   - ✅ `read:org` (Read org and team membership) - **Optional** for organization stats
+   - ✅ `read:user` (Read user profile data) - **Optional** for user stats
+5. Click "Generate token"
+6. Copy the token (starts with `ghp_...`)
+7. Add to `.env` file: `GITHUB_TOKEN=ghp_...`
+
+#### Testing Token Usage
+
+To verify your token is being used:
+
+```bash
+# Start the server with debug logging
+LOG_LEVEL=debug npm run dev
+
+# Make a request and check the response headers
+curl -i "http://localhost:3001/api/v1/search?username=octocat"
+```
+
+With a valid token, the server will authenticate all GitHub API requests automatically.
 
 ## Available Scripts
 
@@ -259,6 +301,31 @@ Fetch language statistics for a given username.
 }
 ```
 
+### Error Codes & HTTP Status Mapping
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| `validation_error` | 400 | Invalid query parameters (username format, etc.) |
+| `user_not_found` | 404 | GitHub user or organization not found |
+| `rate_limited` | 429 | GitHub API rate limit exceeded (see rate limits section) |
+| `network_error` | 503 | Network connectivity issues with GitHub API |
+| `provider_error` | 500 | General GitHub API error |
+| `internal_server_error` | 500 | Unexpected server error |
+
+### `GET /health`
+
+Health check endpoint for monitoring and load balancers.
+
+**Response (200):**
+
+```json
+{
+  "status": "ok",
+  "uptime": 123.456,
+  "timestamp": "2026-02-14T02:10:00.000Z"
+}
+```
+
 ## Development Workflow
 
 1. **Make changes** in `src/`
@@ -296,10 +363,161 @@ Fetch language statistics for a given username.
 ## Security Considerations
 
 - **Input Validation**: Zod schemas for all inputs
-- **Rate Limiting**: Prevent abuse with express-rate-limit
+- **Rate Limiting**: Prevent abuse with express-rate-limit (100 req/15min per IP)
 - **Security Headers**: Helmet middleware for common protections
 - **Secret Management**: Environment variables, never commit tokens
 - **Error Sanitization**: No internal stack traces in production
+- **CORS**: Configured for cross-origin requests (adjust in production)
+
+## Known Limitations & Important Notes
+
+### Current Implementation
+
+1. **GitHub Only**: Currently only supports GitHub. GitLab and Bitbucket are planned but not implemented.
+
+2. **No Caching**: Every request fetches fresh data from GitHub API. Consider implementing Redis caching for production.
+
+3. **No Pagination UI**: The API fetches all repositories for a user but doesn't expose pagination controls to frontend (yet).
+
+4. **Basic Profile Info**: User profile information is minimal (username, type). Could be enhanced to fetch more details from GitHub.
+
+5. **Fork Handling**: Forks are counted separately in a `__forks__` category. They are not included in language statistics.
+
+6. **Language Detection**: Relies on GitHub's language detection. Repos without a detected language are categorized as "Unknown".
+
+### Rate Limiting Behavior
+
+- **Express Rate Limit**: 100 requests per 15 minutes per IP (application-level)
+- **GitHub Rate Limit**: 60/hour (no token) or 5,000/hour (with token)
+- **Important**: If you hit GitHub's rate limit, the API returns a `429` error with retry information
+
+### Environment-Specific Behavior
+
+- **Development**: Stack traces included in error responses
+- **Production**: Stack traces hidden, minimal error messages
+- **Logging**: Use `LOG_LEVEL=debug` for verbose logging during development
+
+## Deployment
+
+### Prerequisites
+
+- Node.js 20+ installed
+- GitHub Personal Access Token (recommended for production)
+- Reverse proxy (nginx, Caddy) for HTTPS termination (recommended)
+
+### Build for Production
+
+```bash
+# Install dependencies
+npm ci --production=false
+
+# Run linting and tests
+npm run lint
+npm run typecheck
+
+# Build
+npm run build
+
+# Start production server
+NODE_ENV=production npm start
+```
+
+### Docker Deployment (Recommended)
+
+```bash
+# Build Docker image
+docker build -t gitlingo-backend .
+
+# Run container
+docker run -d \
+  -p 3001:3001 \
+  -e GITHUB_TOKEN=your_token_here \
+  -e NODE_ENV=production \
+  --name gitlingo-backend \
+  gitlingo-backend
+```
+
+### Environment Variables for Production
+
+```env
+# Required
+PORT=3001
+NODE_ENV=production
+
+# Highly Recommended
+GITHUB_TOKEN=ghp_your_production_token
+
+# Optional
+LOG_LEVEL=info
+```
+
+### Monitoring & Health Checks
+
+Use the `/health` endpoint for:
+- Load balancer health checks
+- Uptime monitoring (Uptime Robot, Pingdom, etc.)
+- Kubernetes liveness/readiness probes
+
+```bash
+# Example health check
+curl http://localhost:3001/health
+```
+
+### Reverse Proxy Example (nginx)
+
+```nginx
+server {
+    listen 80;
+    server_name api.gitlingo.com;
+
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## Troubleshooting
+
+### Issue: "Rate limit exceeded" errors
+
+**Solution**:
+- Add a valid `GITHUB_TOKEN` to `.env`
+- Check your token has the required scopes (`repo`, `read:org`)
+- Wait for rate limit to reset (check `X-RateLimit-Reset` header)
+
+### Issue: Server starts but requests timeout
+
+**Solution**:
+- Check if GitHub API is accessible: `curl https://api.github.com`
+- Verify firewall/network settings
+- Check server logs: `LOG_LEVEL=debug npm run dev`
+
+### Issue: Validation errors for valid usernames
+
+**Solution**:
+- GitHub usernames can only contain alphanumeric characters and hyphens
+- Maximum 39 characters
+- Cannot start or end with a hyphen
+
+### Issue: "Cannot find module" errors
+
+**Solution**:
+```bash
+# Clean install
+rm -rf node_modules package-lock.json
+npm install
+
+# Rebuild
+npm run clean
+npm run build
+```
 
 ## Future Enhancements
 
