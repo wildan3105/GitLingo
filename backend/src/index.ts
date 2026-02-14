@@ -66,7 +66,10 @@ function createApp(): Application {
   // print token
   logger.debug(
     {
-      githubToken: typeof config.githubToken === 'string' && config.githubToken.length > 0 ? '✓ Provided' : '✗ Not provided',
+      githubToken:
+        typeof config.githubToken === 'string' && config.githubToken.length > 0
+          ? '✓ Provided'
+          : '✗ Not provided',
     },
     'GitHub Token'
   );

@@ -24,19 +24,20 @@ async function testGitHubAdapter(): Promise<void> {
   try {
     const username = 'pveyes';
     console.log(`📦 Fetching repositories for "${username}"...`);
-    const repos = await adapter.fetchRepositories(username);
+    const { profile, repositories } = await adapter.fetchRepositories(username);
 
-    console.log(`✓ Success! Found ${repos.length} repositories\n`);
+    console.log(`✓ Success! Found ${repositories.length} repositories`);
+    console.log(`Profile: ${profile.username} (${profile.type}, ID: ${profile.providerUserId})\n`);
 
     // Show first 5 repos
     console.log('First 5 repositories:');
-    repos.slice(0, 5).forEach((repo, index) => {
+    repositories.slice(0, 5).forEach((repo, index) => {
       const forkBadge = repo.isFork ? '🍴' : '  ';
       console.log(`  ${index + 1}. ${forkBadge} ${repo.name} [${repo.language ?? 'Unknown'}]`);
     });
 
     // Language stats
-    const languageCounts = repos.reduce(
+    const languageCounts = repositories.reduce(
       (acc, repo) => {
         const lang = repo.language ?? 'Unknown';
         acc[lang] = (acc[lang] ?? 0) + 1;
@@ -53,7 +54,7 @@ async function testGitHubAdapter(): Promise<void> {
         console.log(`  ${lang}: ${count} repos`);
       });
 
-    console.log(`\n🍴 Forks: ${repos.filter((r) => r.isFork).length}`);
+    console.log(`\n🍴 Forks: ${repositories.filter((r) => r.isFork).length}`);
   } catch (error) {
     console.error('✗ Error:', error);
   }
