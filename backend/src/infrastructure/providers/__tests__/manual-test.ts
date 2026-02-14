@@ -22,7 +22,7 @@ async function testGitHubAdapter(): Promise<void> {
 
   // Test 1: Fetch repos for a known user
   try {
-    const username = 'google';
+    const username = 'pveyes';
     console.log(`📦 Fetching repositories for "${username}"...`);
     const repos = await adapter.fetchRepositories(username);
 
