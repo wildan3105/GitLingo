@@ -165,7 +165,7 @@ Ensure the application works well on all devices and is accessible to all users.
 - SearchBar: aria-label="Search for GitHub username"
 - ProviderSelect: aria-label="Select provider"
 - Search button: aria-label="Search"
-- Chart type buttons: aria-label="View as [bar/pie/doughnut/radar] chart"
+- Chart type buttons: aria-label="View as [bar/pie/radar] chart"
 - Download button: aria-label="Download chart as image"
 - Share buttons: aria-label="Share on [Twitter/Facebook]"
 

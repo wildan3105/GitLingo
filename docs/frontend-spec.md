@@ -17,7 +17,7 @@ Frontend responsibilities:
 
 - Provide a clean UI for searching accounts
 - Call backend `/api/v1/search`
-- Render results as selectable chart types (bar/pie/doughnut/radar)
+- Render results as selectable chart types (bar/pie/radar)
 - Support sharing and downloading charts
 - Display friendly messages for rate limit / not found / errors
 
@@ -68,7 +68,6 @@ Proposed structure inside `/frontend` (No need to follow exactly the same as thi
         charts/
           BarChartView.tsx
           PieChartView.tsx
-          DoughnutChartView.tsx
           RadarChartView.tsx
         utils/
           normalizeSeries.ts
@@ -147,7 +146,6 @@ User can switch between chart types:
 
 - Bar (default)
 - Pie
-- Doughnut
 - Radar
 
 ### Behavior requirements
@@ -287,7 +285,7 @@ TBD (but intended direction)
 - React + TypeScript
 - Vite
 - Tailwind CSS + a theme/component library
-- Chart library (should support bar/pie/doughnut/radar)
+- Chart library (should support bar/pie/radar)
 - Fetching/caching library (optional but recommended)
 
 ---

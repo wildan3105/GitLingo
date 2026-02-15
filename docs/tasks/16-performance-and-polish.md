@@ -19,7 +19,6 @@ Optimize performance, reduce bundle size, and add final polish to the applicatio
 **Components to memoize:**
 - BarChartView
 - PieChartView
-- DoughnutChartView
 - RadarChartView
 - ChartPanel
 

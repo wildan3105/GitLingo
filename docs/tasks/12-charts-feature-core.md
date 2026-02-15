@@ -26,7 +26,7 @@ Build the chart visualization system with 4 chart types and chart switching func
 **Acceptance Criteria:**
 - ✅ Chart library installed
 - ✅ Sample chart renders correctly
-- ✅ Library supports Bar, Pie, Doughnut, Radar
+- ✅ Library supports Bar, Pie, Radar
 - ✅ Responsive by default
 - ✅ Decision documented
 
@@ -163,31 +163,7 @@ type PieChartViewProps = {
 
 ---
 
-### 5.5 Create DoughnutChartView component
-**Description:** Build Doughnut chart component (pie chart with hole in center).
-
-**Steps:**
-- Create `features/charts/components/charts/DoughnutChartView.tsx`
-- Similar to PieChartView but with center cutout
-- Use chart library from 5.1
-- Use normalizeSeries utility
-- Display doughnut with language colors
-- Show legend with language names
-- Add tooltips with counts and percentages
-- Exclude forks
-- Make responsive
-- Style with Tailwind CSS
-
-**Props:**
-```typescript
-type DoughnutChartViewProps = {
-  series: LanguageSeries[]
-  isLoading?: boolean
-}
-```
-
 **Acceptance Criteria:**
-- ✅ Doughnut chart renders correctly
 - ✅ Center hole visible
 - ✅ Colors match language colors
 - ✅ Forks excluded from chart
@@ -248,7 +224,7 @@ type RadarChartViewProps = {
 
 **Props:**
 ```typescript
-type ChartType = 'bar' | 'pie' | 'doughnut' | 'radar'
+type ChartType = 'bar' | 'pie' | 'radar'
 
 type ChartTypeSelectProps = {
   value: ChartType
@@ -259,11 +235,10 @@ type ChartTypeSelectProps = {
 **Chart types:**
 - Bar (default)
 - Pie
-- Doughnut
 - Radar
 
 **Acceptance Criteria:**
-- ✅ All 4 chart types selectable
+- ✅ All 3 chart types selectable
 - ✅ Active state visible
 - ✅ onChange fires correctly
 - ✅ Responsive on mobile
@@ -327,7 +302,6 @@ type ChartPanelProps = {
 **ChartPanel.test.tsx:**
 - ✅ Renders BarChartView by default
 - ✅ Switching to Pie renders PieChartView
-- ✅ Switching to Doughnut renders DoughnutChartView
 - ✅ Switching to Radar renders RadarChartView
 - ✅ No API refetch on chart type change
 - ✅ Loading state shows skeleton

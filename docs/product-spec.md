@@ -33,7 +33,6 @@ This previously worked and should behave consistently with standard search UX ex
 ### 1.2 Multiple Chart Types
 Currently, only bar charts are supported. Add support for:
 - Pie
-- Doughnut
 - Radar
 
 This improves flexibility and makes the tool more visually engaging
