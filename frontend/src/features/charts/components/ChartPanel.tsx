@@ -128,20 +128,6 @@ export function ChartPanel({
     }
   }
 
-  // Handle copy link
-  const handleCopyLink = async () => {
-    try {
-      const url = `${window.location.origin}?username=${encodeURIComponent(username)}&provider=${encodeURIComponent(provider)}`
-      await navigator.clipboard.writeText(url)
-      setExportStatus({ type: 'link', status: 'success', message: 'Link copied to clipboard!' })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to copy link'
-      setExportStatus({ type: 'link', status: 'error', message })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
-    }
-  }
-
   // Render chart based on selected type
   const renderChart = () => {
     const chartProps = { series, isLoading }
@@ -254,26 +240,6 @@ export function ChartPanel({
                         </svg>
                       ),
                       onClick: handleDownloadCSV,
-                    },
-                    {
-                      id: 'copy-link',
-                      label: 'Copy Link',
-                      icon: (
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
-                      ),
-                      onClick: handleCopyLink,
                     },
                   ] as DropdownItem[]
                 }
