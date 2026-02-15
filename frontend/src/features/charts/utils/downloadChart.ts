@@ -6,8 +6,6 @@
 export type DownloadOptions = {
   /** GitHub username */
   username: string
-  /** Provider (github, gitlab, etc.) */
-  provider: string
   /** Chart type being downloaded */
   chartType: string
   /** Image format (default: png) */
@@ -21,7 +19,7 @@ export type DownloadOptions = {
  * then triggers a browser download with a descriptive filename.
  *
  * @param chartElement - The HTML element containing the chart canvas
- * @param options - Download configuration (username, provider, chartType, format)
+ * @param options - Download configuration (username, chartType, format)
  * @returns Promise that resolves when download is triggered
  * @throws Error if canvas element is not found or export fails
  *
@@ -30,7 +28,6 @@ export type DownloadOptions = {
  * const chartContainer = document.getElementById('chart')
  * await downloadChart(chartContainer, {
  *   username: 'octocat',
- *   provider: 'github',
  *   chartType: 'bar'
  * })
  * ```
@@ -39,7 +36,7 @@ export async function downloadChart(
   chartElement: HTMLElement,
   options: DownloadOptions
 ): Promise<void> {
-  const { username, provider, chartType, format = 'png' } = options
+  const { username, chartType, format = 'png' } = options
 
   try {
     // Find the canvas element within the chart container
@@ -66,7 +63,7 @@ export async function downloadChart(
 
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '')
-    const filename = `gitlingo-${username}-${provider}-${chartType}-${timestamp}.${format}`
+    const filename = `gitlingo-${username}-${chartType}-${timestamp}.${format}`
 
     // Create temporary link and trigger download
     const link = document.createElement('a')
@@ -87,7 +84,7 @@ export async function downloadChart(
 /**
  * Generates a filename for the chart download
  *
- * Format: gitlingo-{username}-{provider}-{chartType}-{timestamp}.{format}
+ * Format: gitlingo-{username}-{chartType}-{timestamp}.{format}
  *
  * @param options - Download configuration
  * @returns Formatted filename string
@@ -96,15 +93,14 @@ export async function downloadChart(
  * ```typescript
  * generateFilename({
  *   username: 'octocat',
- *   provider: 'github',
  *   chartType: 'bar',
  *   format: 'png'
  * })
- * // Returns: "gitlingo-octocat-github-bar-20250217.png"
+ * // Returns: "gitlingo-octocat-bar-20250217.png"
  * ```
  */
 export function generateFilename(options: DownloadOptions): string {
-  const { username, provider, chartType, format = 'png' } = options
+  const { username, chartType, format = 'png' } = options
   const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '')
-  return `gitlingo-${username}-${provider}-${chartType}-${timestamp}.${format}`
+  return `gitlingo-${username}-${chartType}-${timestamp}.${format}`
 }

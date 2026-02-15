@@ -50,7 +50,7 @@ describe('gitlingoApi', () => {
 
       expect(result.ok).toBe(true)
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/search?username=octocat&provider=github'),
+        expect.stringContaining('/api/v1/search?username=octocat'),
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -180,7 +180,7 @@ describe('gitlingoApi', () => {
     it('should encode query parameters correctly', async () => {
       const mockSuccessResponse: SuccessResponse = {
         ok: true,
-        provider: 'gitlab',
+        provider: 'github',
         profile: {
           username: 'test-user',
           type: 'user',
@@ -200,19 +200,20 @@ describe('gitlingoApi', () => {
         json: async () => mockSuccessResponse,
       })
 
-      await searchLanguageStatistics('test-user', 'gitlab')
+      await searchLanguageStatistics('test-user')
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('username=test-user'),
         expect.any(Object)
       )
+      // Provider is not sent as query param - backend defaults to github
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('provider=gitlab'),
+        expect.not.stringContaining('provider='),
         expect.any(Object)
       )
     })
 
-    it('should use default provider "github" when not specified', async () => {
+    it('should not send provider parameter in request', async () => {
       const mockSuccessResponse: SuccessResponse = {
         ok: true,
         provider: 'github',
@@ -237,8 +238,13 @@ describe('gitlingoApi', () => {
 
       await searchLanguageStatistics('testuser')
 
+      // Verify URL only contains username, not provider
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('provider=github'),
+        expect.stringContaining('/api/v1/search?username=testuser'),
+        expect.any(Object)
+      )
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        expect.stringContaining('provider='),
         expect.any(Object)
       )
     })

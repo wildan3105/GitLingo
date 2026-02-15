@@ -32,8 +32,6 @@ export type ChartPanelProps = {
   series: LanguageSeries[]
   /** GitHub username */
   username: string
-  /** Provider (github, gitlab, etc.) */
-  provider: string
   /** Loading state */
   isLoading?: boolean
   /** Error message if request failed */
@@ -66,7 +64,6 @@ export type ChartPanelProps = {
  * <ChartPanel
  *   series={languageSeries}
  *   username="octocat"
- *   provider="github"
  *   isLoading={isLoading}
  *   error={error?.message}
  * />
@@ -75,7 +72,6 @@ export type ChartPanelProps = {
 export function ChartPanel({
   series,
   username,
-  provider,
   isLoading = false,
   error,
   includeForks,
@@ -126,7 +122,6 @@ export function ChartPanel({
     try {
       await downloadChart(chartRef.current, {
         username,
-        provider,
         chartType,
       })
 
@@ -142,7 +137,7 @@ export function ChartPanel({
   // Handle CSV download
   const handleDownloadCSV = () => {
     try {
-      const filename = `${username}-${provider}-languages`
+      const filename = `${username}-languages`
       exportToCSV(series, filename)
       showToast({ type: 'success', message: 'CSV exported successfully!' })
     } catch (err) {

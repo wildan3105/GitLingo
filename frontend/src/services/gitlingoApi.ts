@@ -23,15 +23,12 @@ import type { ApiResponse } from '../contracts/api'
  * }
  * ```
  */
-export async function searchLanguageStatistics(
-  username: string,
-  provider: string = 'github'
-): Promise<ApiResponse> {
+export async function searchLanguageStatistics(username: string): Promise<ApiResponse> {
   try {
     // Build query params
     const params = new URLSearchParams()
     params.append('username', username)
-    params.append('provider', provider)
+    // Provider defaults to 'github' on backend
 
     // Make API request
     const response = await apiClient.get<ApiResponse>(`/api/v1/search?${params.toString()}`)
@@ -41,7 +38,7 @@ export async function searchLanguageStatistics(
     // Transform unknown errors into ErrorResponse format
     return {
       ok: false,
-      provider,
+      provider: 'github',
       error: {
         code: 'network_error',
         message: error instanceof Error ? error.message : 'An unexpected error occurred',

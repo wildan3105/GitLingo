@@ -10,8 +10,6 @@ export type ResultHeaderProps = {
   profile: Profile
   /** Total number of repositories */
   totalRepos: number
-  /** Provider name (github, gitlab, etc.) */
-  provider: string
 }
 
 /**
@@ -28,12 +26,10 @@ export type ResultHeaderProps = {
  * <ResultHeader
  *   profile={profile}
  *   totalRepos={125}
- *   provider="github"
  * />
  * ```
  */
-export function ResultHeader({ profile, totalRepos, provider }: ResultHeaderProps) {
-  const providerDisplay = provider.charAt(0).toUpperCase() + provider.slice(1)
+export function ResultHeader({ profile, totalRepos }: ResultHeaderProps) {
   const accountType = profile.type || 'User'
 
   // Ensure website URL has a protocol
@@ -72,11 +68,6 @@ export function ResultHeader({ profile, totalRepos, provider }: ResultHeaderProp
           {/* Account Type Badge */}
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800">
             {accountType.charAt(0).toUpperCase() + accountType.slice(1).toLowerCase()}
-          </span>
-
-          {/* Provider Badge */}
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-            {providerDisplay}
           </span>
         </div>
 

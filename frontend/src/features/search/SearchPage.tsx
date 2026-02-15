@@ -33,7 +33,6 @@ export function SearchPage() {
   const {
     username,
     setUsername,
-    provider,
     includeForks,
     setIncludeForks,
     includeUnknownLanguage,
@@ -228,7 +227,6 @@ export function SearchPage() {
                 <ResultHeader
                   profile={filteredData.profile}
                   totalRepos={filteredData.series.reduce((sum, item) => sum + item.value, 0)}
-                  provider={provider}
                 />
               </Card>
             </div>
@@ -362,7 +360,6 @@ export function SearchPage() {
               <ChartPanel
                 series={filteredData?.series || []}
                 username={username}
-                provider={provider}
                 isLoading={isLoading}
                 includeForks={includeForks}
                 setIncludeForks={setIncludeForks}

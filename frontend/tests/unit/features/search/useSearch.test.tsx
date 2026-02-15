@@ -39,14 +39,6 @@ describe('useSearch', () => {
       expect(result.current.username).toBe('')
     })
 
-    it('has github as default provider', () => {
-      const { result } = renderHook(() => useSearch(), {
-        wrapper: createWrapper(),
-      })
-
-      expect(result.current.provider).toBe('github')
-    })
-
     it('has no validation error initially', () => {
       const { result } = renderHook(() => useSearch(), {
         wrapper: createWrapper(),
