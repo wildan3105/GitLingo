@@ -164,6 +164,7 @@ export function ChartPanel({
           id={`chart-panel-${chartType}`}
           role="tabpanel"
           aria-labelledby={`chart-type-${chartType}`}
+          aria-busy={isLoading}
           className="mt-6"
         >
           {renderChart()}

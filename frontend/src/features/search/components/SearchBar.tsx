@@ -91,12 +91,13 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
           placeholder="Enter username (e.g., octocat)"
           aria-invalid={hasError}
           aria-describedby={hasError ? 'username-error' : undefined}
+          aria-busy={isLoading}
           className={`
             w-full px-4 py-3
             border-2 rounded-lg
             transition-all duration-200
             placeholder:text-secondary-400
-            disabled:bg-secondary-50 disabled:cursor-not-allowed disabled:text-secondary-500
+            disabled:bg-secondary-50 disabled:cursor-not-allowed disabled:text-secondary-500 disabled:opacity-75
             focus:outline-none focus:ring-2 focus:ring-offset-1
             ${
               hasError
