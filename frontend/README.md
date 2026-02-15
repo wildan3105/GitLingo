@@ -18,7 +18,7 @@ React + TypeScript frontend for GitLingo - Visualize your GitHub language statis
 
 We chose **Chart.js** with **react-chartjs-2** for the following reasons:
 
-- ✅ Supports all 4 required chart types (Bar, Pie, Doughnut, Radar)
+- ✅ Supports all 4 required chart types (Bar, Pie, Radar)
 - ✅ Highly customizable and performant
 - ✅ Excellent documentation and community support
 - ✅ Responsive by default

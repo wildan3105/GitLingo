@@ -3,7 +3,7 @@
  * Allows users to switch between different chart types
  */
 
-export type ChartType = 'bar' | 'pie' | 'doughnut' | 'radar'
+export type ChartType = 'bar' | 'pie' | 'radar'
 
 export type ChartTypeSelectProps = {
   /** Currently selected chart type */
@@ -28,11 +28,6 @@ const CHART_TYPES: ChartTypeOption[] = [
     value: 'pie',
     label: 'Pie',
     description: 'Circular chart showing language distribution',
-  },
-  {
-    value: 'doughnut',
-    label: 'Doughnut',
-    description: 'Pie chart with center cutout',
   },
   {
     value: 'radar',

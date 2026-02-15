@@ -7,7 +7,6 @@ import { useState, useRef } from 'react'
 import { ChartTypeSelect, type ChartType } from './ChartTypeSelect'
 import { BarChartView } from './charts/BarChartView'
 import { PieChartView } from './charts/PieChartView'
-import { DoughnutChartView } from './charts/DoughnutChartView'
 import { RadarChartView } from './charts/RadarChartView'
 import { Card } from '../../../shared/components/Card'
 import { ErrorState } from '../../../shared/components/ErrorState'
@@ -33,7 +32,7 @@ export type ChartPanelProps = {
  * Main chart panel component
  *
  * Features:
- * - Chart type selection (bar, pie, doughnut, radar)
+ * - Chart type selection (bar, pie, radar)
  * - Instant switching between chart types (no refetch)
  * - Download chart as PNG
  * - Share to social media
@@ -120,8 +119,6 @@ export function ChartPanel({
     switch (chartType) {
       case 'pie':
         return <PieChartView {...chartProps} />
-      case 'doughnut':
-        return <DoughnutChartView {...chartProps} />
       case 'radar':
         return <RadarChartView {...chartProps} />
       case 'bar':

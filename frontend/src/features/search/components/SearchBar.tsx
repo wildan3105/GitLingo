@@ -73,11 +73,8 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
   const hasError = (touched && !!validationError) || !!error
 
   return (
-    <div className="w-full">
-      <label
-        htmlFor="username-search"
-        className="block text-sm font-medium text-secondary-700 mb-2"
-      >
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor="username-search" className="text-sm font-medium text-secondary-700">
         Username
       </label>
 

@@ -117,21 +117,6 @@ export const pieChartOptions: ChartOptions<'pie'> = {
 } as ChartOptions<'pie'>
 
 /**
- * Options specific to Doughnut charts
- */
-export const doughnutChartOptions: ChartOptions<'doughnut'> = {
-  ...baseOptions,
-  plugins: {
-    ...baseOptions.plugins,
-    legend: {
-      ...baseOptions.plugins.legend,
-      position: 'right',
-    },
-  },
-  cutout: '60%', // Size of center hole
-} as ChartOptions<'doughnut'>
-
-/**
  * Options specific to Radar charts
  */
 export const radarChartOptions: ChartOptions<'radar'> = {

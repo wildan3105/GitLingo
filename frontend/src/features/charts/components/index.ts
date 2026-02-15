@@ -14,8 +14,5 @@ export type { BarChartViewProps } from './charts/BarChartView'
 export { PieChartView } from './charts/PieChartView'
 export type { PieChartViewProps } from './charts/PieChartView'
 
-export { DoughnutChartView } from './charts/DoughnutChartView'
-export type { DoughnutChartViewProps } from './charts/DoughnutChartView'
-
 export { RadarChartView } from './charts/RadarChartView'
 export type { RadarChartViewProps } from './charts/RadarChartView'
