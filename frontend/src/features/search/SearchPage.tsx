@@ -385,12 +385,12 @@ export function SearchPage() {
               href="https://github.com/wildan3105"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-secondary-700 hover:text-primary-600 transition-colors"
+              className="text-secondary-700 hover:text-primary-600 transition-all duration-200 hover:underline underline-offset-2"
             >
               Wildan Nahar
             </a>{' '}
             with{' '}
-            <span className="text-error-500" aria-label="love">
+            <span className="text-error-500 inline-block animate-pulse" aria-label="love">
               ♥
             </span>
           </p>
@@ -402,9 +402,14 @@ export function SearchPage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Follow on X (Twitter)"
-              className="text-secondary-400 hover:text-[#1DA1F2] transition-colors"
+              className="text-secondary-400 hover:text-[#1DA1F2] transition-all duration-200 hover:scale-110"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-5 h-5 transition-transform"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
@@ -415,7 +420,7 @@ export function SearchPage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View on GitHub"
-              className="text-secondary-400 hover:text-secondary-900 transition-colors"
+              className="text-secondary-400 hover:text-secondary-900 transition-all duration-200 hover:scale-110"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path

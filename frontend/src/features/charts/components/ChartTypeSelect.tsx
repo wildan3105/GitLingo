@@ -78,10 +78,11 @@ export function ChartTypeSelect({ value, onChange }: ChartTypeSelectProps) {
               transition-all duration-200
               whitespace-nowrap
               focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+              hover:scale-105 active:scale-95
               ${
                 isActive
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-md'
-                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200 hover:text-secondary-900'
+                  ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-md scale-105'
+                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200 hover:text-secondary-900 hover:shadow-sm'
               }
             `}
           >

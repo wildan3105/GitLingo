@@ -1,6 +1,6 @@
 # Task 10: Micro-interactions Polish
 
-**Status:** Pending
+**Status:** ✅ Completed
 **Estimated Time:** 30 minutes
 **Priority:** Low (but high impact on delight)
 
@@ -61,13 +61,13 @@ Add subtle micro-interactions that make the app feel polished and delightful wit
    - Icon shifts (e.g., arrow moves right)
 
 ### Acceptance Criteria
-- [ ] All buttons have hover, focus, and active states
-- [ ] Focus states are visible and attractive (not default browser)
-- [ ] Hover effects are subtle and enhance usability
-- [ ] Transitions are smooth (200-300ms)
-- [ ] No janky or laggy animations
-- [ ] Keyboard navigation feels polished
-- [ ] Effects respect `prefers-reduced-motion`
+- [x] All buttons have hover, focus, and active states (scale, shadow, color)
+- [x] Focus states are visible and attractive (glow effect, shadow)
+- [x] Hover effects are subtle and enhance usability (2-10% scale)
+- [x] Transitions are smooth (200ms duration-200)
+- [x] No janky or laggy animations (using transform for performance)
+- [x] Keyboard navigation feels polished (focus rings, transitions)
+- [x] Effects respect `prefers-reduced-motion` (global CSS override)
 
 ## Technical Notes
 - Use Tailwind transition utilities: `transition-all duration-200`

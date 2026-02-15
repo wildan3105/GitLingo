@@ -88,7 +88,7 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           disabled={isLoading}
-          placeholder="Enter username (e.g., octocat)"
+          placeholder="Enter username to search (e.g., octocat)"
           aria-invalid={hasError}
           aria-describedby={hasError ? 'username-error' : undefined}
           aria-busy={isLoading}
@@ -96,13 +96,13 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
             w-full px-4 py-3
             border-2 rounded-lg
             transition-all duration-200
-            placeholder:text-secondary-400
+            placeholder:text-secondary-400 placeholder:transition-opacity
             disabled:bg-secondary-50 disabled:cursor-not-allowed disabled:text-secondary-500 disabled:opacity-75
-            focus:outline-none focus:ring-2 focus:ring-offset-1
+            focus:outline-none focus:ring-2 focus:ring-offset-1 focus:placeholder:opacity-50
             ${
               hasError
-                ? 'border-error-500 focus:border-error-500 focus:ring-error-200'
-                : 'border-secondary-300 focus:border-primary-500 focus:ring-primary-200'
+                ? 'border-error-500 focus:border-error-500 focus:ring-error-200 focus:shadow-error-100/50 focus:shadow-lg'
+                : 'border-secondary-300 focus:border-primary-500 focus:ring-primary-200 focus:shadow-primary-100/50 focus:shadow-lg'
             }
           `}
         />

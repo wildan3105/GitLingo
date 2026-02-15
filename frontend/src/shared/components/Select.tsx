@@ -69,13 +69,13 @@ export function Select<T extends string = string>({
             bg-white border-2 rounded-lg
             text-secondary-900 text-base
             appearance-none cursor-pointer
-            transition-colors duration-200
+            transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-offset-1
             disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary-50
             ${
               hasError
-                ? 'border-error-500 focus:ring-error-500 focus:border-error-500'
-                : 'border-secondary-300 focus:border-primary-500 focus:ring-primary-200 hover:border-secondary-400'
+                ? 'border-error-500 focus:ring-error-500 focus:border-error-500 focus:shadow-error-100/50 focus:shadow-lg'
+                : 'border-secondary-300 focus:border-primary-500 focus:ring-primary-200 focus:shadow-primary-100/50 focus:shadow-lg hover:border-secondary-400'
             }
           `}
           {...rest}

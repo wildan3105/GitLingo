@@ -68,7 +68,7 @@ export function KPICard({
       className={`
         bg-white/50 border border-secondary-200 rounded-lg p-4
         transition-all duration-200
-        hover:bg-white hover:border-secondary-300 hover:shadow-sm
+        hover:bg-white hover:border-secondary-300 hover:shadow-sm hover:scale-[1.02]
         ${className}
       `}
     >
