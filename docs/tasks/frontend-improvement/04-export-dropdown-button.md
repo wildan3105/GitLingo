@@ -1,6 +1,6 @@
 # Task 4: Export Dropdown Button
 
-**Status:** Pending
+**Status:** ✅ Completed
 **Estimated Time:** 45 minutes
 **Priority:** Medium
 
@@ -32,13 +32,13 @@ Replace social share buttons with a single, professional "Export" dropdown butto
 - `frontend/src/features/share/` (entire directory, unless needed for URL building)
 
 ### Acceptance Criteria
-- [ ] Single "Export" button replaces share buttons
-- [ ] Dropdown opens on click with 3-4 options
-- [ ] Download PNG works (reuse existing functionality)
-- [ ] Copy Link copies shareable URL to clipboard
-- [ ] Download CSV exports language data
-- [ ] Toast notification on successful export
-- [ ] Button is secondary/subtle, not visually dominant
+- [x] Single "Export" button replaces share buttons
+- [x] Dropdown opens on click with 3 options
+- [x] Download PNG works (reused existing functionality)
+- [x] Copy Link copies shareable URL to clipboard
+- [x] Download CSV exports language data
+- [x] Success/error messages on export (inline until Task 6)
+- [x] Button is secondary/subtle, not visually dominant
 
 ## Technical Notes
 - Use proper dropdown with click-outside handling

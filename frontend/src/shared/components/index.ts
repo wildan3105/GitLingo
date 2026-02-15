@@ -16,3 +16,9 @@ export type { ErrorStateProps } from './ErrorState'
 
 export { EmptyState } from './EmptyState'
 export type { EmptyStateProps } from './EmptyState'
+
+export { KPICard } from './KPICard'
+export type { KPICardProps } from './KPICard'
+
+export { Dropdown } from './Dropdown'
+export type { DropdownProps, DropdownItem } from './Dropdown'

@@ -212,9 +212,11 @@ export function SearchPage() {
               const totalRepos = data.series.reduce((sum, item) => sum + item.value, 0)
 
               // Find top language (excluding forks)
-              const topLanguageItem = data.series
-                .filter((item) => item.key !== '__forks__')
-                .reduce((max, item) => (item.value > max.value ? item : max), { key: '', value: 0 })
+              const languages = data.series.filter((item) => item.key !== '__forks__')
+              const topLanguageItem =
+                languages.length > 0
+                  ? languages.reduce((max, item) => (item.value > max.value ? item : max))
+                  : null
 
               // Count unique languages (excluding forks)
               const languageCount = data.series.filter((item) => item.key !== '__forks__').length
@@ -250,7 +252,7 @@ export function SearchPage() {
                     }
                   />
 
-                  {topLanguageItem.key && (
+                  {topLanguageItem && (
                     <KPICard
                       label="Top Language"
                       value={topLanguageItem.label}

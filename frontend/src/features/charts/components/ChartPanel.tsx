@@ -12,8 +12,9 @@ import { RadarChartView } from './charts/RadarChartView'
 import { Card } from '../../../shared/components/Card'
 import { ErrorState } from '../../../shared/components/ErrorState'
 import { EmptyState } from '../../../shared/components/EmptyState'
-import { ShareButtons } from '../../share/components/ShareButtons'
+import { Dropdown, type DropdownItem } from '../../../shared/components/Dropdown'
 import { downloadChart } from '../utils/downloadChart'
+import { exportToCSV } from '../../export/utils/exportToCSV'
 import type { LanguageSeries } from '../../../contracts/api'
 
 export type ChartPanelProps = {
@@ -59,9 +60,11 @@ export function ChartPanel({
   error,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadError, setDownloadError] = useState<string | null>(null)
-  const [downloadSuccess, setDownloadSuccess] = useState(false)
+  const [exportStatus, setExportStatus] = useState<{
+    type: 'png' | 'csv' | 'link' | null
+    status: 'loading' | 'success' | 'error'
+    message?: string
+  }>({ type: null, status: 'success' })
   const chartRef = useRef<HTMLDivElement>(null)
 
   // Show error state
@@ -85,16 +88,15 @@ export function ChartPanel({
     )
   }
 
-  // Handle download
-  const handleDownload = async () => {
+  // Handle PNG download
+  const handleDownloadPNG = async () => {
     if (!chartRef.current) {
-      setDownloadError('Chart not found')
+      setExportStatus({ type: 'png', status: 'error', message: 'Chart not found' })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
       return
     }
 
-    setIsDownloading(true)
-    setDownloadError(null)
-    setDownloadSuccess(false)
+    setExportStatus({ type: 'png', status: 'loading' })
 
     try {
       await downloadChart(chartRef.current, {
@@ -103,13 +105,40 @@ export function ChartPanel({
         chartType,
       })
 
-      setDownloadSuccess(true)
-      setTimeout(() => setDownloadSuccess(false), 3000)
+      setExportStatus({ type: 'png', status: 'success', message: 'Chart downloaded!' })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Download failed'
-      setDownloadError(message)
-    } finally {
-      setIsDownloading(false)
+      setExportStatus({ type: 'png', status: 'error', message })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+    }
+  }
+
+  // Handle CSV download
+  const handleDownloadCSV = () => {
+    try {
+      const filename = `${username}-${provider}-languages`
+      exportToCSV(series, filename)
+      setExportStatus({ type: 'csv', status: 'success', message: 'CSV downloaded!' })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Export failed'
+      setExportStatus({ type: 'csv', status: 'error', message })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+    }
+  }
+
+  // Handle copy link
+  const handleCopyLink = async () => {
+    try {
+      const url = `${window.location.origin}?username=${encodeURIComponent(username)}&provider=${encodeURIComponent(provider)}`
+      await navigator.clipboard.writeText(url)
+      setExportStatus({ type: 'link', status: 'success', message: 'Link copied to clipboard!' })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to copy link'
+      setExportStatus({ type: 'link', status: 'error', message })
+      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
     }
   }
 
@@ -159,57 +188,12 @@ export function ChartPanel({
           {renderChart()}
         </div>
 
-        {/* Actions: Download and Share */}
+        {/* Actions: Export */}
         {hasData && (
-          <div className="flex flex-col gap-4 pt-4 border-t border-secondary-200">
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              {/* Download Button */}
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={actionsDisabled || isDownloading}
-                aria-label="Download chart as PNG"
-                className={`
-                  inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                  font-medium text-sm transition-all duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-2
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  bg-green-600 text-white
-                  hover:bg-green-700
-                  focus:ring-green-500
-                `}
-              >
-                {isDownloading ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Downloading...
-                  </>
-                ) : downloadSuccess ? (
-                  <>
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Downloaded!
-                  </>
-                ) : (
+          <div className="flex flex-col gap-3 pt-4 border-t border-secondary-200">
+            <div className="flex items-center justify-center">
+              <Dropdown
+                trigger={
                   <>
                     <svg
                       className="w-4 h-4"
@@ -222,20 +206,90 @@ export function ChartPanel({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    Download PNG
+                    Export
                   </>
-                )}
-              </button>
-
-              <ShareButtons username={username} provider={provider} disabled={actionsDisabled} />
+                }
+                items={
+                  [
+                    {
+                      id: 'download-png',
+                      label: 'Download PNG',
+                      icon: (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                      ),
+                      onClick: handleDownloadPNG,
+                      disabled: exportStatus.type === 'png' && exportStatus.status === 'loading',
+                    },
+                    {
+                      id: 'download-csv',
+                      label: 'Download CSV',
+                      icon: (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      ),
+                      onClick: handleDownloadCSV,
+                    },
+                    {
+                      id: 'copy-link',
+                      label: 'Copy Link',
+                      icon: (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      ),
+                      onClick: handleCopyLink,
+                    },
+                  ] as DropdownItem[]
+                }
+                className="bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500"
+                disabled={actionsDisabled}
+                align="center"
+              />
             </div>
 
-            {downloadError && (
-              <p className="text-sm text-error-600 text-center" role="alert">
-                {downloadError}
+            {/* Success/Error Message */}
+            {exportStatus.type && exportStatus.message && (
+              <p
+                className={`text-sm text-center ${exportStatus.status === 'error' ? 'text-error-600' : 'text-green-600'}`}
+                role={exportStatus.status === 'error' ? 'alert' : 'status'}
+              >
+                {exportStatus.message}
               </p>
             )}
           </div>
