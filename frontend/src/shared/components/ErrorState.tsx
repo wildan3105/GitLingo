@@ -8,7 +8,14 @@ import { Button } from './Button'
 
 export type ErrorStateProps = {
   /** Error code */
-  code: 'user_not_found' | 'rate_limited' | 'network_error' | 'server_error' | 'generic'
+  code:
+    | 'user_not_found'
+    | 'rate_limited'
+    | 'network_error'
+    | 'server_error'
+    | 'validation_error'
+    | 'timeout'
+    | 'generic'
   /** Error message */
   message: string
   /** Additional details */

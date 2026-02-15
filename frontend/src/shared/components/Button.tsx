@@ -3,7 +3,7 @@
  * A distinctive button with code-inspired aesthetics
  */
 
-import { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 export type ButtonProps = {
   /** Button visual style */

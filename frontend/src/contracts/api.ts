@@ -16,6 +16,9 @@ export type SearchQuery = {
  */
 export type Profile = {
   username: string
+  name: string | null
+  avatarUrl: string
+  profileUrl: string
   type: 'user' | 'organization'
   providerUserId: string
 }
@@ -43,7 +46,14 @@ export type Metadata = {
  * Error detail information
  */
 export type ErrorDetail = {
-  code: string
+  code:
+    | 'user_not_found'
+    | 'rate_limited'
+    | 'network_error'
+    | 'server_error'
+    | 'validation_error'
+    | 'timeout'
+    | 'generic'
   message: string
   details?: Record<string, unknown>
   retry_after_seconds?: number

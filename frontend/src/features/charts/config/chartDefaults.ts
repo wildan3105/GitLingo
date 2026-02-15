@@ -33,9 +33,9 @@ ChartJS.register(
 )
 
 /**
- * Common chart options that apply to all chart types
+ * Common chart options (not exported, used as base for specific chart types)
  */
-export const commonChartOptions: Partial<ChartOptions> = {
+const baseOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -66,16 +66,16 @@ export const commonChartOptions: Partial<ChartOptions> = {
   },
   animation: {
     duration: 750,
-    easing: 'easeInOutQuart',
+    easing: 'easeInOutQuart' as const,
   },
 }
 
 /**
  * Options specific to Bar charts
  */
-export const barChartOptions: Partial<ChartOptions<'bar'>> = {
-  ...commonChartOptions,
-  indexAxis: 'y' as const, // Horizontal bars
+export const barChartOptions: ChartOptions<'bar'> = {
+  ...baseOptions,
+  indexAxis: 'y', // Horizontal bars
   scales: {
     x: {
       beginAtZero: true,
@@ -100,40 +100,47 @@ export const barChartOptions: Partial<ChartOptions<'bar'>> = {
       },
     },
   },
-}
+} as ChartOptions<'bar'>
 
 /**
- * Options specific to Pie/Doughnut charts
+ * Options specific to Pie charts
  */
-export const pieChartOptions: Partial<ChartOptions<'pie'>> = {
-  ...commonChartOptions,
+export const pieChartOptions: ChartOptions<'pie'> = {
+  ...baseOptions,
   plugins: {
-    ...commonChartOptions.plugins,
+    ...baseOptions.plugins,
     legend: {
-      ...commonChartOptions.plugins?.legend,
-      position: 'right' as const,
+      ...baseOptions.plugins.legend,
+      position: 'right',
     },
   },
-}
+} as ChartOptions<'pie'>
 
 /**
  * Options specific to Doughnut charts
  */
-export const doughnutChartOptions: Partial<ChartOptions<'doughnut'>> = {
-  ...pieChartOptions,
+export const doughnutChartOptions: ChartOptions<'doughnut'> = {
+  ...baseOptions,
+  plugins: {
+    ...baseOptions.plugins,
+    legend: {
+      ...baseOptions.plugins.legend,
+      position: 'right',
+    },
+  },
   cutout: '60%', // Size of center hole
-}
+} as ChartOptions<'doughnut'>
 
 /**
  * Options specific to Radar charts
  */
-export const radarChartOptions: Partial<ChartOptions<'radar'>> = {
-  ...commonChartOptions,
+export const radarChartOptions: ChartOptions<'radar'> = {
+  ...baseOptions,
   plugins: {
-    ...commonChartOptions.plugins,
+    ...baseOptions.plugins,
     legend: {
-      ...commonChartOptions.plugins?.legend,
-      position: 'top' as const,
+      ...baseOptions.plugins.legend,
+      position: 'top',
     },
   },
   scales: {
@@ -158,4 +165,4 @@ export const radarChartOptions: Partial<ChartOptions<'radar'>> = {
       },
     },
   },
-}
+} as ChartOptions<'radar'>

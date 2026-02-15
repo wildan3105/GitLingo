@@ -18,13 +18,14 @@ export type ApiClientConfig = {
  * API Client error class
  */
 export class ApiClientError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public response?: unknown
-  ) {
+  statusCode?: number
+  response?: unknown
+
+  constructor(message: string, statusCode?: number, response?: unknown) {
     super(message)
     this.name = 'ApiClientError'
+    this.statusCode = statusCode
+    this.response = response
   }
 }
 

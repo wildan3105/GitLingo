@@ -3,6 +3,8 @@
  * Skeleton UI with smooth shimmer animation
  */
 
+import type { CSSProperties } from 'react'
+
 export type LoadingStateProps = {
   /** Loading variant */
   variant?: 'chart' | 'search' | 'default'
@@ -13,12 +15,13 @@ export type LoadingStateProps = {
 /**
  * Shimmer animation wrapper
  */
-function Skeleton({ className = '' }: { className?: string }) {
+function Skeleton({ className = '', style }: { className?: string; style?: CSSProperties }) {
   return (
     <div
       className={`animate-pulse bg-gradient-to-r from-secondary-200 via-secondary-100 to-secondary-200 bg-[length:200%_100%] rounded ${className}`}
       style={{
         animation: 'shimmer 2s ease-in-out infinite',
+        ...style,
       }}
     />
   )

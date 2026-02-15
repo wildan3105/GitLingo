@@ -22,7 +22,7 @@ const PROVIDERS = [
   { value: 'github', label: 'GitHub', disabled: false },
   { value: 'gitlab', label: 'GitLab (Coming soon)', disabled: true },
   { value: 'bitbucket', label: 'Bitbucket (Coming soon)', disabled: true },
-] as const
+]
 
 export function ProviderSelect({ value, onChange, disabled = false }: ProviderSelectProps) {
   return (
