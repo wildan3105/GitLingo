@@ -56,7 +56,7 @@ export function ResultHeader({ profile, totalRepos, provider }: ResultHeaderProp
 
           {/* Account Type Badge */}
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800">
-            {accountType}
+            {accountType.charAt(0).toUpperCase() + accountType.slice(1).toLowerCase()}
           </span>
 
           {/* Provider Badge */}
