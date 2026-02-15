@@ -13,6 +13,3 @@ export type { BarChartViewProps } from './charts/BarChartView'
 
 export { PieChartView } from './charts/PieChartView'
 export type { PieChartViewProps } from './charts/PieChartView'
-
-export { RadarChartView } from './charts/RadarChartView'
-export type { RadarChartViewProps } from './charts/RadarChartView'

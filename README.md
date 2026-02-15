@@ -9,7 +9,7 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
 ## Features
 
 - **GitHub User Search** - Search any GitHub username or organization
-- **Multiple Chart Types** - Visualize data with Bar, Pie, Polar Area, and Radar charts
+- **Multiple Chart Types** - Visualize data with Bar, Pie, and Polar Area charts
 - **Interactive Visualizations** - Built with Chart.js for smooth, responsive charts
 - **Share Results** - Share your language stats on X (Twitter) and Facebook
 - **Download Charts** - Export your charts as PNG images

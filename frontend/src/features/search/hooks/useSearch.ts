@@ -27,6 +27,8 @@ export type UseSearchReturn = {
   setIncludeUnknownLanguage: (value: boolean) => void
   /** Trigger search (validates and calls API) */
   handleSearch: () => void
+  /** Reset all state to defaults */
+  handleReset: () => void
   /** Whether API call is in progress */
   isLoading: boolean
   /** API error response if request failed */
@@ -118,6 +120,21 @@ export function useSearch(): UseSearchReturn {
     mutation.mutate({ username, provider })
   }
 
+  /**
+   * Resets all state to defaults
+   * - Clears username
+   * - Resets filters to true
+   * - Clears API data and errors
+   * - Clears validation errors
+   */
+  const handleReset = () => {
+    setUsernameState('')
+    setIncludeForks(false)
+    setIncludeUnknownLanguage(false)
+    setValidationError(null)
+    mutation.reset()
+  }
+
   // Split API response into success/error for easier consumption
   let data: SuccessResponse | null = null
   let error: ErrorResponse | null = null
@@ -139,6 +156,7 @@ export function useSearch(): UseSearchReturn {
     includeUnknownLanguage,
     setIncludeUnknownLanguage,
     handleSearch,
+    handleReset,
     isLoading: mutation.isPending,
     error,
     data,

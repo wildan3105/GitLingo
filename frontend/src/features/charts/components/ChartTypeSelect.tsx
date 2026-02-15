@@ -3,7 +3,7 @@
  * Allows users to switch between different chart types
  */
 
-export type ChartType = 'bar' | 'pie' | 'polar' | 'radar'
+export type ChartType = 'bar' | 'pie' | 'polar'
 
 export type ChartTypeSelectProps = {
   /** Currently selected chart type */
@@ -33,11 +33,6 @@ const CHART_TYPES: ChartTypeOption[] = [
     value: 'polar',
     label: 'Polar Area',
     description: 'Radial chart with segments sized by value',
-  },
-  {
-    value: 'radar',
-    label: 'Radar',
-    description: 'Multi-axis chart for top languages',
   },
 ]
 

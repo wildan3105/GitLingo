@@ -8,7 +8,6 @@ import { ChartTypeSelect, type ChartType } from './ChartTypeSelect'
 import { BarChartView } from './charts/BarChartView'
 import { PieChartView } from './charts/PieChartView'
 import { PolarAreaChartView } from './charts/PolarAreaChartView'
-import { RadarChartView } from './charts/RadarChartView'
 import { Card } from '../../../shared/components/Card'
 import { ErrorState } from '../../../shared/components/ErrorState'
 import { EmptyState } from '../../../shared/components/EmptyState'
@@ -148,8 +147,6 @@ export function ChartPanel({
         return <PieChartView {...chartProps} />
       case 'polar':
         return <PolarAreaChartView {...chartProps} />
-      case 'radar':
-        return <RadarChartView {...chartProps} />
       case 'bar':
       default:
         return <BarChartView {...chartProps} />

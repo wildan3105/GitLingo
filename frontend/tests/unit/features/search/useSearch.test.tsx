@@ -132,6 +132,37 @@ describe('useSearch', () => {
 
       expect(result.current.includeUnknownLanguage).toBe(false)
     })
+
+    it('resets all state when handleReset is called', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Set some state
+      act(() => {
+        result.current.setUsername('testuser')
+        result.current.setIncludeForks(true)
+        result.current.setIncludeUnknownLanguage(true)
+      })
+
+      // Verify state was set
+      expect(result.current.username).toBe('testuser')
+      expect(result.current.includeForks).toBe(true)
+      expect(result.current.includeUnknownLanguage).toBe(true)
+
+      // Reset
+      act(() => {
+        result.current.handleReset()
+      })
+
+      // Verify state was reset to defaults (both false)
+      expect(result.current.username).toBe('')
+      expect(result.current.includeForks).toBe(false)
+      expect(result.current.includeUnknownLanguage).toBe(false)
+      expect(result.current.validationError).toBeNull()
+      expect(result.current.data).toBeNull()
+      expect(result.current.error).toBeNull()
+    })
   })
 
   describe('validation before API call', () => {

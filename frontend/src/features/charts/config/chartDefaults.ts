@@ -143,39 +143,3 @@ export const polarAreaChartOptions: ChartOptions<'polarArea'> = {
     },
   },
 } as ChartOptions<'polarArea'>
-
-/**
- * Options specific to Radar charts
- */
-export const radarChartOptions: ChartOptions<'radar'> = {
-  ...baseOptions,
-  plugins: {
-    ...baseOptions.plugins,
-    legend: {
-      ...baseOptions.plugins.legend,
-      position: 'top',
-    },
-  },
-  scales: {
-    r: {
-      beginAtZero: true,
-      grid: {
-        color: 'rgba(0, 0, 0, 0.1)',
-      },
-      angleLines: {
-        color: 'rgba(0, 0, 0, 0.1)',
-      },
-      ticks: {
-        font: {
-          size: 11,
-        },
-        backdropColor: 'transparent',
-      },
-      pointLabels: {
-        font: {
-          size: 12,
-        },
-      },
-    },
-  },
-} as ChartOptions<'radar'>

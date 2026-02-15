@@ -39,6 +39,7 @@ export function SearchPage() {
     includeUnknownLanguage,
     setIncludeUnknownLanguage,
     handleSearch,
+    handleReset,
     isLoading,
     error,
     data,
@@ -140,10 +141,16 @@ export function SearchPage() {
       {/* Header */}
       <header className="bg-white border-b border-secondary-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-            GitLingo
-          </h1>
-          <p className="text-secondary-600 mt-1">Visualize your GitHub language statistics</p>
+          <button
+            onClick={handleReset}
+            className="text-left transition-all duration-200 hover:opacity-80 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1 -m-1"
+            aria-label="Reset to home"
+          >
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              GitLingo
+            </h1>
+            <p className="text-secondary-600 mt-1">Visualize your GitHub language statistics</p>
+          </button>
         </div>
       </header>
 
