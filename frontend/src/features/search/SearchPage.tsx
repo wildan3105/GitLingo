@@ -12,6 +12,7 @@ import { Card } from '../../shared/components/Card'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { ErrorState } from '../../shared/components/ErrorState'
 import { Button } from '../../shared/components/Button'
+import { LoadingState } from '../../shared/components/LoadingState'
 
 /**
  * Main search page component
@@ -178,6 +179,19 @@ export function SearchPage() {
             </div>
           </Card>
 
+          {/* Loading Skeletons - Show during loading after a search */}
+          {isLoading && username && (
+            <>
+              <Card padding="lg">
+                <LoadingState variant="profile" />
+              </Card>
+
+              <Card padding="lg">
+                <LoadingState variant="chartPanel" />
+              </Card>
+            </>
+          )}
+
           {/* Profile Header - Show for any successful search */}
           {data && !isLoading && (
             <Card padding="lg">
@@ -190,7 +204,7 @@ export function SearchPage() {
           )}
 
           {/* Chart Panel - Only show if user has repositories */}
-          {hasData && data && (
+          {hasData && data && !isLoading && (
             <ChartPanel
               series={data.series}
               username={username}
