@@ -109,6 +109,7 @@ Get language statistics for a GitHub user.
     "username": "octocat",
     "type": "user",
     "avatarUrl": "https://avatars.githubusercontent.com/u/583231?v=4",
+    "websiteUrl": "https://github.com/octocat"
   },
   "series": [
     {

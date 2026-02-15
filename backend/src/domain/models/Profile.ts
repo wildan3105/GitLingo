@@ -23,4 +23,14 @@ export interface Profile {
    * Optional avatar URL for the profile
    */
   avatarUrl?: string;
+
+  /**
+   * Optional website URL for the profile
+   */
+  websiteUrl?: string;
+
+  /**
+   * Optional location for the profile
+   */
+  location?: string;
 }
