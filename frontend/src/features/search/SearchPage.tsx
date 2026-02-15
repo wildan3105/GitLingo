@@ -114,7 +114,7 @@ export function SearchPage() {
   const hasData = data && data.series.length > 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-secondary-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary-50 to-secondary-100">
       {/* Header */}
       <header className="bg-white border-b border-secondary-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -126,7 +126,7 @@ export function SearchPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
         <div className="space-y-6">
           {/* Search Form */}
           <Card padding="lg">
@@ -247,7 +247,7 @@ export function SearchPage() {
       </main>
 
       {/* Footer */}
-      <footer className="max-w-6xl mx-auto px-4 py-8">
+      <footer className="w-full max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between text-sm text-secondary-500">
           <p>
             © 2026 GitLingo, created by{' '}
