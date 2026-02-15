@@ -13,6 +13,7 @@ import { EmptyState } from '../../shared/components/EmptyState'
 import { ErrorState } from '../../shared/components/ErrorState'
 import { Button } from '../../shared/components/Button'
 import { LoadingState } from '../../shared/components/LoadingState'
+import { KPICard } from '../../shared/components/KPICard'
 
 /**
  * Main search page component
@@ -202,6 +203,125 @@ export function SearchPage() {
               />
             </Card>
           )}
+
+          {/* KPI Cards - Show key metrics */}
+          {data &&
+            !isLoading &&
+            (() => {
+              // Calculate metrics from series data
+              const totalRepos = data.series.reduce((sum, item) => sum + item.value, 0)
+
+              // Find top language (excluding forks)
+              const topLanguageItem = data.series
+                .filter((item) => item.key !== '__forks__')
+                .reduce((max, item) => (item.value > max.value ? item : max), { key: '', value: 0 })
+
+              // Count unique languages (excluding forks)
+              const languageCount = data.series.filter((item) => item.key !== '__forks__').length
+
+              // Calculate forks percentage
+              const forksItem = data.series.find((item) => item.key === '__forks__')
+              const forksPercentage =
+                forksItem && totalRepos > 0
+                  ? ((forksItem.value / totalRepos) * 100).toFixed(1)
+                  : null
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <KPICard
+                    label="Repositories"
+                    value={totalRepos}
+                    subtitle="analyzed"
+                    color="primary"
+                    icon={
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                        />
+                      </svg>
+                    }
+                  />
+
+                  {topLanguageItem.key && (
+                    <KPICard
+                      label="Top Language"
+                      value={topLanguageItem.label}
+                      subtitle={`${topLanguageItem.value} ${topLanguageItem.value === 1 ? 'repository' : 'repositories'}`}
+                      color="success"
+                      icon={
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                          />
+                        </svg>
+                      }
+                    />
+                  )}
+
+                  <KPICard
+                    label="Languages"
+                    value={languageCount}
+                    subtitle="detected"
+                    color="secondary"
+                    icon={
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                        />
+                      </svg>
+                    }
+                  />
+
+                  {forksPercentage && parseFloat(forksPercentage) > 0 && (
+                    <KPICard
+                      label="Forks"
+                      value={`${forksPercentage}%`}
+                      subtitle="of repositories"
+                      color="warning"
+                      icon={
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      }
+                    />
+                  )}
+                </div>
+              )
+            })()}
 
           {/* Chart Panel - Only show if user has repositories */}
           {hasData && data && !isLoading && (
