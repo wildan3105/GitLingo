@@ -110,48 +110,27 @@ export function SearchPage() {
   // Render initial empty state
   const renderEmptyState = () => {
     return (
-      <div className="space-y-6">
-        <Card>
-          <EmptyState
-            title="Search a GitHub Username"
-            description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
-            icon={
-              <svg
-                className="w-16 h-16 text-secondary-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            }
-          />
-        </Card>
-
-        {/* Preview skeleton - hint of what's coming */}
-        <Card variant="subtle" padding="lg">
-          <div className="space-y-4 opacity-40">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-secondary-200 animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-secondary-200 rounded w-1/4 animate-pulse" />
-                <div className="h-3 bg-secondary-200 rounded w-1/3 animate-pulse" />
-              </div>
-            </div>
-            <div className="grid grid-cols-4 gap-3 pt-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-20 bg-secondary-200 rounded-lg animate-pulse" />
-              ))}
-            </div>
-            <div className="h-64 bg-secondary-200 rounded-lg animate-pulse mt-4" />
-          </div>
-        </Card>
-      </div>
+      <Card>
+        <EmptyState
+          title="Search a GitHub Username"
+          description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
+          icon={
+            <svg
+              className="w-16 h-16 text-secondary-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          }
+        />
+      </Card>
     )
   }
 
