@@ -12,7 +12,7 @@ Implement a proper toast notification system for success/error feedback.
 
 ## Scope
 - Create reusable toast notification component
-- Show toast for export actions (download, copy link, etc.)
+- Show toast for export actions (download, etc.)
 - Show toast for errors if helpful
 - Auto-dismiss after 3-4 seconds
 - Support different types: success, error, info

@@ -13,10 +13,19 @@ import { ErrorState } from '../../../shared/components/ErrorState'
 import { EmptyState } from '../../../shared/components/EmptyState'
 import { Dropdown, type DropdownItem } from '../../../shared/components/Dropdown'
 import { Checkbox } from '../../../shared/components/Checkbox'
+import { SegmentedControl, type SegmentedOption } from '../../../shared/components/SegmentedControl'
 import { downloadChart } from '../utils/downloadChart'
 import { exportToCSV } from '../../export/utils/exportToCSV'
+import { aggregateTopN, type TopNOption } from '../utils/aggregateTopN'
 import { useToast } from '../../../shared/hooks/useToast'
 import type { LanguageSeries } from '../../../contracts/api'
+
+// Top-N options for segmented control
+const TOP_N_OPTIONS: SegmentedOption<TopNOption>[] = [
+  { value: 'top10', label: 'Top 10' },
+  { value: 'top25', label: 'Top 25' },
+  { value: 'all', label: 'All languages' },
+]
 
 export type ChartPanelProps = {
   /** Language statistics series data */
@@ -76,9 +85,13 @@ export function ChartPanel({
   hasOriginalData = true,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
+  const [topN, setTopN] = useState<TopNOption>('all')
   const [isExporting, setIsExporting] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+
+  // Apply Top-N aggregation to series
+  const aggregatedSeries = aggregateTopN(series, topN)
 
   // Show error state
   if (error && !isLoading) {
@@ -138,9 +151,45 @@ export function ChartPanel({
     }
   }
 
+  // Export dropdown items
+  const EXPORT_ITEMS: DropdownItem[] = [
+    {
+      id: 'download-png',
+      label: 'Download PNG',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+          />
+        </svg>
+      ),
+      onClick: handleDownloadPNG,
+      disabled: isExporting,
+    },
+    {
+      id: 'download-csv',
+      label: 'Download CSV',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      ),
+      onClick: handleDownloadCSV,
+      disabled: false,
+    },
+  ]
+
   // Render chart based on selected type
   const renderChart = () => {
-    const chartProps = { series, isLoading }
+    const chartProps = { series: aggregatedSeries, isLoading }
 
     switch (chartType) {
       case 'pie':
@@ -154,43 +203,91 @@ export function ChartPanel({
   }
 
   const hasData = !isLoading && series.length > 0
-  const actionsDisabled = isLoading || !!error || !hasData
 
   return (
     <Card variant="prominent" padding="lg">
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div>
-            <h2 className="text-2xl font-bold text-secondary-900">Language Statistics</h2>
-            <p className="text-sm text-secondary-600 mt-2">
-              Programming languages used across repositories
-            </p>
-          </div>
-
-          {/* Options - Filter Checkboxes */}
-          <div className="flex flex-col gap-2">
-            <h3 className="text-sm font-medium text-secondary-700">Options</h3>
-            <div className="flex flex-col gap-2.5">
-              <Checkbox
-                id="chart-include-forks"
-                label="Include fork"
-                checked={includeForks}
-                onChange={setIncludeForks}
-                disabled={isLoading}
-              />
-              <Checkbox
-                id="chart-include-unknown"
-                label="Include unknown"
-                checked={includeUnknownLanguage}
-                onChange={setIncludeUnknownLanguage}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
+        <div>
+          <h2 className="text-2xl font-bold text-secondary-900">Language Statistics</h2>
+          <p className="text-sm text-secondary-600 mt-2">
+            Programming languages used across repositories
+          </p>
         </div>
 
-        <ChartTypeSelect value={chartType} onChange={setChartType} />
+        {/* Unified Toolbar */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-secondary-200">
+          {/* Left: Chart Types */}
+          <div className="flex-shrink-0">
+            <ChartTypeSelect value={chartType} onChange={setChartType} />
+          </div>
+
+          {/* Middle: Top-N Selector */}
+          <div className="flex-shrink-0">
+            <SegmentedControl
+              options={TOP_N_OPTIONS}
+              value={topN}
+              onChange={setTopN}
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Right: Advanced + Export */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Advanced Dropdown (Filters) */}
+            <Dropdown
+              trigger="Advanced"
+              items={[
+                {
+                  id: 'advanced-filters',
+                  label: '',
+                  onClick: () => {},
+                  disabled: true,
+                },
+              ]}
+              customContent={
+                <div className="px-4 py-3 min-w-[200px]">
+                  <p className="text-xs font-medium text-secondary-700 mb-3">Filter Options</p>
+                  <div className="space-y-2.5">
+                    <Checkbox
+                      id="advanced-include-forks"
+                      label="Include fork"
+                      checked={includeForks}
+                      onChange={setIncludeForks}
+                      disabled={isLoading}
+                    />
+                    <Checkbox
+                      id="advanced-include-unknown"
+                      label="Include unknown"
+                      checked={includeUnknownLanguage}
+                      onChange={setIncludeUnknownLanguage}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+              }
+            />
+
+            {/* Export Dropdown */}
+            <Dropdown
+              trigger={
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Export
+                </>
+              }
+              items={EXPORT_ITEMS}
+              disabled={!hasData || isExporting}
+            />
+          </div>
+        </div>
 
         {/* Chart display area */}
         <div
@@ -229,83 +326,6 @@ export function ChartPanel({
             renderChart()
           )}
         </div>
-
-        {/* Actions: Export */}
-        {hasData && (
-          <div className="flex flex-col gap-3 pt-4 border-t border-secondary-200">
-            <div className="flex items-center justify-center">
-              <Dropdown
-                trigger={
-                  <>
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    Export
-                  </>
-                }
-                items={
-                  [
-                    {
-                      id: 'download-png',
-                      label: 'Download PNG',
-                      icon: (
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                          />
-                        </svg>
-                      ),
-                      onClick: handleDownloadPNG,
-                      disabled: isExporting,
-                    },
-                    {
-                      id: 'download-csv',
-                      label: 'Download CSV',
-                      icon: (
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      ),
-                      onClick: handleDownloadCSV,
-                    },
-                  ] as DropdownItem[]
-                }
-                className="bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500"
-                disabled={actionsDisabled}
-                align="center"
-              />
-            </div>
-          </div>
-        )}
       </div>
     </Card>
   )

@@ -51,9 +51,7 @@ Big "Share on X / Facebook" buttons are visually louder than the insight. ALso: 
 
 **Fix**:
 - Replace with one "Export" button (dropdown):
-    - Copy link
     - Download PNG/SVG
-    - Copy as image
     - Download CSV
 - Make export actions secondary (smaller, right-aligned)
 

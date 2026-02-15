@@ -15,7 +15,6 @@ Replace social share buttons with a single, professional "Export" dropdown butto
 - Create single "Export" dropdown button
 - Include options:
   - Download PNG (existing functionality)
-  - Copy Link (share current URL with username)
   - Download CSV (language data as CSV)
   - Copy as Image (optional, may need clipboard API)
 
@@ -35,7 +34,6 @@ Replace social share buttons with a single, professional "Export" dropdown butto
 - [x] Single "Export" button replaces share buttons
 - [x] Dropdown opens on click with 3 options
 - [x] Download PNG works (reused existing functionality)
-- [x] Copy Link copies shareable URL to clipboard
 - [x] Download CSV exports language data
 - [x] Success/error messages on export (inline until Task 6)
 - [x] Button is secondary/subtle, not visually dominant
@@ -43,7 +41,6 @@ Replace social share buttons with a single, professional "Export" dropdown butto
 ## Technical Notes
 - Use proper dropdown with click-outside handling
 - CSV format: Language, Repositories, Percentage
-- Copy Link: `${window.location.origin}?user=${username}&provider=${provider}`
 - Use Clipboard API for copy operations
 - Add keyboard navigation (Escape to close, Arrow keys to navigate)
 - Ensure dropdown is accessible

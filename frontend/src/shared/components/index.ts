@@ -25,3 +25,6 @@ export type { DropdownProps, DropdownItem } from './Dropdown'
 
 export { Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
+
+export { SegmentedControl } from './SegmentedControl'
+export type { SegmentedControlProps, SegmentedOption } from './SegmentedControl'
