@@ -21,6 +21,8 @@ export type Profile = {
   profileUrl: string
   type: 'user' | 'organization'
   providerUserId: string
+  location?: string | null
+  websiteUrl?: string | null
 }
 
 /**
