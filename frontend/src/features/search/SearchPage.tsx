@@ -140,7 +140,7 @@ export function SearchPage() {
                 />
               </div>
 
-              <div className="md:w-48">
+              <div className="md:w-60">
                 <ProviderSelect value={provider} onChange={setProvider} disabled={isLoading} />
               </div>
 
