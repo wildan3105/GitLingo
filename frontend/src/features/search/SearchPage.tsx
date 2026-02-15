@@ -6,7 +6,6 @@
 import { useSearch } from './hooks/useSearch'
 import { SearchBar } from './components/SearchBar'
 import { ResultHeader } from './components/ResultHeader'
-import { Checkbox } from '../../shared/components/Checkbox'
 import { ChartPanel } from '../charts/components/ChartPanel'
 import { Card } from '../../shared/components/Card'
 import { EmptyState } from '../../shared/components/EmptyState'
@@ -154,9 +153,9 @@ export function SearchPage() {
         <div className="space-y-8">
           {/* Search Form */}
           <Card padding="lg">
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-4">
               {/* Username Input */}
-              <div className="flex-1 w-full">
+              <div className="flex-1">
                 <SearchBar
                   value={username}
                   onChange={setUsername}
@@ -166,29 +165,8 @@ export function SearchPage() {
                 />
               </div>
 
-              {/* Options - Filter Checkboxes */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-secondary-700">Options</label>
-                <div className="flex flex-col gap-2.5 pt-1">
-                  <Checkbox
-                    id="include-forks"
-                    label="Include fork"
-                    checked={includeForks}
-                    onChange={setIncludeForks}
-                    disabled={isLoading}
-                  />
-                  <Checkbox
-                    id="include-unknown"
-                    label="Include unknown"
-                    checked={includeUnknownLanguage}
-                    onChange={setIncludeUnknownLanguage}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
               {/* Search Button */}
-              <div className="flex flex-col gap-1.5 w-full lg:w-auto">
+              <div className="flex flex-col gap-1.5">
                 {/* Invisible label for alignment */}
                 <label
                   className="text-sm font-medium text-transparent select-none pointer-events-none"
@@ -200,7 +178,7 @@ export function SearchPage() {
                   onClick={handleSearch}
                   disabled={isLoading || !!validationError}
                   variant="primary"
-                  className="w-full lg:w-auto px-8"
+                  className="w-full md:w-auto px-8"
                 >
                   <svg
                     className="w-4 h-4"
@@ -379,6 +357,10 @@ export function SearchPage() {
                 username={username}
                 provider={provider}
                 isLoading={isLoading}
+                includeForks={includeForks}
+                setIncludeForks={setIncludeForks}
+                includeUnknownLanguage={includeUnknownLanguage}
+                setIncludeUnknownLanguage={setIncludeUnknownLanguage}
               />
             </div>
           )}

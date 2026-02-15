@@ -13,6 +13,7 @@ import { Card } from '../../../shared/components/Card'
 import { ErrorState } from '../../../shared/components/ErrorState'
 import { EmptyState } from '../../../shared/components/EmptyState'
 import { Dropdown, type DropdownItem } from '../../../shared/components/Dropdown'
+import { Checkbox } from '../../../shared/components/Checkbox'
 import { downloadChart } from '../utils/downloadChart'
 import { exportToCSV } from '../../export/utils/exportToCSV'
 import { useToast } from '../../../shared/hooks/useToast'
@@ -29,6 +30,14 @@ export type ChartPanelProps = {
   isLoading?: boolean
   /** Error message if request failed */
   error?: string
+  /** Whether to include forked repositories in results */
+  includeForks: boolean
+  /** Update include forks filter */
+  setIncludeForks: (value: boolean) => void
+  /** Whether to include unknown language repositories in results */
+  includeUnknownLanguage: boolean
+  /** Update include unknown language filter */
+  setIncludeUnknownLanguage: (value: boolean) => void
 }
 
 /**
@@ -59,6 +68,10 @@ export function ChartPanel({
   provider,
   isLoading = false,
   error,
+  includeForks,
+  setIncludeForks,
+  includeUnknownLanguage,
+  setIncludeUnknownLanguage,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
   const [isExporting, setIsExporting] = useState(false)
@@ -147,12 +160,33 @@ export function ChartPanel({
     <Card variant="prominent" padding="lg">
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div>
             <h2 className="text-2xl font-bold text-secondary-900">Language Statistics</h2>
             <p className="text-sm text-secondary-600 mt-2">
               Programming languages used across repositories
             </p>
+          </div>
+
+          {/* Options - Filter Checkboxes */}
+          <div className="flex flex-col gap-2">
+            <h3 className="text-sm font-medium text-secondary-700">Options</h3>
+            <div className="flex flex-col gap-2.5">
+              <Checkbox
+                id="chart-include-forks"
+                label="Include fork"
+                checked={includeForks}
+                onChange={setIncludeForks}
+                disabled={isLoading}
+              />
+              <Checkbox
+                id="chart-include-unknown"
+                label="Include unknown"
+                checked={includeUnknownLanguage}
+                onChange={setIncludeUnknownLanguage}
+                disabled={isLoading}
+              />
+            </div>
           </div>
         </div>
 

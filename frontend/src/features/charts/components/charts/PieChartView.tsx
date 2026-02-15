@@ -22,7 +22,7 @@ export type PieChartViewProps = {
  * Pie chart component for displaying language distribution
  *
  * Features:
- * - Excludes __forks__ from display (reduces clutter)
+ * - Displays all data from filtered series
  * - Language colors preserved from API
  * - Legend with language names
  * - Tooltips with counts and percentages
@@ -38,10 +38,7 @@ export const PieChartView = memo(function PieChartView({
   isLoading = false,
 }: PieChartViewProps) {
   // Memoize normalized data
-  const { labels, values, colors } = useMemo(
-    () => normalizeSeries(series, { excludeForks: true }),
-    [series]
-  )
+  const { labels, values, colors } = useMemo(() => normalizeSeries(series), [series])
 
   // Calculate total for percentages
   const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])

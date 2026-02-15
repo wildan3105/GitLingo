@@ -23,7 +23,7 @@ export type PolarAreaChartViewProps = {
  *
  * Features:
  * - Radial segments sized by repository count
- * - Excludes __forks__ from display (reduces clutter)
+ * - Displays all data from filtered series
  * - Language colors preserved from API
  * - Legend with language names
  * - Tooltips with counts and percentages
@@ -39,10 +39,7 @@ export const PolarAreaChartView = memo(function PolarAreaChartView({
   isLoading = false,
 }: PolarAreaChartViewProps) {
   // Memoize normalized data
-  const { labels, values, colors } = useMemo(
-    () => normalizeSeries(series, { excludeForks: true }),
-    [series]
-  )
+  const { labels, values, colors } = useMemo(() => normalizeSeries(series), [series])
 
   // Calculate total for percentages
   const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
