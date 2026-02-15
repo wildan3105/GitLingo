@@ -65,7 +65,7 @@ export function ResultHeader({ profile, totalRepos, provider }: ResultHeaderProp
       {/* Profile Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 flex-wrap">
-          <h3 className="text-xl font-bold text-secondary-900">
+          <h3 className="text-lg font-semibold text-secondary-900">
             {profile.name || profile.username}
           </h3>
 
@@ -81,7 +81,7 @@ export function ResultHeader({ profile, totalRepos, provider }: ResultHeaderProp
         </div>
 
         {/* Metadata */}
-        <div className="flex items-center gap-2 mt-2 text-sm text-secondary-600">
+        <div className="flex items-center gap-2 mt-2 text-sm text-secondary-600 leading-relaxed">
           <span className="font-medium">@{profile.username}</span>
           <span className="text-secondary-400">•</span>
           <span>

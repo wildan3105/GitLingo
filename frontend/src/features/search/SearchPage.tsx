@@ -110,27 +110,48 @@ export function SearchPage() {
   // Render initial empty state
   const renderEmptyState = () => {
     return (
-      <Card>
-        <EmptyState
-          title="Search a GitHub Username"
-          description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
-          icon={
-            <svg
-              className="w-16 h-16 text-secondary-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          }
-        />
-      </Card>
+      <div className="space-y-6">
+        <Card>
+          <EmptyState
+            title="Search a GitHub Username"
+            description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
+            icon={
+              <svg
+                className="w-16 h-16 text-secondary-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            }
+          />
+        </Card>
+
+        {/* Preview skeleton - hint of what's coming */}
+        <Card variant="subtle" padding="lg">
+          <div className="space-y-4 opacity-40">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-secondary-200 animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-secondary-200 rounded w-1/4 animate-pulse" />
+                <div className="h-3 bg-secondary-200 rounded w-1/3 animate-pulse" />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-3 pt-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-20 bg-secondary-200 rounded-lg animate-pulse" />
+              ))}
+            </div>
+            <div className="h-64 bg-secondary-200 rounded-lg animate-pulse mt-4" />
+          </div>
+        </Card>
+      </div>
     )
   }
 
@@ -146,10 +167,12 @@ export function SearchPage() {
             className="text-left transition-all duration-200 hover:opacity-80 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1 -m-1"
             aria-label="Reset to home"
           >
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-semibold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
               GitLingo
             </h1>
-            <p className="text-secondary-600 mt-1">Visualize your GitHub language statistics</p>
+            <p className="text-sm text-secondary-600 mt-1 leading-relaxed">
+              Visualize your GitHub language statistics
+            </p>
           </button>
         </div>
       </header>

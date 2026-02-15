@@ -209,8 +209,8 @@ export function ChartPanel({
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-secondary-900">Language Statistics</h2>
-          <p className="text-sm text-secondary-600 mt-2">
+          <h2 className="text-lg font-semibold text-secondary-900">Language Statistics</h2>
+          <p className="text-sm text-secondary-600 mt-1 leading-relaxed">
             Programming languages used across repositories
           </p>
         </div>
@@ -299,7 +299,7 @@ export function ChartPanel({
           className="mt-6"
         >
           {series.length === 0 && hasOriginalData ? (
-            <div className="flex items-center justify-center h-[28rem] bg-secondary-50 rounded-lg border-2 border-dashed border-secondary-300">
+            <div className="flex items-center justify-center h-[28rem] bg-secondary-50 rounded-lg border-2 border-dashed border-secondary-300 transition-all duration-200">
               <div className="text-center px-4">
                 <svg
                   className="mx-auto h-12 w-12 text-secondary-400"
@@ -314,16 +314,18 @@ export function ChartPanel({
                     d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                   />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-secondary-900">
+                <h3 className="mt-4 text-lg font-semibold text-secondary-900">
                   No repositories match your filters
                 </h3>
-                <p className="mt-2 text-sm text-secondary-600">
+                <p className="mt-2 text-sm text-secondary-600 leading-relaxed">
                   Try adjusting the filter options above to see more data.
                 </p>
               </div>
             </div>
           ) : (
-            renderChart()
+            <div key={chartType} className="animate-fade-in-up">
+              {renderChart()}
+            </div>
           )}
         </div>
       </div>
