@@ -91,7 +91,11 @@ export const PolarAreaChartView = memo(function PolarAreaChartView({
   }
 
   return (
-    <div className="h-96 w-full" role="img" aria-label="Polar area chart of programming languages">
+    <div
+      className="h-[28rem] w-full"
+      role="img"
+      aria-label="Polar area chart of programming languages"
+    >
       <PolarArea data={data} options={options} />
     </div>
   )

@@ -130,7 +130,7 @@ export function SearchPage() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Search Form */}
           <Card padding="lg">
             <div className="flex flex-col md:flex-row gap-4">
@@ -198,7 +198,7 @@ export function SearchPage() {
           {/* Profile Header - Show for any successful search */}
           {data && !isLoading && (
             <div className="animate-fade-in-up">
-              <Card padding="lg">
+              <Card variant="subtle" padding="md">
                 <ResultHeader
                   profile={data.profile}
                   totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
@@ -331,7 +331,7 @@ export function SearchPage() {
 
           {/* Chart Panel - Only show if user has repositories */}
           {hasData && data && !isLoading && (
-            <div className="animate-fade-in-up animate-delay-200">
+            <div className="animate-fade-in-up animate-delay-200 mt-12">
               <ChartPanel
                 series={data.series}
                 username={username}

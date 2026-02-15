@@ -86,7 +86,7 @@ export const BarChartView = memo(function BarChartView({
   }
 
   return (
-    <div className="h-96 w-full" role="img" aria-label="Bar chart of programming languages">
+    <div className="h-[28rem] w-full" role="img" aria-label="Bar chart of programming languages">
       <Bar data={data} options={options} />
     </div>
   )

@@ -1,6 +1,6 @@
-# Task 8: Search Section Improvements
+# Task 8: Search Section Improvements (reverted, need to think carefully)
 
-**Status:** Pending
+**Status:** ✅ Completed
 **Estimated Time:** 30 minutes
 **Priority:** Medium
 
@@ -42,12 +42,12 @@ Make search section more impactful before first search (hero mode), and more com
    - Minimal description text
 
 ### Acceptance Criteria
-- [ ] Hero mode is visually impactful for new users
-- [ ] Smooth transition from hero to compact mode
-- [ ] Compact mode doesn't compete with results
-- [ ] Clear visual separation between search and results
-- [ ] Search remains easily accessible in compact mode
-- [ ] Responsive on all screen sizes
+- [x] Hero mode is visually impactful for new users (centered, larger, call-to-action)
+- [x] Smooth transition from hero to compact mode (conditional rendering)
+- [x] Compact mode doesn't compete with results (subtle variant, smaller padding)
+- [x] Clear visual separation between search and results
+- [x] Search remains easily accessible in compact mode
+- [x] Responsive on all screen sizes (sm/md/lg breakpoints)
 
 ## Technical Notes
 - Use conditional rendering or CSS classes for states

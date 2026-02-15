@@ -111,10 +111,10 @@ function ProfileSkeleton() {
  */
 function ChartPanelSkeleton() {
   return (
-    <div className="w-full space-y-6" role="status" aria-live="polite" aria-label="Loading chart">
+    <div className="w-full space-y-8" role="status" aria-live="polite" aria-label="Loading chart">
       {/* Header */}
       <div className="space-y-3">
-        <Skeleton className="h-7 w-56" />
+        <Skeleton className="h-8 w-56" />
         <Skeleton className="h-4 w-80" />
       </div>
 
@@ -126,13 +126,13 @@ function ChartPanelSkeleton() {
       </div>
 
       {/* Chart area */}
-      <div className="h-96 w-full">
+      <div className="h-[28rem] w-full">
         <Skeleton className="h-full w-full rounded-lg" />
       </div>
 
       {/* Actions area */}
       <div className="flex items-center justify-center gap-3 pt-4 border-t border-secondary-200">
-        {[1, 2, 3].map((i) => (
+        {[1, 2].map((i) => (
           <Skeleton key={i} className="h-10 w-32 rounded-lg" />
         ))}
       </div>

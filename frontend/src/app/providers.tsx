@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ToastProvider } from '../shared/hooks/useToast'
 
 /**
  * React Query client configuration
@@ -29,13 +30,15 @@ const queryClient = new QueryClient({
 
 /**
  * App-level providers wrapper
- * Includes QueryClient for data fetching/caching
+ * Includes QueryClient for data fetching/caching and ToastProvider for notifications
  */
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      {import.meta.env.MODE === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      <ToastProvider position="top-right" defaultDuration={3000}>
+        {children}
+        {import.meta.env.MODE === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      </ToastProvider>
     </QueryClientProvider>
   )
 }

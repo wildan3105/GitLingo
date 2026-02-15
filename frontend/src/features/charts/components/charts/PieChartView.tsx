@@ -90,7 +90,7 @@ export const PieChartView = memo(function PieChartView({
   }
 
   return (
-    <div className="h-96 w-full" role="img" aria-label="Pie chart of programming languages">
+    <div className="h-[28rem] w-full" role="img" aria-label="Pie chart of programming languages">
       <Pie data={data} options={options} />
     </div>
   )

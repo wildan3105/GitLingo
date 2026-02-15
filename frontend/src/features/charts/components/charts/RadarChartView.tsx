@@ -91,7 +91,11 @@ export const RadarChartView = memo(function RadarChartView({
   }
 
   return (
-    <div className="h-96 w-full" role="img" aria-label="Radar chart of top programming languages">
+    <div
+      className="h-[28rem] w-full"
+      role="img"
+      aria-label="Radar chart of top programming languages"
+    >
       <Radar data={data} options={options} />
     </div>
   )

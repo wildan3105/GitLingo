@@ -15,6 +15,7 @@ import { EmptyState } from '../../../shared/components/EmptyState'
 import { Dropdown, type DropdownItem } from '../../../shared/components/Dropdown'
 import { downloadChart } from '../utils/downloadChart'
 import { exportToCSV } from '../../export/utils/exportToCSV'
+import { useToast } from '../../../shared/hooks/useToast'
 import type { LanguageSeries } from '../../../contracts/api'
 
 export type ChartPanelProps = {
@@ -60,12 +61,9 @@ export function ChartPanel({
   error,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
-  const [exportStatus, setExportStatus] = useState<{
-    type: 'png' | 'csv' | 'link' | null
-    status: 'loading' | 'success' | 'error'
-    message?: string
-  }>({ type: null, status: 'success' })
+  const [isExporting, setIsExporting] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
+  const { showToast } = useToast()
 
   // Show error state
   if (error && !isLoading) {
@@ -91,12 +89,11 @@ export function ChartPanel({
   // Handle PNG download
   const handleDownloadPNG = async () => {
     if (!chartRef.current) {
-      setExportStatus({ type: 'png', status: 'error', message: 'Chart not found' })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+      showToast({ type: 'error', message: 'Chart not found' })
       return
     }
 
-    setExportStatus({ type: 'png', status: 'loading' })
+    setIsExporting(true)
 
     try {
       await downloadChart(chartRef.current, {
@@ -105,12 +102,12 @@ export function ChartPanel({
         chartType,
       })
 
-      setExportStatus({ type: 'png', status: 'success', message: 'Chart downloaded!' })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+      showToast({ type: 'success', message: 'Chart downloaded successfully!' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Download failed'
-      setExportStatus({ type: 'png', status: 'error', message })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+      showToast({ type: 'error', message })
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -119,12 +116,10 @@ export function ChartPanel({
     try {
       const filename = `${username}-${provider}-languages`
       exportToCSV(series, filename)
-      setExportStatus({ type: 'csv', status: 'success', message: 'CSV downloaded!' })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+      showToast({ type: 'success', message: 'CSV exported successfully!' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Export failed'
-      setExportStatus({ type: 'csv', status: 'error', message })
-      setTimeout(() => setExportStatus({ type: null, status: 'success' }), 3000)
+      showToast({ type: 'error', message })
     }
   }
 
@@ -149,13 +144,13 @@ export function ChartPanel({
   const actionsDisabled = isLoading || !!error || !hasData
 
   return (
-    <Card padding="lg">
-      <div className="space-y-6">
+    <Card variant="prominent" padding="lg">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-secondary-900">Language Statistics</h2>
-            <p className="text-sm text-secondary-600 mt-1">
+            <h2 className="text-2xl font-bold text-secondary-900">Language Statistics</h2>
+            <p className="text-sm text-secondary-600 mt-2">
               Programming languages used across repositories
             </p>
           </div>
@@ -219,7 +214,7 @@ export function ChartPanel({
                         </svg>
                       ),
                       onClick: handleDownloadPNG,
-                      disabled: exportStatus.type === 'png' && exportStatus.status === 'loading',
+                      disabled: isExporting,
                     },
                     {
                       id: 'download-csv',
@@ -248,16 +243,6 @@ export function ChartPanel({
                 align="center"
               />
             </div>
-
-            {/* Success/Error Message */}
-            {exportStatus.type && exportStatus.message && (
-              <p
-                className={`text-sm text-center ${exportStatus.status === 'error' ? 'text-error-600' : 'text-green-600'}`}
-                role={exportStatus.status === 'error' ? 'alert' : 'status'}
-              >
-                {exportStatus.message}
-              </p>
-            )}
           </div>
         )}
       </div>
