@@ -227,6 +227,7 @@ export function SearchPage() {
                 <ResultHeader
                   profile={filteredData.profile}
                   totalRepos={filteredData.series.reduce((sum, item) => sum + item.value, 0)}
+                  metadata={filteredData.metadata}
                 />
               </Card>
             </div>
