@@ -134,7 +134,6 @@ export function SearchPage() {
   }
 
   const hasSearched = data || error
-  const hasData = filteredData && filteredData.series.length > 0
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary-50 to-secondary-100">
@@ -348,11 +347,11 @@ export function SearchPage() {
               )
             })()}
 
-          {/* Chart Panel - Only show if user has repositories */}
-          {hasData && filteredData && !isLoading && (
+          {/* Chart Panel - Show whenever we have data, even if filtered results are empty */}
+          {data && !isLoading && (
             <div className="animate-fade-in-up animate-delay-200 mt-12">
               <ChartPanel
-                series={filteredData.series}
+                series={filteredData?.series || []}
                 username={username}
                 provider={provider}
                 isLoading={isLoading}
@@ -360,34 +359,8 @@ export function SearchPage() {
                 setIncludeForks={setIncludeForks}
                 includeUnknownLanguage={includeUnknownLanguage}
                 setIncludeUnknownLanguage={setIncludeUnknownLanguage}
+                hasOriginalData={data.series.length > 0}
               />
-            </div>
-          )}
-
-          {/* No Repositories State - Show after profile if no repos */}
-          {filteredData && !hasData && !isLoading && (
-            <div className="animate-fade-in-up animate-delay-200">
-              <Card>
-                <EmptyState
-                  title="No Repositories Found"
-                  description={`@${username} doesn't have any public repositories matching your filter criteria. Try adjusting the filter options.`}
-                  icon={
-                    <svg
-                      className="w-16 h-16 text-secondary-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                      />
-                    </svg>
-                  }
-                />
-              </Card>
             </div>
           )}
 

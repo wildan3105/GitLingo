@@ -38,6 +38,8 @@ export type ChartPanelProps = {
   includeUnknownLanguage: boolean
   /** Update include unknown language filter */
   setIncludeUnknownLanguage: (value: boolean) => void
+  /** Whether the user has any repositories (before filtering) */
+  hasOriginalData?: boolean
 }
 
 /**
@@ -72,6 +74,7 @@ export function ChartPanel({
   setIncludeForks,
   includeUnknownLanguage,
   setIncludeUnknownLanguage,
+  hasOriginalData = true,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
   const [isExporting, setIsExporting] = useState(false)
@@ -87,8 +90,8 @@ export function ChartPanel({
     )
   }
 
-  // Show empty state
-  if (!isLoading && series.length === 0) {
+  // Show empty state only if user has no repositories at all
+  if (!isLoading && series.length === 0 && !hasOriginalData) {
     return (
       <Card>
         <EmptyState
@@ -201,7 +204,33 @@ export function ChartPanel({
           aria-busy={isLoading}
           className="mt-6"
         >
-          {renderChart()}
+          {series.length === 0 && hasOriginalData ? (
+            <div className="flex items-center justify-center h-[28rem] bg-secondary-50 rounded-lg border-2 border-dashed border-secondary-300">
+              <div className="text-center px-4">
+                <svg
+                  className="mx-auto h-12 w-12 text-secondary-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                <h3 className="mt-4 text-lg font-medium text-secondary-900">
+                  No repositories match your filters
+                </h3>
+                <p className="mt-2 text-sm text-secondary-600">
+                  Try adjusting the filter options above to see more data.
+                </p>
+              </div>
+            </div>
+          ) : (
+            renderChart()
+          )}
         </div>
 
         {/* Actions: Export */}
