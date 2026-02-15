@@ -117,6 +117,34 @@ export const pieChartOptions: ChartOptions<'pie'> = {
 } as ChartOptions<'pie'>
 
 /**
+ * Options specific to Polar Area charts
+ */
+export const polarAreaChartOptions: ChartOptions<'polarArea'> = {
+  ...baseOptions,
+  plugins: {
+    ...baseOptions.plugins,
+    legend: {
+      ...baseOptions.plugins.legend,
+      position: 'right',
+    },
+  },
+  scales: {
+    r: {
+      beginAtZero: true,
+      grid: {
+        color: 'rgba(0, 0, 0, 0.1)',
+      },
+      ticks: {
+        font: {
+          size: 11,
+        },
+        backdropColor: 'transparent',
+      },
+    },
+  },
+} as ChartOptions<'polarArea'>
+
+/**
  * Options specific to Radar charts
  */
 export const radarChartOptions: ChartOptions<'radar'> = {
