@@ -3,7 +3,7 @@
  * A styled dropdown with error states and accessibility
  */
 
-import { SelectHTMLAttributes } from 'react'
+import type { SelectHTMLAttributes } from 'react'
 
 export type SelectOption<T = string> = {
   value: T

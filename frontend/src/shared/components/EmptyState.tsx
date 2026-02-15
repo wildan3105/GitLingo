@@ -3,7 +3,7 @@
  * Displays friendly no-data states with optional actions
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Button } from './Button'
 
 export type EmptyStateProps = {

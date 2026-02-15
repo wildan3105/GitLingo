@@ -3,7 +3,8 @@
  * Text input for username search with client-side validation
  */
 
-import { useState, useEffect, useRef, KeyboardEvent, ChangeEvent } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { KeyboardEvent, ChangeEvent } from 'react'
 import { validateUsername } from '../utils/validation'
 
 export type SearchBarProps = {

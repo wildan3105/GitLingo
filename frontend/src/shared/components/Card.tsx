@@ -3,7 +3,7 @@
  * A clean container with subtle depth and optional hover effects
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 export type CardProps = {
   /** Padding size */

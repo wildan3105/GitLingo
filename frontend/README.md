@@ -31,7 +31,7 @@ We chose **Chart.js** with **react-chartjs-2** for the following reasons:
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
+- Node.js >= 22.0.0
 - npm >= 9.0.0
 
 ### Installation
