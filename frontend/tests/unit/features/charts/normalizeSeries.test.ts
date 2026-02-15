@@ -8,18 +8,18 @@ import type { LanguageSeries } from '../../../../src/contracts/api'
 
 describe('normalizeSeries', () => {
   const mockSeries: LanguageSeries[] = [
-    { key: 'JavaScript', value: 25, color: '#f1e05a' },
-    { key: 'TypeScript', value: 15, color: '#3178c6' },
-    { key: 'Python', value: 10, color: '#3572A5' },
-    { key: '__forks__', value: 5, color: '#cccccc' },
-    { key: 'Go', value: 3, color: '#00ADD8' },
+    { key: 'JavaScript', label: 'JavaScript', value: 25, color: '#f1e05a' },
+    { key: 'TypeScript', label: 'TypeScript', value: 15, color: '#3178c6' },
+    { key: 'Python', label: 'Python', value: 10, color: '#3572A5' },
+    { key: '__forks__', label: 'Forked repos', value: 5, color: '#cccccc' },
+    { key: 'Go', label: 'Go', value: 3, color: '#00ADD8' },
   ]
 
   describe('basic transformation', () => {
     it('transforms series into separate arrays', () => {
       const result = normalizeSeries(mockSeries)
 
-      expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', '__forks__', 'Go'])
+      expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', 'Forked repos', 'Go'])
       expect(result.values).toEqual([25, 15, 10, 5, 3])
       expect(result.colors).toEqual(['#f1e05a', '#3178c6', '#3572A5', '#cccccc', '#00ADD8'])
     })
@@ -50,7 +50,7 @@ describe('normalizeSeries', () => {
     it('excludes __forks__ when excludeForks is true', () => {
       const result = normalizeSeries(mockSeries, { excludeForks: true })
 
-      expect(result.labels).not.toContain('__forks__')
+      expect(result.labels).not.toContain('Forked repos')
       expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', 'Go'])
       expect(result.values).toEqual([25, 15, 10, 3])
       expect(result.colors.length).toBe(4)
@@ -59,14 +59,14 @@ describe('normalizeSeries', () => {
     it('includes __forks__ when excludeForks is false', () => {
       const result = normalizeSeries(mockSeries, { excludeForks: false })
 
-      expect(result.labels).toContain('__forks__')
+      expect(result.labels).toContain('Forked repos')
       expect(result.labels.length).toBe(5)
     })
 
     it('includes __forks__ by default when option not provided', () => {
       const result = normalizeSeries(mockSeries)
 
-      expect(result.labels).toContain('__forks__')
+      expect(result.labels).toContain('Forked repos')
     })
   })
 
@@ -115,7 +115,7 @@ describe('normalizeSeries', () => {
       })
 
       expect(result.labels).toEqual(['JavaScript', 'TypeScript'])
-      expect(result.labels).not.toContain('__forks__')
+      expect(result.labels).not.toContain('Forked repos')
       expect(result.values).toEqual([25, 15])
       expect(result.colors.length).toBe(2)
     })
@@ -128,7 +128,7 @@ describe('normalizeSeries', () => {
 
       // Should have 4 items after excluding forks
       expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', 'Go'])
-      expect(result.labels).not.toContain('__forks__')
+      expect(result.labels).not.toContain('Forked repos')
     })
   })
 
@@ -142,7 +142,9 @@ describe('normalizeSeries', () => {
     })
 
     it('handles series with only __forks__', () => {
-      const forksOnly: LanguageSeries[] = [{ key: '__forks__', value: 10, color: '#cccccc' }]
+      const forksOnly: LanguageSeries[] = [
+        { key: '__forks__', label: 'Forked repos', value: 10, color: '#cccccc' },
+      ]
 
       const result = normalizeSeries(forksOnly, { excludeForks: true })
 
@@ -152,7 +154,9 @@ describe('normalizeSeries', () => {
     })
 
     it('handles series with single item', () => {
-      const singleItem: LanguageSeries[] = [{ key: 'Rust', value: 42, color: '#dea584' }]
+      const singleItem: LanguageSeries[] = [
+        { key: 'Rust', label: 'Rust', value: 42, color: '#dea584' },
+      ]
 
       const result = normalizeSeries(singleItem)
 
@@ -163,8 +167,8 @@ describe('normalizeSeries', () => {
 
     it('handles series with duplicate keys', () => {
       const duplicates: LanguageSeries[] = [
-        { key: 'JavaScript', value: 10, color: '#f1e05a' },
-        { key: 'JavaScript', value: 5, color: '#f1e05a' },
+        { key: 'JavaScript', label: 'JavaScript', value: 10, color: '#f1e05a' },
+        { key: 'JavaScript', label: 'JavaScript', value: 5, color: '#f1e05a' },
       ]
 
       const result = normalizeSeries(duplicates)
@@ -175,9 +179,9 @@ describe('normalizeSeries', () => {
 
     it('handles series with zero values', () => {
       const withZeros: LanguageSeries[] = [
-        { key: 'JavaScript', value: 10, color: '#f1e05a' },
-        { key: 'TypeScript', value: 0, color: '#3178c6' },
-        { key: 'Python', value: 5, color: '#3572A5' },
+        { key: 'JavaScript', label: 'JavaScript', value: 10, color: '#f1e05a' },
+        { key: 'TypeScript', label: 'TypeScript', value: 0, color: '#3178c6' },
+        { key: 'Python', label: 'Python', value: 5, color: '#3572A5' },
       ]
 
       const result = normalizeSeries(withZeros)

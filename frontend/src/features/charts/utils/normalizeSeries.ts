@@ -77,7 +77,7 @@ export function normalizeSeries(
   }
 
   // Transform to separate arrays
-  const labels = filteredSeries.map((item) => item.key)
+  const labels = filteredSeries.map((item) => item.label)
   const values = filteredSeries.map((item) => item.value)
   const colors = filteredSeries.map((item) => item.color)
 
