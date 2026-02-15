@@ -1,3 +1,6 @@
+/* Custom animations */
+@import '../shared/styles/animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

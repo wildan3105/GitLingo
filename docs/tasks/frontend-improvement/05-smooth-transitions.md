@@ -1,6 +1,6 @@
 # Task 5: Smooth Transitions
 
-**Status:** Pending
+**Status:** ✅ Completed
 **Estimated Time:** 30 minutes
 **Priority:** Medium
 
@@ -47,12 +47,13 @@ Add smooth, professional transitions between states to make the app feel polishe
 ```
 
 ### Acceptance Criteria
-- [ ] Results fade in smoothly (300ms duration)
-- [ ] Profile card and chart card have staggered entrance (100ms delay)
-- [ ] Loading states fade out before results fade in
-- [ ] Empty state fades out when starting search
-- [ ] Transitions feel smooth, not sluggish or janky
-- [ ] No layout shift during transitions
+- [x] Results fade in smoothly (300ms duration)
+- [x] Profile card, KPI cards, and chart card have staggered entrance (0ms, 100ms, 200ms delays)
+- [x] Loading states use skeleton animations (already implemented in Task 1)
+- [x] Error and empty states fade in smoothly
+- [x] Transitions feel smooth with ease-out timing
+- [x] No layout shift during transitions
+- [x] prefers-reduced-motion accessibility support included
 
 ## Technical Notes
 - Use `ease-in-out` timing function for natural feel

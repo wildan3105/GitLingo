@@ -73,14 +73,16 @@ export function SearchPage() {
     }
 
     return (
-      <Card>
-        <ErrorState
-          code={errorCode}
-          message={errorMessage}
-          onRetry={handleSearch}
-          retryAfter={error.error.retry_after_seconds}
-        />
-      </Card>
+      <div className="animate-fade-in-up">
+        <Card>
+          <ErrorState
+            code={errorCode}
+            message={errorMessage}
+            onRetry={handleSearch}
+            retryAfter={error.error.retry_after_seconds}
+          />
+        </Card>
+      </div>
     )
   }
 
@@ -195,13 +197,15 @@ export function SearchPage() {
 
           {/* Profile Header - Show for any successful search */}
           {data && !isLoading && (
-            <Card padding="lg">
-              <ResultHeader
-                profile={data.profile}
-                totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
-                provider={provider}
-              />
-            </Card>
+            <div className="animate-fade-in-up">
+              <Card padding="lg">
+                <ResultHeader
+                  profile={data.profile}
+                  totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
+                  provider={provider}
+                />
+              </Card>
+            </div>
           )}
 
           {/* KPI Cards - Show key metrics */}
@@ -229,7 +233,7 @@ export function SearchPage() {
                   : null
 
               return (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up animate-delay-100">
                   <KPICard
                     label="Repositories"
                     value={totalRepos}
@@ -327,37 +331,41 @@ export function SearchPage() {
 
           {/* Chart Panel - Only show if user has repositories */}
           {hasData && data && !isLoading && (
-            <ChartPanel
-              series={data.series}
-              username={username}
-              provider={provider}
-              isLoading={isLoading}
-            />
+            <div className="animate-fade-in-up animate-delay-200">
+              <ChartPanel
+                series={data.series}
+                username={username}
+                provider={provider}
+                isLoading={isLoading}
+              />
+            </div>
           )}
 
           {/* No Repositories State - Show after profile if no repos */}
           {data && !hasData && !isLoading && (
-            <Card>
-              <EmptyState
-                title="No Repositories Found"
-                description={`@${username} doesn't have any public repositories yet. Once they create repositories, their language statistics will appear here.`}
-                icon={
-                  <svg
-                    className="w-16 h-16 text-secondary-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                    />
-                  </svg>
-                }
-              />
-            </Card>
+            <div className="animate-fade-in-up animate-delay-200">
+              <Card>
+                <EmptyState
+                  title="No Repositories Found"
+                  description={`@${username} doesn't have any public repositories yet. Once they create repositories, their language statistics will appear here.`}
+                  icon={
+                    <svg
+                      className="w-16 h-16 text-secondary-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                      />
+                    </svg>
+                  }
+                />
+              </Card>
+            </div>
           )}
 
           {/* Error State */}
