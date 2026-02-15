@@ -15,10 +15,16 @@ export type UseSearchReturn = {
   username: string
   /** Update username */
   setUsername: (value: string) => void
-  /** Current provider selection */
+  /** Current provider (always 'github') */
   provider: string
-  /** Update provider */
-  setProvider: (value: string) => void
+  /** Whether to include forked repositories in results */
+  includeForks: boolean
+  /** Update include forks filter */
+  setIncludeForks: (value: boolean) => void
+  /** Whether to include unknown language repositories in results */
+  includeUnknownLanguage: boolean
+  /** Update include unknown language filter */
+  setIncludeUnknownLanguage: (value: boolean) => void
   /** Trigger search (validates and calls API) */
   handleSearch: () => void
   /** Whether API call is in progress */
@@ -67,8 +73,14 @@ export type UseSearchReturn = {
 export function useSearch(): UseSearchReturn {
   // Form state
   const [username, setUsernameState] = useState('')
-  const [provider, setProvider] = useState('github')
   const [validationError, setValidationError] = useState<string | null>(null)
+
+  // Filter state - both default to true
+  const [includeForks, setIncludeForks] = useState(true)
+  const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(true)
+
+  // Provider is always GitHub
+  const provider = 'github'
 
   // React Query mutation for API call
   const mutation = useMutation<ApiResponse, Error, { username: string; provider: string }>({
@@ -122,7 +134,10 @@ export function useSearch(): UseSearchReturn {
     username,
     setUsername,
     provider,
-    setProvider,
+    includeForks,
+    setIncludeForks,
+    includeUnknownLanguage,
+    setIncludeUnknownLanguage,
     handleSearch,
     isLoading: mutation.isPending,
     error,

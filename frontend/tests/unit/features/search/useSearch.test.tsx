@@ -93,16 +93,44 @@ describe('useSearch', () => {
       expect(result.current.username).toBe('octocat')
     })
 
-    it('updates provider when setProvider is called', () => {
+    it('has includeForks set to true by default', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      expect(result.current.includeForks).toBe(true)
+    })
+
+    it('has includeUnknownLanguage set to true by default', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      expect(result.current.includeUnknownLanguage).toBe(true)
+    })
+
+    it('updates includeForks when setIncludeForks is called', () => {
       const { result } = renderHook(() => useSearch(), {
         wrapper: createWrapper(),
       })
 
       act(() => {
-        result.current.setProvider('gitlab')
+        result.current.setIncludeForks(false)
       })
 
-      expect(result.current.provider).toBe('gitlab')
+      expect(result.current.includeForks).toBe(false)
+    })
+
+    it('updates includeUnknownLanguage when setIncludeUnknownLanguage is called', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.setIncludeUnknownLanguage(false)
+      })
+
+      expect(result.current.includeUnknownLanguage).toBe(false)
     })
   })
 

@@ -5,8 +5,8 @@
 
 import { useSearch } from './hooks/useSearch'
 import { SearchBar } from './components/SearchBar'
-import { ProviderSelect } from './components/ProviderSelect'
 import { ResultHeader } from './components/ResultHeader'
+import { Checkbox } from '../../shared/components/Checkbox'
 import { ChartPanel } from '../charts/components/ChartPanel'
 import { Card } from '../../shared/components/Card'
 import { EmptyState } from '../../shared/components/EmptyState'
@@ -35,13 +35,34 @@ export function SearchPage() {
     username,
     setUsername,
     provider,
-    setProvider,
+    includeForks,
+    setIncludeForks,
+    includeUnknownLanguage,
+    setIncludeUnknownLanguage,
     handleSearch,
     isLoading,
     error,
     data,
     validationError,
   } = useSearch()
+
+  // Filter data based on user selections
+  const filteredData = data
+    ? {
+        ...data,
+        series: data.series.filter((item) => {
+          // Filter out forks if not included
+          if (!includeForks && item.key === '__forks__') {
+            return false
+          }
+          // Filter out unknown language if not included
+          if (!includeUnknownLanguage && item.key === 'Unknown') {
+            return false
+          }
+          return true
+        }),
+      }
+    : null
 
   // Render error state with retry
   const renderError = () => {
@@ -114,7 +135,7 @@ export function SearchPage() {
   }
 
   const hasSearched = data || error
-  const hasData = data && data.series.length > 0
+  const hasData = filteredData && filteredData.series.length > 0
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary-50 to-secondary-100">
@@ -133,8 +154,9 @@ export function SearchPage() {
         <div className="space-y-8">
           {/* Search Form */}
           <Card padding="lg">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+              {/* Username Input */}
+              <div className="flex-1 w-full">
                 <SearchBar
                   value={username}
                   onChange={setUsername}
@@ -144,11 +166,29 @@ export function SearchPage() {
                 />
               </div>
 
-              <div className="md:w-60">
-                <ProviderSelect value={provider} onChange={setProvider} disabled={isLoading} />
+              {/* Options - Filter Checkboxes */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-secondary-700">Options</label>
+                <div className="flex flex-col gap-2.5 pt-1">
+                  <Checkbox
+                    id="include-forks"
+                    label="Include fork"
+                    checked={includeForks}
+                    onChange={setIncludeForks}
+                    disabled={isLoading}
+                  />
+                  <Checkbox
+                    id="include-unknown"
+                    label="Include unknown"
+                    checked={includeUnknownLanguage}
+                    onChange={setIncludeUnknownLanguage}
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              {/* Search Button */}
+              <div className="flex flex-col gap-1.5 w-full lg:w-auto">
                 {/* Invisible label for alignment */}
                 <label
                   className="text-sm font-medium text-transparent select-none pointer-events-none"
@@ -160,7 +200,7 @@ export function SearchPage() {
                   onClick={handleSearch}
                   disabled={isLoading || !!validationError}
                   variant="primary"
-                  className="w-full md:w-auto"
+                  className="w-full lg:w-auto px-8"
                 >
                   <svg
                     className="w-4 h-4"
@@ -196,12 +236,12 @@ export function SearchPage() {
           )}
 
           {/* Profile Header - Show for any successful search */}
-          {data && !isLoading && (
+          {filteredData && !isLoading && (
             <div className="animate-fade-in-up">
               <Card variant="subtle" padding="md">
                 <ResultHeader
-                  profile={data.profile}
-                  totalRepos={data.series.reduce((sum, item) => sum + item.value, 0)}
+                  profile={filteredData.profile}
+                  totalRepos={filteredData.series.reduce((sum, item) => sum + item.value, 0)}
                   provider={provider}
                 />
               </Card>
@@ -209,24 +249,26 @@ export function SearchPage() {
           )}
 
           {/* KPI Cards - Show key metrics */}
-          {data &&
+          {filteredData &&
             !isLoading &&
             (() => {
               // Calculate metrics from series data
-              const totalRepos = data.series.reduce((sum, item) => sum + item.value, 0)
+              const totalRepos = filteredData.series.reduce((sum, item) => sum + item.value, 0)
 
               // Find top language (excluding forks)
-              const languages = data.series.filter((item) => item.key !== '__forks__')
+              const languages = filteredData.series.filter((item) => item.key !== '__forks__')
               const topLanguageItem =
                 languages.length > 0
                   ? languages.reduce((max, item) => (item.value > max.value ? item : max))
                   : null
 
               // Count unique languages (excluding forks)
-              const languageCount = data.series.filter((item) => item.key !== '__forks__').length
+              const languageCount = filteredData.series.filter(
+                (item) => item.key !== '__forks__'
+              ).length
 
               // Calculate forks percentage
-              const forksItem = data.series.find((item) => item.key === '__forks__')
+              const forksItem = filteredData.series.find((item) => item.key === '__forks__')
               const forksPercentage =
                 forksItem && totalRepos > 0
                   ? ((forksItem.value / totalRepos) * 100).toFixed(1)
@@ -330,10 +372,10 @@ export function SearchPage() {
             })()}
 
           {/* Chart Panel - Only show if user has repositories */}
-          {hasData && data && !isLoading && (
+          {hasData && filteredData && !isLoading && (
             <div className="animate-fade-in-up animate-delay-200 mt-12">
               <ChartPanel
-                series={data.series}
+                series={filteredData.series}
                 username={username}
                 provider={provider}
                 isLoading={isLoading}
@@ -342,12 +384,12 @@ export function SearchPage() {
           )}
 
           {/* No Repositories State - Show after profile if no repos */}
-          {data && !hasData && !isLoading && (
+          {filteredData && !hasData && !isLoading && (
             <div className="animate-fade-in-up animate-delay-200">
               <Card>
                 <EmptyState
                   title="No Repositories Found"
-                  description={`@${username} doesn't have any public repositories yet. Once they create repositories, their language statistics will appear here.`}
+                  description={`@${username} doesn't have any public repositories matching your filter criteria. Try adjusting the filter options.`}
                   icon={
                     <svg
                       className="w-16 h-16 text-secondary-400"
