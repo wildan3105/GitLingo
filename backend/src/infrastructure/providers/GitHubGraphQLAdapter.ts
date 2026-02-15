@@ -63,8 +63,8 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             type: response.user ? 'user' : 'organization',
             providerUserId: account.id,
             avatarUrl: account.avatarUrl,
-            ...(account.location && { location: account.location }),
-            ...(account.websiteUrl && { websiteUrl: account.websiteUrl }),
+            ...(account.location != null && { location: account.location }),
+            ...(account.websiteUrl != null && { websiteUrl: account.websiteUrl }),
           };
         }
 
