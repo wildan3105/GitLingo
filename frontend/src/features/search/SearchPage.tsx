@@ -385,7 +385,7 @@ export function SearchPage() {
           <p>
             © 2026 GitLingo, created by{' '}
             <a
-              href="https://github.com/wildan3105"
+              href="https://github.com/wildan3105/GitLingo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-secondary-700 hover:text-primary-600 transition-all duration-200 hover:underline underline-offset-2"
