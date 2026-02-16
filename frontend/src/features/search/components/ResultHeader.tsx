@@ -209,9 +209,15 @@ export function ResultHeader({ profile, totalRepos, metadata }: ResultHeaderProp
 
       {/* Row 2: Metadata */}
       <div className="flex items-center justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
-        {/* Left: @username + repos */}
-        <div className="flex items-center gap-2 leading-relaxed">
+        {/* Left: @username + member since + repos */}
+        <div className="flex items-center gap-2 leading-relaxed flex-wrap">
           <span className="font-medium text-secondary-700">@{profile.username}</span>
+          {profile.createdAt && (
+            <>
+              <span className="text-secondary-400">•</span>
+              <span>Member since {new Date(profile.createdAt).getFullYear()}</span>
+            </>
+          )}
           <span className="text-secondary-400">•</span>
           <span>
             {totalRepos.toLocaleString()} {totalRepos === 1 ? 'repository' : 'repositories'}

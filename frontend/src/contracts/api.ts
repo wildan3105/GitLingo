@@ -24,6 +24,7 @@ export type Profile = {
   location?: string | null
   websiteUrl?: string | null
   isVerified?: boolean
+  createdAt?: string
 }
 
 /**
