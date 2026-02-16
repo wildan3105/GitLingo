@@ -24,7 +24,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           })
         : graphql;
 
-    if (graphqlURL) {
+    if (typeof graphqlURL === 'string' && graphqlURL.length > 0) {
       this.graphqlClient = this.graphqlClient.defaults({
         baseUrl: graphqlURL,
       });
