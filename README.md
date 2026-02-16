@@ -144,46 +144,6 @@ npm run test:watch   # Watch mode
 npm run test:coverage # Coverage report
 ```
 
-## API Endpoints
-
-### `GET /api/v1/language-stats/:username`
-
-Fetch language statistics for a GitHub user.
-
-**Query Parameters**:
-- `provider` (optional): Platform provider (default: `github`)
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "profile": {
-      "username": "octocat",
-      "name": "The Octocat",
-      "avatarUrl": "https://avatars.githubusercontent.com/u/583231",
-      "profileUrl": "https://github.com/octocat"
-    },
-    "series": [
-      {
-        "name": "JavaScript",
-        "value": 15,
-        "color": "#f1e05a"
-      }
-    ]
-  }
-}
-```
-
-**Error Codes**:
-- `user_not_found` - User doesn't exist
-- `rate_limited` - GitHub API rate limit exceeded
-- `network_error` - Network/connectivity issues
-- `server_error` - Internal server error
-- `validation_error` - Invalid request parameters
-
-See [backend/README.md](./backend/README.md) for detailed API documentation.
-
 ## Deployment
 
 ### Backend Deployment
@@ -195,12 +155,6 @@ docker build -t gitlingo-backend .
 docker run -p 3001:3001 --env-file .env gitlingo-backend
 ```
 
-**Platform Recommendations**:
-- Railway.app (recommended)
-- Render.com
-- Fly.io
-- AWS ECS/Fargate
-
 **Environment Variables**: Ensure all variables from `.env.example` are set in your deployment platform.
 
 ### Frontend Deployment
@@ -211,12 +165,6 @@ cd frontend
 npm run build       # Creates dist/ folder
 npm run preview     # Preview production build locally
 ```
-
-**Platform Recommendations**:
-- Vercel (recommended)
-- Netlify
-- Cloudflare Pages
-- AWS S3 + CloudFront
 
 **Environment Variables**: Set `VITE_API_BASE_URL` to your deployed backend URL.
 
@@ -293,6 +241,11 @@ npm run preview     # Preview production build locally
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
+## Similar Projects
+- [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) - A popular project that generates GitHub stats as images for README files.
+- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown
+) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
+- [github-profile-languages](https://github.com/IonicaBizau/github-profile-languages) - A project that visualizes the programming languages used in a GitHub profile.
 ## License
 
 MIT License - see [LICENSE](./LICENSE) file for details
