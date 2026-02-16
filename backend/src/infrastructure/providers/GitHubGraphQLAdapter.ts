@@ -73,6 +73,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             ...(account.location != null && { location: account.location }),
             ...(account.websiteUrl != null && { websiteUrl: account.websiteUrl }),
             isVerified,
+            ...(account.createdAt != null && { createdAt: account.createdAt }),
           };
         }
 
@@ -122,6 +123,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           location
           websiteUrl
           email
+          createdAt
           repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
             nodes {
               name
@@ -144,6 +146,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           location
           websiteUrl
           isVerified
+          createdAt
           repositories(first: 100, after: $cursor) {
             nodes {
               name

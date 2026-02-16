@@ -71,6 +71,7 @@ describe('API Integration Tests', () => {
           login: 'testuser',
           id: '123',
           email: 'test@example.com',
+          createdAt: '2020-01-15T10:30:00Z',
           repositories: {
             nodes: [
               { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
@@ -96,6 +97,7 @@ describe('API Integration Tests', () => {
           type: 'user',
           providerUserId: '123',
           isVerified: true,
+          createdAt: '2020-01-15T10:30:00Z',
         },
         series: expect.arrayContaining([
           expect.objectContaining({
@@ -222,6 +224,7 @@ describe('API Integration Tests', () => {
           login: 'github',
           id: '789',
           isVerified: true,
+          createdAt: '2008-04-10T02:30:00Z',
           repositories: {
             nodes: [
               { name: 'repo1', primaryLanguage: { name: 'TypeScript' }, isFork: false },
@@ -244,6 +247,7 @@ describe('API Integration Tests', () => {
           type: 'organization',
           providerUserId: '789',
           isVerified: true,
+          createdAt: '2008-04-10T02:30:00Z',
         },
       });
     });
@@ -279,6 +283,60 @@ describe('API Integration Tests', () => {
           isVerified: false,
         },
       });
+    });
+
+    it('should handle user without createdAt field (optional)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '999',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'C++' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(200);
+      expect(response.body.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '999',
+        isVerified: true,
+      });
+      expect(response.body.profile.createdAt).toBeUndefined();
+    });
+
+    it('should handle organization without createdAt field (optional)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          id: '888',
+          isVerified: false,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Scala' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testorg');
+
+      expect(response.status).toBe(200);
+      expect(response.body.profile).toEqual({
+        username: 'testorg',
+        type: 'organization',
+        providerUserId: '888',
+        isVerified: false,
+      });
+      expect(response.body.profile.createdAt).toBeUndefined();
     });
 
     it('should accept provider query parameter with default github', async () => {

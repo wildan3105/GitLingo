@@ -40,4 +40,10 @@ export interface Profile {
    * - For organizations: based on GitHub's isVerified field
    */
   isVerified: boolean;
+
+  /**
+   * Account creation timestamp from provider
+   * ISO 8601 format string (as-is from provider)
+   */
+  createdAt?: string;
 }

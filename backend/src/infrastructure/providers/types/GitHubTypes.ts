@@ -49,6 +49,7 @@ export interface GitHubUser {
   websiteUrl?: string;
   email?: string; // Only for users
   isVerified?: boolean; // Only for organizations
+  createdAt?: string; // ISO 8601 timestamp
   repositories: GitHubRepositoryConnection;
 }
 
