@@ -47,6 +47,8 @@ export interface GitHubUser {
   avatarUrl: string;
   location?: string;
   websiteUrl?: string;
+  email?: string; // Only for users
+  isVerified?: boolean; // Only for organizations
   repositories: GitHubRepositoryConnection;
 }
 

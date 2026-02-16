@@ -22,13 +22,14 @@ describe('GitHubGraphQLAdapter', () => {
   });
 
   describe('fetchRepositories', () => {
-    it('should fetch repositories successfully', async () => {
+    it('should fetch repositories successfully for user with email', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
           login: 'testuser',
           id: '123',
+          email: 'test@example.com',
           repositories: {
             nodes: [
               { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
@@ -47,6 +48,7 @@ describe('GitHubGraphQLAdapter', () => {
         username: 'testuser',
         type: 'user',
         providerUserId: '123',
+        isVerified: true,
       });
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0]).toEqual({
@@ -61,6 +63,87 @@ describe('GitHubGraphQLAdapter', () => {
       });
     });
 
+    it('should handle user without email (isVerified = false)', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: null,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: false,
+      });
+    });
+
+    it('should handle user with empty email string (isVerified = false)', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: '',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: false,
+      });
+    });
+
+    it('should handle user with whitespace-only email (isVerified = false)', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: '   ',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: false,
+      });
+    });
+
     it('should handle repositories without language', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
@@ -68,6 +151,7 @@ describe('GitHubGraphQLAdapter', () => {
         user: {
           login: 'testuser',
           id: '123',
+          email: 'test@example.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: null, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },
@@ -91,6 +175,7 @@ describe('GitHubGraphQLAdapter', () => {
         user: {
           login: 'testuser',
           id: '123',
+          email: 'test@example.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
             pageInfo: { hasNextPage: true, endCursor: 'cursor1' },
@@ -105,6 +190,7 @@ describe('GitHubGraphQLAdapter', () => {
         user: {
           login: 'testuser',
           id: '123',
+          email: 'test@example.com',
           repositories: {
             nodes: [{ name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },
@@ -168,7 +254,63 @@ describe('GitHubGraphQLAdapter', () => {
       expect(adapter.getProviderName()).toBe('github');
     });
 
-    it('should handle organization accounts', async () => {
+    it('should handle verified organization (github)', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'github',
+          id: '456',
+          isVerified: true,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('github');
+
+      expect(result.profile).toEqual({
+        username: 'github',
+        type: 'organization',
+        providerUserId: '456',
+        isVerified: true,
+      });
+      expect(result.repositories).toHaveLength(1);
+    });
+
+    it('should handle unverified organization (rakutentech)', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'rakutentech',
+          id: '789',
+          isVerified: false,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('rakutentech');
+
+      expect(result.profile).toEqual({
+        username: 'rakutentech',
+        type: 'organization',
+        providerUserId: '789',
+        isVerified: false,
+      });
+      expect(result.repositories).toHaveLength(1);
+    });
+
+    it('should handle organization without isVerified field (default to false)', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
       mockGraphqlFn.mockResolvedValueOnce({
@@ -190,6 +332,7 @@ describe('GitHubGraphQLAdapter', () => {
         username: 'testorg',
         type: 'organization',
         providerUserId: '456',
+        isVerified: false,
       });
       expect(result.repositories).toHaveLength(1);
     });

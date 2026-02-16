@@ -17,6 +17,7 @@ class MockProvider implements ProviderPort {
         username,
         type: 'user',
         providerUserId: 'mock-id-123',
+        isVerified: true,
       },
       repositories: this.mockRepos,
     };

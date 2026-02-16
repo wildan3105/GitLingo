@@ -33,4 +33,11 @@ export interface Profile {
    * Optional location for the profile
    */
   location?: string;
+
+  /**
+   * Verification status
+   * - For users: true if email exists (truthy value)
+   * - For organizations: based on GitHub's isVerified field
+   */
+  isVerified: boolean;
 }

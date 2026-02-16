@@ -58,13 +58,21 @@ export class GitHubGraphQLAdapter implements ProviderPort {
 
         // Extract profile on first page
         if (!accountProfile) {
+          const isUser = response.user !== null;
+          const isVerified = isUser
+            ? // For users: verified if email exists and is truthy
+              account.email != null && account.email.trim() !== ''
+            : // For organizations: use isVerified field from API (default false if not present)
+              Boolean(account.isVerified);
+
           accountProfile = {
             username: account.login,
-            type: response.user ? 'user' : 'organization',
+            type: isUser ? 'user' : 'organization',
             providerUserId: account.id,
             avatarUrl: account.avatarUrl,
             ...(account.location != null && { location: account.location }),
             ...(account.websiteUrl != null && { websiteUrl: account.websiteUrl }),
+            isVerified,
           };
         }
 
@@ -113,6 +121,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           avatarUrl
           location
           websiteUrl
+          email
           repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
             nodes {
               name
@@ -134,6 +143,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           avatarUrl
           location
           websiteUrl
+          isVerified
           repositories(first: 100, after: $cursor) {
             nodes {
               name

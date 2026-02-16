@@ -65,11 +65,12 @@ describe('API Integration Tests', () => {
   });
 
   describe('GET /api/v1/search', () => {
-    it('should return language statistics for valid user', async () => {
+    it('should return language statistics for valid user with email (isVerified = true)', async () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
           login: 'testuser',
           id: '123',
+          email: 'test@example.com',
           repositories: {
             nodes: [
               { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
@@ -94,6 +95,7 @@ describe('API Integration Tests', () => {
           username: 'testuser',
           type: 'user',
           providerUserId: '123',
+          isVerified: true,
         },
         series: expect.arrayContaining([
           expect.objectContaining({
@@ -147,11 +149,144 @@ describe('API Integration Tests', () => {
       });
     });
 
+    it('should return language statistics for user without email (isVerified = false)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: null,
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'testuser',
+          type: 'user',
+          providerUserId: '123',
+          isVerified: false,
+        },
+      });
+    });
+
+    it('should return language statistics for user with empty email string (isVerified = false)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '456',
+          email: '',
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'TypeScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Go' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'testuser',
+          type: 'user',
+          providerUserId: '456',
+          isVerified: false,
+        },
+      });
+    });
+
+    it('should return language statistics for verified organization (github)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'github',
+          id: '789',
+          isVerified: true,
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'TypeScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Go' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=github');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'github',
+          type: 'organization',
+          providerUserId: '789',
+          isVerified: true,
+        },
+      });
+    });
+
+    it('should return language statistics for unverified organization (rakutentech)', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'rakutentech',
+          id: '101112',
+          isVerified: false,
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Swift' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=rakutentech');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'rakutentech',
+          type: 'organization',
+          providerUserId: '101112',
+          isVerified: false,
+        },
+      });
+    });
+
     it('should accept provider query parameter with default github', async () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
           login: 'testuser',
           id: '456',
+          email: 'test@example.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: { name: 'Rust' }, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },

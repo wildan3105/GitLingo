@@ -41,6 +41,7 @@ describe('SearchController', () => {
           username: 'testuser',
           type: 'user' as const,
           providerUserId: '123',
+          isVerified: true,
         },
         series: [],
         metadata: {
@@ -186,6 +187,7 @@ describe('SearchController', () => {
           username: 'testuser',
           type: 'user' as const,
           providerUserId: '123',
+          isVerified: true,
         },
         series: [],
         metadata: {
