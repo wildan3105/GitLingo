@@ -93,7 +93,7 @@
     "axios": "^1.8.4",
     "body-parser": "^2.2.0",
     "bootstrap": "^5.3.7",
-    "express": "4.21.1",
+    "express": "5.2.1",
     "express-handlebars": "3.0.0",
     "fs": "0.0.1-security",
     "gulp": "^4.0.0",
