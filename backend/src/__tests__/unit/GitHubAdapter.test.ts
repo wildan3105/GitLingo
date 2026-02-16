@@ -397,4 +397,144 @@ describe('GitHubGraphQLAdapter', () => {
       expect(result.profile.createdAt).toBeUndefined();
     });
   });
+
+  describe('Decision Matrix Tests', () => {
+    describe('Scenario 1: No token + No URL → GitHub public API (low rate)', () => {
+      it('should use default GitHub endpoint without authentication', async () => {
+        const adapter = new GitHubGraphQLAdapter();
+
+        mockGraphqlFn.mockResolvedValueOnce({
+          user: {
+            login: 'abc',
+            id: '123',
+            repositories: {
+              nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+              pageInfo: { hasNextPage: false, endCursor: null },
+              totalCount: 1,
+            },
+          },
+          organization: null,
+        });
+
+        const result = await adapter.fetchRepositories('abc');
+
+        expect(result.profile.username).toBe('abc');
+        expect(mockGraphql.defaults).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Scenario 2: GitHub token + No URL → GitHub API (high rate)', () => {
+      it('should use GitHub API with authentication', async () => {
+        const githubToken = 'ghp_GitHubPersonalToken123';
+        const adapter = new GitHubGraphQLAdapter(githubToken);
+
+        mockGraphqlFn.mockResolvedValueOnce({
+          user: {
+            login: 'abc',
+            id: '456',
+            email: 'user@example.com',
+            repositories: {
+              nodes: [{ name: 'repo1', primaryLanguage: { name: 'TypeScript' }, isFork: false }],
+              pageInfo: { hasNextPage: false, endCursor: null },
+              totalCount: 1,
+            },
+          },
+          organization: null,
+        });
+
+        const result = await adapter.fetchRepositories('abc');
+
+        expect(result.profile.username).toBe('abc');
+        expect(mockGraphql.defaults).toHaveBeenCalledWith({
+          headers: {
+            authorization: `token ${githubToken}`,
+          },
+        });
+      });
+    });
+
+    describe('Scenario 3: GitHub token + GHE URL → Bad credentials', () => {
+      it('should fail with bad credentials when using GitHub token with GHE endpoint', async () => {
+        const githubToken = 'ghp_GitHubPersonalToken123';
+        const gheURL = 'https://ghe.company.com/api';
+        const adapter = new GitHubGraphQLAdapter(githubToken, gheURL);
+
+        const error: any = new Error('Bad credentials');
+        error.errors = [{ type: 'UNAUTHORIZED', message: 'Bad credentials' }];
+        mockGraphqlFn.mockRejectedValue(error);
+
+        await expect(adapter.fetchRepositories('boheng-cao')).rejects.toThrow(ProviderError);
+      });
+    });
+
+    describe('Scenario 4: No token + GHE URL → GHE public API (low rate)', () => {
+      it('should use GHE endpoint without authentication', async () => {
+        const gheURL = 'https://ghe.rakuten-it.com/api';
+        const adapter = new GitHubGraphQLAdapter(undefined, gheURL);
+
+        mockGraphqlFn.mockResolvedValueOnce({
+          user: {
+            login: 'boheng-cao',
+            id: '789',
+            repositories: {
+              nodes: [{ name: 'ghe-repo', primaryLanguage: { name: 'Go' }, isFork: false }],
+              pageInfo: { hasNextPage: false, endCursor: null },
+              totalCount: 1,
+            },
+          },
+          organization: null,
+        });
+
+        const result = await adapter.fetchRepositories('boheng-cao');
+
+        expect(result.profile.username).toBe('boheng-cao');
+        expect(mockGraphql.defaults).toHaveBeenCalledWith({
+          baseUrl: gheURL,
+        });
+      });
+    });
+
+    describe('Scenario 5: GHE token + GHE URL → GHE API (high rate)', () => {
+      it('should use GHE endpoint with authentication', async () => {
+        const gheToken = 'ghp_GheEnterpriseToken456';
+        const gheURL = 'https://ghe.rakuten-it.com/api';
+        const adapter = new GitHubGraphQLAdapter(gheToken, gheURL);
+
+        mockGraphqlFn.mockResolvedValueOnce({
+          user: {
+            login: 'boheng-cao',
+            id: '101112',
+            email: 'boheng.cao@company.com',
+            repositories: {
+              nodes: [
+                { name: 'enterprise-repo', primaryLanguage: { name: 'Java' }, isFork: false },
+              ],
+              pageInfo: { hasNextPage: false, endCursor: null },
+              totalCount: 1,
+            },
+          },
+          organization: null,
+        });
+
+        const result = await adapter.fetchRepositories('boheng-cao');
+
+        expect(result.profile.username).toBe('boheng-cao');
+        expect(result.profile.isVerified).toBe(true);
+        expect(mockGraphql.defaults).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Scenario 6: GHE token + No URL → Bad credentials', () => {
+      it('should fail with bad credentials when using GHE token with GitHub endpoint', async () => {
+        const gheToken = 'ghp_GheEnterpriseToken456';
+        const adapter = new GitHubGraphQLAdapter(gheToken);
+
+        const error: any = new Error('Bad credentials');
+        error.errors = [{ type: 'UNAUTHORIZED', message: 'Bad credentials' }];
+        mockGraphqlFn.mockRejectedValue(error);
+
+        await expect(adapter.fetchRepositories('abc')).rejects.toThrow(ProviderError);
+      });
+    });
+  });
 });

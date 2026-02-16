@@ -14,7 +14,7 @@ import { Providers } from '../../shared/constants/providers';
 export class GitHubGraphQLAdapter implements ProviderPort {
   private readonly graphqlClient: typeof graphql;
 
-  constructor(token?: string) {
+  constructor(token?: string, graphqlURL?: string) {
     this.graphqlClient =
       typeof token === 'string' && token.length > 0
         ? graphql.defaults({
@@ -23,6 +23,12 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             },
           })
         : graphql;
+
+    if (graphqlURL) {
+      this.graphqlClient = this.graphqlClient.defaults({
+        baseUrl: graphqlURL,
+      });
+    }
   }
 
   /**

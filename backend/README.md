@@ -68,6 +68,52 @@ GITHUB_TOKEN=your_token_here
 
 [Get a token here](https://github.com/settings/tokens) (select `repo` scope)
 
+## Using with GitHub Enterprise (GHE)
+
+The backend supports **self-hosted GitHub Enterprise** instances. Configure it by adding the `GRAPHQL_URL` environment variable.
+
+### Configuration
+
+Add to your `.env`:
+
+```env
+# GitHub Enterprise Configuration
+GRAPHQL_URL=https://ghe.your-company.com/api
+GITHUB_TOKEN=your_ghe_token_here
+```
+
+**Important:** Use the **full API URL**, including `/api`.
+
+### Examples
+
+#### GitHub.com (Default)
+```env
+# No GRAPHQL_URL needed - defaults to api.github.com
+GITHUB_TOKEN=ghp_GitHubPersonalAccessToken
+```
+
+#### GitHub Enterprise
+```env
+GRAPHQL_URL=https://ghe.rakuten-it.com/api
+GITHUB_TOKEN=ghp_EnterpriseAccessToken
+```
+
+### Key Points
+
+- **Match your token to your endpoint**: Use GitHub tokens with GitHub.com, GHE tokens with GHE URLs
+- **Tokens are environment-specific**: A GitHub.com token won't work with GHE and vice versa
+- **URL format matters**: Must be `https://your-ghe-instance/api/` (not just the hostname)
+
+### Testing Your GHE Setup
+
+```bash
+# Start the server
+npm run dev
+
+# Test with a GHE user (replace with actual username)
+curl "http://localhost:3001/api/v1/search?username=your-ghe-username"
+```
+
 ## Available Scripts
 
 ```bash

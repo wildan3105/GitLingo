@@ -10,6 +10,7 @@ interface Config {
   port: number;
   nodeEnv: Environment;
   githubToken: string | undefined;
+  graphqlURL: string | undefined;
   logLevel: LogLevel;
 }
 
@@ -66,6 +67,7 @@ export const config: Config = {
   port: getPort(),
   nodeEnv: getNodeEnv(),
   githubToken: process.env.GITHUB_TOKEN,
+  graphqlURL: process.env.GRAPHQL_URL,
   logLevel: getLogLevel(),
 };
 

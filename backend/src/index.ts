@@ -75,7 +75,7 @@ function createApp(): Application {
   );
 
   // Dependency injection
-  const githubAdapter = new GitHubGraphQLAdapter(config.githubToken);
+  const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
   const searchService = new SearchService(githubAdapter);
   const searchController = new SearchController(searchService);
 
