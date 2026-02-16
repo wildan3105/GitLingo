@@ -23,6 +23,7 @@ export type Profile = {
   providerUserId: string
   location?: string | null
   websiteUrl?: string | null
+  isVerified?: boolean
 }
 
 /**
