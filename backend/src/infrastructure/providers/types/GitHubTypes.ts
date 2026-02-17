@@ -50,6 +50,7 @@ export interface GitHubTotalCountConnection {
  */
 export interface GitHubUser {
   login: string;
+  name?: string | null; // Display name (can be null or empty)
   id: string;
   avatarUrl: string;
   location?: string;

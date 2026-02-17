@@ -102,6 +102,9 @@ export class GitHubGraphQLAdapter implements ProviderPort {
 
           accountProfile = {
             username: account.login,
+            ...(account.name != null &&
+              typeof account.name === 'string' &&
+              account.name.trim() !== '' && { name: account.name }),
             type: isUser ? 'user' : 'organization',
             providerUserId: account.id,
             avatarUrl: account.avatarUrl,
@@ -155,6 +158,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       query($username: String!, $cursor: String) {
         user(login: $username) {
           login
+          name
           id
           avatarUrl
           location
@@ -184,6 +188,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
         }
         organization(login: $username) {
           login
+          name
           id
           avatarUrl
           location

@@ -10,6 +10,12 @@ export interface Profile {
   username: string;
 
   /**
+   * Optional display name for the profile
+   * Can be null or empty string from provider
+   */
+  name?: string;
+
+  /**
    * Account type
    */
   type: 'user' | 'organization';

@@ -771,6 +771,221 @@ describe('GitHubGraphQLAdapter', () => {
         },
       });
     });
+
+    it('should include name field for user with valid name', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'torvalds',
+          name: 'Linus Torvalds',
+          id: '1024',
+          email: 'torvalds@linux.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'C' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('torvalds');
+
+      expect(result.profile.name).toBe('Linus Torvalds');
+      expect(result.profile.username).toBe('torvalds');
+    });
+
+    it('should not include name field for user when name is null', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          name: null,
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testuser');
+    });
+
+    it('should not include name field for user when name is undefined', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testuser');
+    });
+
+    it('should not include name field for user when name is empty string', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          name: '',
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testuser');
+    });
+
+    it('should not include name field for user when name is whitespace-only', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          name: '   ',
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testuser');
+    });
+
+    it('should include name field for organization with valid name', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'github',
+          name: 'GitHub',
+          id: '9919',
+          isVerified: true,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('github');
+
+      expect(result.profile.name).toBe('GitHub');
+      expect(result.profile.username).toBe('github');
+    });
+
+    it('should not include name field for organization when name is null', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          name: null,
+          id: '456',
+          isVerified: false,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('testorg');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testorg');
+    });
+
+    it('should not include name field for organization when name is empty string', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          name: '',
+          id: '456',
+          isVerified: false,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('testorg');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testorg');
+    });
+
+    it('should not include name field for organization when name is whitespace-only', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          name: '   ',
+          id: '456',
+          isVerified: false,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('testorg');
+
+      expect(result.profile).not.toHaveProperty('name');
+      expect(result.profile.username).toBe('testorg');
+    });
   });
 
   describe('Decision Matrix Tests', () => {
