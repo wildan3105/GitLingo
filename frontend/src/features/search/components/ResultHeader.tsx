@@ -70,8 +70,11 @@ export function ResultHeader({ profile, totalRepos, metadata }: ResultHeaderProp
   const [copied, setCopied] = useState(false)
   const accountType = profile.type || 'User'
 
-  // Construct GitHub profile URL (backend doesn't always return profileUrl)
-  const profileUrl = profile.profileUrl || `https://github.com/${profile.username}`
+  // Construct GitHub profile URL
+  // Use providerBaseUrl if available (for GHE support), otherwise default to github.com
+  const profileUrl = profile.providerBaseUrl
+    ? `${profile.providerBaseUrl}/${profile.username}`
+    : `https://github.com/${profile.username}`
 
   // Ensure website URL has a protocol
   const normalizeUrl = (url: string): string => {

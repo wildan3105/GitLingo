@@ -213,7 +213,6 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/octocat',
         },
         series: [],
         metadata: {
@@ -256,7 +255,6 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/octocat',
         },
         series: [],
         metadata: {
@@ -292,7 +290,6 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/octocat',
         },
         series: [],
         metadata: {
@@ -356,7 +353,6 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/octocat',
         },
         series: [],
         metadata: {
@@ -402,7 +398,6 @@ describe('useSearch', () => {
           username: 'user1',
           name: 'User 1',
           avatarUrl: 'https://example.com/avatar1.png',
-          profileUrl: 'https://github.com/user1',
         },
         series: [],
         metadata: {
@@ -418,7 +413,6 @@ describe('useSearch', () => {
           username: 'user2',
           name: 'User 2',
           avatarUrl: 'https://example.com/avatar2.png',
-          profileUrl: 'https://github.com/user2',
         },
         series: [],
         metadata: {
@@ -469,7 +463,6 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/octocat',
           type: 'user',
           providerUserId: '123',
         },
@@ -533,7 +526,6 @@ describe('useSearch', () => {
           username: 'urluser',
           name: 'URL User',
           avatarUrl: 'https://example.com/avatar.png',
-          profileUrl: 'https://github.com/urluser',
           type: 'user',
           providerUserId: '456',
         },

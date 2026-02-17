@@ -18,13 +18,13 @@ export type Profile = {
   username: string
   name: string | null
   avatarUrl: string
-  profileUrl: string
   type: 'user' | 'organization'
   providerUserId: string
   location?: string | null
   websiteUrl?: string | null
   isVerified?: boolean
   createdAt?: string
+  providerBaseUrl?: string
 }
 
 /**
