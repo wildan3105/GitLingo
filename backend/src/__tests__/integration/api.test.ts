@@ -307,6 +307,7 @@ describe('API Integration Tests', () => {
         type: 'user',
         providerUserId: '999',
         isVerified: true,
+        providerBaseUrl: 'https://github.com',
       });
       expect(response.body.profile.createdAt).toBeUndefined();
     });
@@ -334,6 +335,7 @@ describe('API Integration Tests', () => {
         type: 'organization',
         providerUserId: '888',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
       expect(response.body.profile.createdAt).toBeUndefined();
     });

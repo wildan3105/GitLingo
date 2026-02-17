@@ -10,6 +10,7 @@ import { ProviderPort, AccountData } from '../../domain/ports/ProviderPort';
 import { ProviderError } from '../errors/ProviderError';
 import { GitHubUserQueryResponse, GitHubRepository } from './types/GitHubTypes';
 import { Providers } from '../../shared/constants/providers';
+import { extractProviderBaseUrl } from '../../shared/utils/providerUrl';
 
 export class GitHubGraphQLAdapter implements ProviderPort {
   private readonly graphqlClient: typeof graphql;
@@ -80,6 +81,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             ...(account.websiteUrl != null && { websiteUrl: account.websiteUrl }),
             isVerified,
             ...(account.createdAt != null && { createdAt: account.createdAt }),
+            providerBaseUrl: extractProviderBaseUrl(account.avatarUrl),
           };
         }
 

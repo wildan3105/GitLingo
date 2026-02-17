@@ -51,6 +51,7 @@ describe('GitHubGraphQLAdapter', () => {
         providerUserId: '123',
         isVerified: true,
         createdAt: '2020-01-15T10:30:00Z',
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0]).toEqual({
@@ -89,6 +90,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'user',
         providerUserId: '123',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
     });
 
@@ -116,6 +118,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'user',
         providerUserId: '123',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
     });
 
@@ -143,6 +146,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'user',
         providerUserId: '123',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
     });
 
@@ -282,6 +286,7 @@ describe('GitHubGraphQLAdapter', () => {
         providerUserId: '456',
         isVerified: true,
         createdAt: '2008-04-10T02:30:00Z',
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.repositories).toHaveLength(1);
     });
@@ -310,6 +315,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'organization',
         providerUserId: '789',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.repositories).toHaveLength(1);
     });
@@ -337,6 +343,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'organization',
         providerUserId: '456',
         isVerified: false,
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.repositories).toHaveLength(1);
     });
@@ -365,6 +372,7 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'user',
         providerUserId: '999',
         isVerified: true,
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.profile.createdAt).toBeUndefined();
     });
@@ -393,8 +401,105 @@ describe('GitHubGraphQLAdapter', () => {
         type: 'organization',
         providerUserId: '888',
         isVerified: true,
+        providerBaseUrl: 'https://github.com',
       });
       expect(result.profile.createdAt).toBeUndefined();
+    });
+
+    it('should extract providerBaseUrl from GitHub.com avatar URL', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'airbnb',
+          id: '698437',
+          email: 'opensource@airbnb.com',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/698437?v=4',
+          repositories: {
+            nodes: [{ name: 'javascript', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('airbnb');
+
+      expect(result.profile.avatarUrl).toBe('https://avatars.githubusercontent.com/u/698437?v=4');
+      expect(result.profile.providerBaseUrl).toBe('https://github.com');
+    });
+
+    it('should extract providerBaseUrl from GHE avatar URL', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token', 'https://ghe.your-company.com/api');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'boheng-cao',
+          id: '16',
+          email: 'boheng.cao@company.com',
+          avatarUrl: 'https://avatars.ghe.your-company.com/u/16',
+          repositories: {
+            nodes: [{ name: 'internal-tool', primaryLanguage: { name: 'Java' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('boheng-cao');
+
+      expect(result.profile.avatarUrl).toBe('https://avatars.ghe.your-company.com/u/16');
+      expect(result.profile.providerBaseUrl).toBe('https://ghe.your-company.com');
+    });
+
+    it('should default to https://github.com when avatarUrl is missing', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '999',
+          email: 'test@example.com',
+          // avatarUrl is missing
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Python' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile.avatarUrl).toBeUndefined();
+      expect(result.profile.providerBaseUrl).toBe('https://github.com');
+    });
+
+    it('should extract providerBaseUrl for organization from GHE', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token', 'https://ghe.company.com/api');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'engineering',
+          id: '12345',
+          isVerified: true,
+          avatarUrl: 'https://avatars.ghe.company.com/u/12345?v=4',
+          repositories: {
+            nodes: [{ name: 'backend', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('engineering');
+
+      expect(result.profile.avatarUrl).toBe('https://avatars.ghe.company.com/u/12345?v=4');
+      expect(result.profile.providerBaseUrl).toBe('https://ghe.company.com');
     });
   });
 
@@ -469,7 +574,7 @@ describe('GitHubGraphQLAdapter', () => {
 
     describe('Scenario 4: No token + GHE URL → GHE public API (low rate)', () => {
       it('should use GHE endpoint without authentication', async () => {
-        const gheURL = 'https://ghe.rakuten-it.com/api';
+        const gheURL = 'https://ghe.your-company.com/api';
         const adapter = new GitHubGraphQLAdapter(undefined, gheURL);
 
         mockGraphqlFn.mockResolvedValueOnce({
@@ -497,7 +602,7 @@ describe('GitHubGraphQLAdapter', () => {
     describe('Scenario 5: GHE token + GHE URL → GHE API (high rate)', () => {
       it('should use GHE endpoint with authentication', async () => {
         const gheToken = 'ghp_GheEnterpriseToken456';
-        const gheURL = 'https://ghe.rakuten-it.com/api';
+        const gheURL = 'https://ghe.your-company.com/api';
         const adapter = new GitHubGraphQLAdapter(gheToken, gheURL);
 
         mockGraphqlFn.mockResolvedValueOnce({

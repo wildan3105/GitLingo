@@ -46,4 +46,10 @@ export interface Profile {
    * ISO 8601 format string (as-is from provider)
    */
   createdAt?: string;
+
+  /**
+   * Provider base URL (e.g., 'https://github.com' or 'https://ghe.company.com')
+   * Derived from avatarUrl to support "Open Github" button in frontend
+   */
+  providerBaseUrl?: string;
 }
