@@ -28,6 +28,8 @@ function createWrapper() {
 describe('useSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset URL to root before each test
+    window.history.pushState({}, '', '/')
   })
 
   describe('initial state', () => {
@@ -455,6 +457,174 @@ describe('useSearch', () => {
       })
 
       expect(searchSpy).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('URL management', () => {
+    it('updates URL when search succeeds', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          profileUrl: 'https://github.com/octocat',
+          type: 'user',
+          providerUserId: '123',
+        },
+        series: [],
+        metadata: {
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
+        },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(mockSuccessResponse)
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+
+      act(() => {
+        result.current.handleSearch()
+      })
+
+      // Wait for both data and URL to update
+      await waitFor(
+        () => {
+          expect(result.current.data).toBeTruthy()
+          expect(window.location.pathname).toBe('/github/octocat')
+        },
+        { timeout: 2000 }
+      )
+    })
+
+    it('resets URL to root when handleReset is called', () => {
+      // Set URL to a user page
+      window.history.pushState({}, '', '/github/testuser')
+      expect(window.location.pathname).toBe('/github/testuser')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.handleReset()
+      })
+
+      // URL should be reset to root
+      expect(window.location.pathname).toBe('/')
+    })
+
+    it('reads username from URL on initial load', async () => {
+      // Set URL before rendering hook
+      window.history.pushState({}, '', '/github/urluser')
+
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'urluser',
+          name: 'URL User',
+          avatarUrl: 'https://example.com/avatar.png',
+          profileUrl: 'https://github.com/urluser',
+          type: 'user',
+          providerUserId: '456',
+        },
+        series: [],
+        metadata: {
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
+        },
+      })
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Username should be populated from URL
+      await waitFor(() => {
+        expect(result.current.username).toBe('urluser')
+      })
+
+      // Search should be automatically triggered
+      await waitFor(() => {
+        expect(searchSpy).toHaveBeenCalledWith('urluser')
+      })
+    })
+
+    it('does not auto-search for invalid username in URL', () => {
+      // Set URL with invalid username
+      window.history.pushState({}, '', '/github/invalid user')
+
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+
+      renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Should not trigger search for invalid username
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+
+    it('ignores non-github URL paths', () => {
+      // Set URL to non-matching path
+      window.history.pushState({}, '', '/some/other/path')
+
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Username should remain empty
+      expect(result.current.username).toBe('')
+
+      // Should not trigger search
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+
+    it('redirects to homepage for invalid URL paths', () => {
+      // Set URL to non-matching path
+      window.history.pushState({}, '', '/invalid/path')
+
+      renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Should redirect to root
+      expect(window.location.pathname).toBe('/')
+    })
+
+    it('redirects to homepage for non-github provider paths', () => {
+      // Set URL with different provider
+      window.history.pushState({}, '', '/gitlab/testuser')
+
+      renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Should redirect to root
+      expect(window.location.pathname).toBe('/')
+    })
+
+    it('does not redirect when already on homepage', () => {
+      // Set URL to root
+      window.history.pushState({}, '', '/')
+
+      renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Should stay on root
+      expect(window.location.pathname).toBe('/')
     })
   })
 })

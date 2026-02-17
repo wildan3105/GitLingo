@@ -3,7 +3,7 @@
  * Custom hook for managing search state and API calls
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { searchLanguageStatistics } from '../../../services/gitlingoApi'
 import { validateUsername } from '../utils/validation'
@@ -121,6 +121,7 @@ export function useSearch(): UseSearchReturn {
    * - Resets filters to true
    * - Clears API data and errors
    * - Clears validation errors
+   * - Resets URL to root
    */
   const handleReset = () => {
     setUsernameState('')
@@ -128,6 +129,8 @@ export function useSearch(): UseSearchReturn {
     setIncludeUnknownLanguage(false)
     setValidationError(null)
     mutation.reset()
+    // Reset URL to root
+    window.history.pushState({}, '', '/')
   }
 
   // Split API response into success/error for easier consumption
@@ -141,6 +144,39 @@ export function useSearch(): UseSearchReturn {
       error = mutation.data
     }
   }
+
+  // Update URL when search succeeds
+  useEffect(() => {
+    if (data && username) {
+      const newUrl = `/github/${username}`
+      // Update URL without reloading the page
+      window.history.pushState({}, '', newUrl)
+    }
+  }, [data, username])
+
+  // Read from URL on initial load (deep linking support)
+  useEffect(() => {
+    const path = window.location.pathname
+    const match = path.match(/^\/github\/([^/]+)$/)
+
+    if (match) {
+      const usernameFromUrl = match[1]
+      if (usernameFromUrl && !username && !mutation.data) {
+        setUsernameState(usernameFromUrl)
+        // Auto-trigger search for deep-linked URLs
+        const validation = validateUsername(usernameFromUrl)
+        if (validation.isValid) {
+          mutation.mutate({ username: usernameFromUrl })
+        }
+      }
+    } else if (path !== '/') {
+      // If URL doesn't match /github/{username} and it's not the root path,
+      // redirect to homepage
+      window.history.replaceState({}, '', '/')
+    }
+    // Only run on initial mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return {
     username,

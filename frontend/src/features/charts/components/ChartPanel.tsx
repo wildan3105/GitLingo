@@ -146,8 +146,36 @@ export function ChartPanel({
     }
   }
 
-  // Export dropdown items
-  const EXPORT_ITEMS: DropdownItem[] = [
+  // Handle Copy URL
+  const handleCopyURL = async () => {
+    try {
+      const url = window.location.href
+      await navigator.clipboard.writeText(url)
+      showToast({ type: 'success', message: 'URL copied to clipboard!' })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to copy URL'
+      showToast({ type: 'error', message })
+    }
+  }
+
+  // Share dropdown items
+  const SHARE_ITEMS: DropdownItem[] = [
+    {
+      id: 'copy-url',
+      label: 'Copy URL',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          />
+        </svg>
+      ),
+      onClick: handleCopyURL,
+      disabled: false,
+    },
     {
       id: 'download-png',
       label: 'Download PNG',
@@ -275,7 +303,7 @@ export function ChartPanel({
               }
             />
 
-            {/* Export Dropdown */}
+            {/* Share Dropdown */}
             <Dropdown
               trigger={
                 <>
@@ -284,13 +312,13 @@ export function ChartPanel({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                     />
                   </svg>
-                  Export
+                  Share
                 </>
               }
-              items={EXPORT_ITEMS}
+              items={SHARE_ITEMS}
               disabled={!hasData || isExporting}
             />
           </div>
