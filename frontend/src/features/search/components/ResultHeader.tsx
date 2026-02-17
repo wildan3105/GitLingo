@@ -210,13 +210,43 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
 
       {/* Row 2: Metadata */}
       <div className="flex items-center justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
-        {/* Left: @username + member since + statistics */}
+        {/* Left: @username + joined since + statistics */}
         <div className="flex items-center gap-2 leading-relaxed flex-wrap">
-          <span className="font-medium text-secondary-700">@{profile.username}</span>
+          <div className="flex items-center gap-1.5">
+            <svg
+              className="w-4 h-4 text-secondary-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+              />
+            </svg>
+            <span className="font-medium text-secondary-700">{profile.username}</span>
+          </div>
           {profile.createdAt && (
             <>
               <span className="text-secondary-400">•</span>
-              <span>Member since {new Date(profile.createdAt).getFullYear()}</span>
+              <div className="flex items-center gap-1.5">
+                <svg
+                  className="w-4 h-4 text-secondary-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span>Joined since {new Date(profile.createdAt).getFullYear()}</span>
+              </div>
             </>
           )}
 
