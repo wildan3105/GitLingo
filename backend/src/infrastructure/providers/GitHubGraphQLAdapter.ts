@@ -72,6 +72,34 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             : // For organizations: use isVerified field from API (default false if not present)
               Boolean(account.isVerified);
 
+          // Build statistics object based on account type
+          let statistics: { followers?: number; following?: number; members?: number } | undefined;
+
+          if (isUser) {
+            // For users: include followers and following if available
+            const hasFollowers = account.followers?.totalCount != null;
+            const hasFollowing = account.following?.totalCount != null;
+
+            if (hasFollowers || hasFollowing) {
+              statistics = {
+                ...(hasFollowers && { followers: account.followers!.totalCount }),
+                ...(hasFollowing && { following: account.following!.totalCount }),
+              };
+            }
+          } else {
+            // For organizations: include members if available
+            if (account.membersWithRole?.totalCount != null) {
+              statistics = {
+                members: account.membersWithRole.totalCount,
+              };
+            }
+          }
+
+          // If statistics is empty object, set to undefined
+          if (statistics && Object.keys(statistics).length === 0) {
+            statistics = undefined;
+          }
+
           accountProfile = {
             username: account.login,
             type: isUser ? 'user' : 'organization',
@@ -82,6 +110,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             isVerified,
             ...(account.createdAt != null && { createdAt: account.createdAt }),
             providerBaseUrl: extractProviderBaseUrl(account.avatarUrl),
+            ...(statistics != null && { statistics }),
           };
         }
 
@@ -132,6 +161,12 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           websiteUrl
           email
           createdAt
+          followers {
+            totalCount
+          }
+          following {
+            totalCount
+          }
           repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
             nodes {
               name
@@ -155,6 +190,9 @@ export class GitHubGraphQLAdapter implements ProviderPort {
           websiteUrl
           isVerified
           createdAt
+          membersWithRole {
+            totalCount
+          }
           repositories(first: 100, after: $cursor) {
             nodes {
               name

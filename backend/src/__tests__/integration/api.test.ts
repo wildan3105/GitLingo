@@ -467,5 +467,201 @@ describe('API Integration Tests', () => {
         },
       });
     });
+
+    it('should return statistics for user with followers and following', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'octocat',
+          id: '583231',
+          email: 'octocat@github.com',
+          createdAt: '2011-01-25T18:44:36Z',
+          followers: {
+            totalCount: 21841,
+          },
+          following: {
+            totalCount: 9,
+          },
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'Python' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=octocat');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          type: 'user',
+          providerUserId: '583231',
+          isVerified: true,
+          createdAt: '2011-01-25T18:44:36Z',
+          statistics: {
+            followers: 21841,
+            following: 9,
+          },
+        },
+      });
+    });
+
+    it('should not return statistics for user when followers and following are missing', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(200);
+      expect(response.body.profile).not.toHaveProperty('statistics');
+    });
+
+    it('should return statistics for organization with members', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'rakutentech',
+          id: '1415441',
+          isVerified: false,
+          createdAt: '2012-02-07T09:30:38Z',
+          membersWithRole: {
+            totalCount: 18,
+          },
+          repositories: {
+            nodes: [
+              { name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false },
+              { name: 'repo2', primaryLanguage: { name: 'JavaScript' }, isFork: false },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 2,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=rakutentech');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'rakutentech',
+          type: 'organization',
+          providerUserId: '1415441',
+          isVerified: false,
+          createdAt: '2012-02-07T09:30:38Z',
+          statistics: {
+            members: 18,
+          },
+        },
+      });
+    });
+
+    it('should not return statistics for organization when members is missing', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          id: '456',
+          isVerified: true,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=testorg');
+
+      expect(response.status).toBe(200);
+      expect(response.body.profile).not.toHaveProperty('statistics');
+    });
+
+    it('should return statistics with zero values for user', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'newuser',
+          id: '999',
+          email: 'new@example.com',
+          followers: {
+            totalCount: 0,
+          },
+          following: {
+            totalCount: 0,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const response = await request(app).get('/api/v1/search?username=newuser');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        profile: {
+          username: 'newuser',
+          statistics: {
+            followers: 0,
+            following: 0,
+          },
+        },
+      });
+    });
+
+    it('should return statistics with zero members for organization', async () => {
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'emptyorg',
+          id: '888',
+          isVerified: false,
+          membersWithRole: {
+            totalCount: 0,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const response = await request(app).get('/api/v1/search?username=emptyorg');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        ok: true,
+        profile: {
+          username: 'emptyorg',
+          statistics: {
+            members: 0,
+          },
+        },
+      });
+    });
   });
 });

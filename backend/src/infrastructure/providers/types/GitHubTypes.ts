@@ -39,6 +39,13 @@ export interface GitHubRepositoryConnection {
 }
 
 /**
+ * Connection with total count
+ */
+export interface GitHubTotalCountConnection {
+  totalCount: number;
+}
+
+/**
  * GitHub user or organization
  */
 export interface GitHubUser {
@@ -51,6 +58,9 @@ export interface GitHubUser {
   isVerified?: boolean; // Only for organizations
   createdAt?: string; // ISO 8601 timestamp
   repositories: GitHubRepositoryConnection;
+  followers?: GitHubTotalCountConnection; // Only for users
+  following?: GitHubTotalCountConnection; // Only for users
+  membersWithRole?: GitHubTotalCountConnection; // Only for organizations
 }
 
 /**

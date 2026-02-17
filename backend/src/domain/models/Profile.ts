@@ -52,4 +52,18 @@ export interface Profile {
    * Derived from avatarUrl to support "Open Github" button in frontend
    */
   providerBaseUrl?: string;
+
+  /**
+   * Optional statistics based on account type
+   * - For users: followers and following counts
+   * - For organizations: members count
+   */
+  statistics?:
+    | {
+        followers?: number;
+        following?: number;
+      }
+    | {
+        members?: number;
+      };
 }

@@ -501,6 +501,276 @@ describe('GitHubGraphQLAdapter', () => {
       expect(result.profile.avatarUrl).toBe('https://avatars.ghe.company.com/u/12345?v=4');
       expect(result.profile.providerBaseUrl).toBe('https://ghe.company.com');
     });
+
+    it('should include statistics for user with followers and following', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'octocat',
+          id: '583231',
+          email: 'octocat@github.com',
+          followers: {
+            totalCount: 21841,
+          },
+          following: {
+            totalCount: 9,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('octocat');
+
+      expect(result.profile).toEqual({
+        username: 'octocat',
+        type: 'user',
+        providerUserId: '583231',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          followers: 21841,
+          following: 9,
+        },
+      });
+    });
+
+    it('should not include statistics for user when followers and following are missing', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: 'test@example.com',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+      });
+      expect(result.profile.statistics).toBeUndefined();
+    });
+
+    it('should include only followers in statistics when following is missing', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: 'test@example.com',
+          followers: {
+            totalCount: 100,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          followers: 100,
+        },
+      });
+    });
+
+    it('should include only following in statistics when followers is missing', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'testuser',
+          id: '123',
+          email: 'test@example.com',
+          following: {
+            totalCount: 50,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('testuser');
+
+      expect(result.profile).toEqual({
+        username: 'testuser',
+        type: 'user',
+        providerUserId: '123',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          following: 50,
+        },
+      });
+    });
+
+    it('should include statistics for organization with members', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'rakutentech',
+          id: '1415441',
+          isVerified: false,
+          membersWithRole: {
+            totalCount: 18,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('rakutentech');
+
+      expect(result.profile).toEqual({
+        username: 'rakutentech',
+        type: 'organization',
+        providerUserId: '1415441',
+        isVerified: false,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          members: 18,
+        },
+      });
+    });
+
+    it('should not include statistics for organization when members is missing', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'testorg',
+          id: '456',
+          isVerified: true,
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('testorg');
+
+      expect(result.profile).toEqual({
+        username: 'testorg',
+        type: 'organization',
+        providerUserId: '456',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+      });
+      expect(result.profile.statistics).toBeUndefined();
+    });
+
+    it('should handle user with zero followers and following', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: {
+          login: 'newuser',
+          id: '999',
+          email: 'new@example.com',
+          followers: {
+            totalCount: 0,
+          },
+          following: {
+            totalCount: 0,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      });
+
+      const result = await adapter.fetchRepositories('newuser');
+
+      expect(result.profile).toEqual({
+        username: 'newuser',
+        type: 'user',
+        providerUserId: '999',
+        isVerified: true,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          followers: 0,
+          following: 0,
+        },
+      });
+    });
+
+    it('should handle organization with zero members', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      mockGraphqlFn.mockResolvedValueOnce({
+        user: null,
+        organization: {
+          login: 'emptyorg',
+          id: '888',
+          isVerified: false,
+          membersWithRole: {
+            totalCount: 0,
+          },
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'Go' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+      });
+
+      const result = await adapter.fetchRepositories('emptyorg');
+
+      expect(result.profile).toEqual({
+        username: 'emptyorg',
+        type: 'organization',
+        providerUserId: '888',
+        isVerified: false,
+        providerBaseUrl: 'https://github.com',
+        statistics: {
+          members: 0,
+        },
+      });
+    });
   });
 
   describe('Decision Matrix Tests', () => {
