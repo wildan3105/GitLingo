@@ -116,7 +116,6 @@ describe('API Integration Tests', () => {
         metadata: {
           generatedAt: expect.any(String),
           unit: 'repos',
-          limit: 4,
         },
       });
 

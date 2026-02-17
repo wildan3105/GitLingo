@@ -160,7 +160,6 @@ describe('SearchService', () => {
 
       expect(result.metadata).toBeDefined();
       expect(result.metadata.unit).toBe('repos');
-      expect(result.metadata.limit).toBe(1);
       expect(result.metadata.generatedAt).toBeDefined();
       expect(new Date(result.metadata.generatedAt).getTime()).toBeGreaterThan(0);
     });

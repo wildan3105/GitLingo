@@ -38,7 +38,6 @@ export class SearchService {
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos',
-          limit: repositories.length,
         },
       };
     } catch (error) {

@@ -40,10 +40,5 @@ export interface SearchResult {
      * Unit of measurement (always "repos")
      */
     unit: string;
-
-    /**
-     * Maximum number of results (for future pagination)
-     */
-    limit: number;
   };
 }

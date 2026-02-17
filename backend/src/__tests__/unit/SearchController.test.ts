@@ -47,7 +47,6 @@ describe('SearchController', () => {
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos' as const,
-          limit: 0,
         },
       };
 
@@ -193,7 +192,6 @@ describe('SearchController', () => {
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos' as const,
-          limit: 0,
         },
       };
 
