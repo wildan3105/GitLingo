@@ -111,7 +111,7 @@ describe('ResultHeader', () => {
         <ResultHeader profile={baseProfile} totalRepos={10} metadata={metadata} />
       )
 
-      expect(screen.getByText('@testuser')).toBeInTheDocument()
+      expect(screen.getByText('testuser')).toBeInTheDocument()
     })
 
     it('does not render repository count in profile card', () => {
@@ -231,7 +231,7 @@ describe('ResultHeader', () => {
       renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
 
       // Should render without errors
-      expect(screen.getByText('@testuser')).toBeInTheDocument()
+      expect(screen.getByText('testuser')).toBeInTheDocument()
       expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
       expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
       expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
@@ -245,7 +245,7 @@ describe('ResultHeader', () => {
 
       renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
 
-      expect(screen.getByText('@testuser')).toBeInTheDocument()
+      expect(screen.getByText('testuser')).toBeInTheDocument()
       expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
       expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
       expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
