@@ -7,7 +7,6 @@ import express, { Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 
 import { config } from './shared/config/env';
@@ -16,6 +15,7 @@ import { SearchService } from './application/services/SearchService';
 import { SearchController } from './interfaces/controllers/SearchController';
 import { createRoutes } from './interfaces/routes';
 import { errorHandler } from './interfaces/middleware/errorHandler';
+import { rateLimiter } from './interfaces/middleware/rateLimiter';
 
 // Initialize logger
 const logger = pino({ level: config.logLevel });
@@ -43,36 +43,10 @@ function createApp(): Application {
     })
   );
 
-  // Rate limiting (100 requests per 15 minutes per IP)
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Max 100 requests per window
-    message: {
-      ok: false,
-      provider: 'unknown',
-      error: {
-        code: 'rate_limited',
-        message: 'Too many requests, please try again later',
-      },
-      meta: {
-        generatedAt: new Date().toISOString(),
-      },
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-  app.use(limiter);
-
-  // print token
-  logger.debug(
-    {
-      githubToken:
-        typeof config.githubToken === 'string' && config.githubToken.length > 0
-          ? '✓ Provided'
-          : '✗ Not provided',
-    },
-    'GitHub Token'
-  );
+  // Rate limiting middleware
+  if (config.useRateLimiter) {
+    app.use(rateLimiter);
+  }
 
   // Dependency injection
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
