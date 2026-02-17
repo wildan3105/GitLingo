@@ -12,6 +12,18 @@ export type SearchQuery = {
 }
 
 /**
+ * Profile statistics for users and organizations
+ */
+export type ProfileStatistics = {
+  /** Number of followers (users only) */
+  followers?: number
+  /** Number of following (users only) */
+  following?: number
+  /** Number of members (organizations only) */
+  members?: number
+}
+
+/**
  * Profile information returned from the API
  */
 export type Profile = {
@@ -25,6 +37,7 @@ export type Profile = {
   isVerified?: boolean
   createdAt?: string
   providerBaseUrl?: string
+  statistics?: ProfileStatistics
 }
 
 /**

@@ -9,8 +9,6 @@ import type { Profile, Metadata } from '../../../contracts/api'
 export type ResultHeaderProps = {
   /** User/organization profile information */
   profile: Profile
-  /** Total number of repositories */
-  totalRepos: number
   /** API response metadata (for last updated timestamp) */
   metadata: Metadata
 }
@@ -66,7 +64,7 @@ function formatLocalDateTime(isoString: string): string {
  * />
  * ```
  */
-export function ResultHeader({ profile, totalRepos, metadata }: ResultHeaderProps) {
+export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
   const [copied, setCopied] = useState(false)
   const accountType = profile.type || 'User'
 
@@ -212,7 +210,7 @@ export function ResultHeader({ profile, totalRepos, metadata }: ResultHeaderProp
 
       {/* Row 2: Metadata */}
       <div className="flex items-center justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
-        {/* Left: @username + member since + repos */}
+        {/* Left: @username + member since + statistics */}
         <div className="flex items-center gap-2 leading-relaxed flex-wrap">
           <span className="font-medium text-secondary-700">@{profile.username}</span>
           {profile.createdAt && (
@@ -221,10 +219,82 @@ export function ResultHeader({ profile, totalRepos, metadata }: ResultHeaderProp
               <span>Member since {new Date(profile.createdAt).getFullYear()}</span>
             </>
           )}
-          <span className="text-secondary-400">•</span>
-          <span>
-            {totalRepos.toLocaleString()} {totalRepos === 1 ? 'repository' : 'repositories'}
-          </span>
+
+          {/* Statistics - Followers/Following for users, Members for orgs */}
+          {profile.statistics && (
+            <>
+              {/* User statistics */}
+              {profile.type === 'user' && (
+                <>
+                  {profile.statistics.followers !== undefined && (
+                    <>
+                      <span className="text-secondary-400">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <svg
+                          className="w-4 h-4 text-secondary-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                        <span>{profile.statistics.followers.toLocaleString()} Followers</span>
+                      </div>
+                    </>
+                  )}
+                  {profile.statistics.following !== undefined && (
+                    <>
+                      <span className="text-secondary-400">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <svg
+                          className="w-4 h-4 text-secondary-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        <span>{profile.statistics.following.toLocaleString()} Following</span>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Organization statistics */}
+              {profile.type === 'organization' && profile.statistics.members !== undefined && (
+                <>
+                  <span className="text-secondary-400">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <svg
+                      className="w-4 h-4 text-secondary-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                    <span>{profile.statistics.members.toLocaleString()} Members</span>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
 
         {/* Right: Location + Website + Last Updated */}

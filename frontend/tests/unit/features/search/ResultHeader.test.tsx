@@ -114,18 +114,190 @@ describe('ResultHeader', () => {
       expect(screen.getByText('@testuser')).toBeInTheDocument()
     })
 
-    it('renders repository count', () => {
+    it('does not render repository count in profile card', () => {
       renderWithProviders(
         <ResultHeader profile={baseProfile} totalRepos={42} metadata={metadata} />
       )
 
-      expect(screen.getByText('42 repositories')).toBeInTheDocument()
+      // Repository count should NOT be in the profile card (it's in KPI cards instead)
+      expect(screen.queryByText(/42 repositories/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/repository/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('User statistics', () => {
+    it('displays followers count for users', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 150,
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('150 Followers')).toBeInTheDocument()
     })
 
-    it('uses singular form for single repository', () => {
-      renderWithProviders(<ResultHeader profile={baseProfile} totalRepos={1} metadata={metadata} />)
+    it('displays following count for users', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          following: 75,
+        },
+      }
 
-      expect(screen.getByText('1 repository')).toBeInTheDocument()
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('75 Following')).toBeInTheDocument()
+    })
+
+    it('displays both followers and following for users', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 1250,
+          following: 340,
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('1,250 Followers')).toBeInTheDocument()
+      expect(screen.getByText('340 Following')).toBeInTheDocument()
+    })
+
+    it('does not display members count for users', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 100,
+          members: 50, // Should be ignored for users
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('100 Followers')).toBeInTheDocument()
+      expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Organization statistics', () => {
+    it('displays members count for organizations', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'organization',
+        statistics: {
+          members: 250,
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('250 Members')).toBeInTheDocument()
+    })
+
+    it('does not display followers/following for organizations', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'organization',
+        statistics: {
+          members: 250,
+          followers: 100, // Should be ignored for orgs
+          following: 50, // Should be ignored for orgs
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('250 Members')).toBeInTheDocument()
+      expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Statistics edge cases', () => {
+    it('handles missing statistics object gracefully', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        // No statistics field
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      // Should render without errors
+      expect(screen.getByText('@testuser')).toBeInTheDocument()
+      expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
+    })
+
+    it('handles empty statistics object', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        statistics: {},
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('@testuser')).toBeInTheDocument()
+      expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
+    })
+
+    it('handles zero values correctly', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 0,
+          following: 0,
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      // Zero values should still display
+      expect(screen.getByText('0 Followers')).toBeInTheDocument()
+      expect(screen.getByText('0 Following')).toBeInTheDocument()
+    })
+
+    it('formats large numbers with commas', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 1234567,
+          following: 9876,
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('1,234,567 Followers')).toBeInTheDocument()
+      expect(screen.getByText('9,876 Following')).toBeInTheDocument()
+    })
+
+    it('handles partial statistics for users', () => {
+      const profile: Profile = {
+        ...baseProfile,
+        type: 'user',
+        statistics: {
+          followers: 100,
+          // following is missing
+        },
+      }
+
+      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+
+      expect(screen.getByText('100 Followers')).toBeInTheDocument()
+      expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
     })
   })
 })
