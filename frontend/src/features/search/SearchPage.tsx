@@ -238,6 +238,8 @@ export function SearchPage() {
                 <LoadingState variant="profile" />
               </Card>
 
+              <LoadingState variant="kpiCards" />
+
               <Card padding="lg">
                 <LoadingState variant="chartPanel" />
               </Card>

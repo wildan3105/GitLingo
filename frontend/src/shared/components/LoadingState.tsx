@@ -7,7 +7,7 @@ import type { CSSProperties } from 'react'
 
 export type LoadingStateProps = {
   /** Loading variant */
-  variant?: 'chart' | 'search' | 'default' | 'profile' | 'chartPanel'
+  variant?: 'chart' | 'search' | 'default' | 'profile' | 'kpiCards' | 'chartPanel'
   /** Additional CSS classes */
   className?: string
 }
@@ -82,24 +82,38 @@ function SearchSkeleton() {
 
 /**
  * Profile card skeleton - matches ResultHeader layout
+ * Row 1: avatar + name + badge | action buttons
+ * Row 2: @username + joined + stat | location + website + last updated
  */
 function ProfileSkeleton() {
   return (
-    <div className="w-full" role="status" aria-live="polite" aria-label="Loading profile">
-      <div className="flex items-start gap-6">
-        {/* Avatar */}
-        <Skeleton className="h-20 w-20 rounded-full flex-shrink-0" />
+    <div className="space-y-3" role="status" aria-live="polite" aria-label="Loading profile">
+      {/* Row 1: Avatar + Name + Badge | Action Buttons */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-14 w-14 rounded-full flex-shrink-0" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-28 rounded-lg" />
+          <Skeleton className="h-9 w-28 rounded-lg" />
+        </div>
+      </div>
 
-        {/* Profile info */}
-        <div className="flex-1 space-y-3">
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-5 w-32" />
-          </div>
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-28" />
-          </div>
+      {/* Row 2: @username + joined + stat | location + website + last updated */}
+      <div className="flex items-center justify-between gap-4 pt-2 border-t border-secondary-100">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-28" />
         </div>
       </div>
     </div>
@@ -107,34 +121,71 @@ function ProfileSkeleton() {
 }
 
 /**
+ * KPI cards skeleton - matches the 4-card grid below ResultHeader
+ */
+function KpiCardsSkeleton() {
+  return (
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading metrics"
+    >
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="bg-white/50 border border-secondary-200 rounded-lg p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+            <Skeleton className="h-6 w-6 rounded flex-shrink-0" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
  * Chart panel skeleton - matches ChartPanel layout
+ * Header + unified 3-section toolbar + chart area
  */
 function ChartPanelSkeleton() {
   return (
-    <div className="w-full space-y-8" role="status" aria-live="polite" aria-label="Loading chart">
+    <div className="space-y-6" role="status" aria-live="polite" aria-label="Loading chart">
       {/* Header */}
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-4 w-80" />
+      <div className="space-y-1">
+        <Skeleton className="h-7 w-44" />
+        <Skeleton className="h-4 w-72" />
       </div>
 
-      {/* Chart type selector */}
-      <div className="flex gap-2">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-10 w-24 rounded-lg" />
-        ))}
+      {/* Unified toolbar: left (chart types) | middle (top-N) | right (dropdowns) */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-secondary-200">
+        {/* Left: 3 chart type buttons */}
+        <div className="flex gap-1.5">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-9 w-20 rounded-lg" />
+          ))}
+        </div>
+
+        {/* Middle: 3 segmented control options (Top 10 / Top 25 / All) */}
+        <div className="flex gap-1">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-8 w-16 rounded-md" />
+          ))}
+        </div>
+
+        {/* Right: Advanced + Share dropdowns */}
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-24 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-lg" />
+        </div>
       </div>
 
       {/* Chart area */}
       <div className="h-[28rem] w-full">
         <Skeleton className="h-full w-full rounded-lg" />
-      </div>
-
-      {/* Actions area */}
-      <div className="flex items-center justify-center gap-3 pt-4 border-t border-secondary-200">
-        {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-10 w-32 rounded-lg" />
-        ))}
       </div>
     </div>
   )
@@ -196,6 +247,7 @@ export function LoadingState({ variant = 'default', className = '' }: LoadingSta
         {variant === 'chart' && <ChartSkeleton />}
         {variant === 'search' && <SearchSkeleton />}
         {variant === 'profile' && <ProfileSkeleton />}
+        {variant === 'kpiCards' && <KpiCardsSkeleton />}
         {variant === 'chartPanel' && <ChartPanelSkeleton />}
         {variant === 'default' && <DefaultSpinner />}
       </div>
