@@ -157,7 +157,7 @@ Get language statistics for a GitHub user.
     "avatarUrl": "https://avatars.githubusercontent.com/u/583231?v=4",
     "websiteUrl": "https://github.com/octocat"
   },
-  "series": [
+  "data": [
     {
       "key": "JavaScript",
       "label": "JavaScript",
@@ -205,7 +205,7 @@ Get language statistics for a GitHub user.
 
 ```json
 {
-  "series": [
+  "data": [
     { "key": "Go", "value": 15 },           // Non-forked repos only
     { "key": "__forks__", "value": 9 }      // All forks counted here
   ]

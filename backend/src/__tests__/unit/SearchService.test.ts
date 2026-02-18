@@ -46,8 +46,8 @@ describe('SearchService', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
 
-      expect(result.series).toHaveLength(3);
-      expect(result.series[0]).toMatchObject({
+      expect(result.data).toHaveLength(3);
+      expect(result.data[0]).toMatchObject({
         key: 'JavaScript',
         label: 'JavaScript',
         value: 2,
@@ -69,7 +69,7 @@ describe('SearchService', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
 
-      const forksEntry = result.series.find((s) => s.key === '__forks__');
+      const forksEntry = result.data.find((s) => s.key === '__forks__');
       expect(forksEntry).toBeDefined();
       expect(forksEntry?.value).toBe(2);
       expect(forksEntry?.label).toBe('Forked repos');
@@ -91,7 +91,7 @@ describe('SearchService', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
 
-      const unknownEntry = result.series.find((s) => s.key === 'Unknown');
+      const unknownEntry = result.data.find((s) => s.key === 'Unknown');
       expect(unknownEntry).toBeDefined();
       expect(unknownEntry?.value).toBe(2);
     });
@@ -114,12 +114,12 @@ describe('SearchService', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
 
-      expect(result.series[0]?.key).toBe('JavaScript');
-      expect(result.series[0]?.value).toBe(3);
-      expect(result.series[1]?.key).toBe('TypeScript');
-      expect(result.series[1]?.value).toBe(2);
-      expect(result.series[2]?.key).toBe('Python');
-      expect(result.series[2]?.value).toBe(1);
+      expect(result.data[0]?.key).toBe('JavaScript');
+      expect(result.data[0]?.value).toBe(3);
+      expect(result.data[1]?.key).toBe('TypeScript');
+      expect(result.data[1]?.value).toBe(2);
+      expect(result.data[2]?.key).toBe('Python');
+      expect(result.data[2]?.value).toBe(1);
     });
 
     it('should apply correct language colors', async () => {
@@ -137,13 +137,13 @@ describe('SearchService', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
 
-      const jsEntry = result.series.find((s) => s.key === 'JavaScript');
+      const jsEntry = result.data.find((s) => s.key === 'JavaScript');
       expect(jsEntry?.color).toBe('#f1e05a'); // GitHub Linguist color
 
-      const pyEntry = result.series.find((s) => s.key === 'Python');
+      const pyEntry = result.data.find((s) => s.key === 'Python');
       expect(pyEntry?.color).toBe('#3572A5');
 
-      const unknownEntry = result.series.find((s) => s.key === 'UnknownLanguage');
+      const unknownEntry = result.data.find((s) => s.key === 'UnknownLanguage');
       expect(unknownEntry?.color).toBe('#cccccc'); // Default color
     });
 

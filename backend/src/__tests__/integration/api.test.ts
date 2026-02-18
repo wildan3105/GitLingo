@@ -99,7 +99,7 @@ describe('API Integration Tests', () => {
           isVerified: true,
           createdAt: '2020-01-15T10:30:00Z',
         },
-        series: expect.arrayContaining([
+        data: expect.arrayContaining([
           expect.objectContaining({
             key: 'JavaScript',
             label: 'JavaScript',
@@ -120,8 +120,8 @@ describe('API Integration Tests', () => {
       });
 
       // Verify sorting (JavaScript should be first with 2 repos)
-      expect(response.body.series[0].key).toBe('JavaScript');
-      expect(response.body.series[0].value).toBe(2);
+      expect(response.body.data[0].key).toBe('JavaScript');
+      expect(response.body.data[0].value).toBe(2);
     });
 
     it('should return 400 for missing username', async () => {

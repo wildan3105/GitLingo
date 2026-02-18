@@ -43,7 +43,7 @@ describe('SearchController', () => {
           providerUserId: '123',
           isVerified: true,
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos' as const,
@@ -188,7 +188,7 @@ describe('SearchController', () => {
           providerUserId: '123',
           isVerified: true,
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos' as const,

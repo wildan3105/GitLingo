@@ -27,14 +27,14 @@ export class SearchService {
       const { profile, repositories } = await this.provider.fetchRepositories(username);
 
       // 2. Aggregate and count repositories by language
-      const series = this.aggregateLanguageStatistics(repositories);
+      const data = this.aggregateLanguageStatistics(repositories);
 
       // 3. Return successful result
       return {
         ok: true,
         provider: this.provider.getProviderName(),
         profile,
-        series,
+        data,
         metadata: {
           generatedAt: new Date().toISOString(),
           unit: 'repos',
@@ -68,11 +68,11 @@ export class SearchService {
     }
 
     // Convert to LanguageStatistic array
-    const series: LanguageStatistic[] = [];
+    const data: LanguageStatistic[] = [];
 
     // Add language statistics
     for (const [language, count] of languageMap.entries()) {
-      series.push({
+      data.push({
         key: language,
         label: language,
         value: count,
@@ -82,7 +82,7 @@ export class SearchService {
 
     // Add forks as a special category if there are any
     if (forkCount > 0) {
-      series.push({
+      data.push({
         key: '__forks__',
         label: 'Forked repos',
         value: forkCount,
@@ -91,7 +91,7 @@ export class SearchService {
     }
 
     // Sort by count descending
-    return series.sort((a, b) => b.value - a.value);
+    return data.sort((a, b) => b.value - a.value);
   }
 
   /**

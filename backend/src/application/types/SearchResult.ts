@@ -25,7 +25,7 @@ export interface SearchResult {
   /**
    * Language statistics (chart-ready data)
    */
-  series: LanguageStatistic[];
+  data: LanguageStatistic[];
 
   /**
    * Response metadata
