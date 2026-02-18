@@ -45,7 +45,7 @@ describe('ResultHeader', () => {
         providerBaseUrl: 'https://ghe.rakuten-it.com',
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
       expect(githubLink).toHaveAttribute('href', 'https://ghe.rakuten-it.com/testuser')
@@ -56,7 +56,7 @@ describe('ResultHeader', () => {
         ...baseProfile,
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
       expect(githubLink).toHaveAttribute('href', 'https://github.com/testuser')
@@ -71,7 +71,7 @@ describe('ResultHeader', () => {
         providerBaseUrl: 'https://ghe.example.com',
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={5} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
       expect(githubLink).toHaveAttribute('href', 'https://ghe.example.com/gheuser')
@@ -84,7 +84,7 @@ describe('ResultHeader', () => {
         providerBaseUrl: 'https://ghe.example.com',
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={5} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
       expect(githubLink).toHaveAttribute('href', 'https://ghe.example.com/gheuser')
@@ -98,7 +98,7 @@ describe('ResultHeader', () => {
         providerBaseUrl: 'https://ghe.company.com',
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={50} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
       expect(githubLink).toHaveAttribute('href', 'https://ghe.company.com/myorg')
@@ -107,17 +107,13 @@ describe('ResultHeader', () => {
 
   describe('Profile display', () => {
     it('renders username correctly', () => {
-      renderWithProviders(
-        <ResultHeader profile={baseProfile} totalRepos={10} metadata={metadata} />
-      )
+      renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
 
       expect(screen.getByText('testuser')).toBeInTheDocument()
     })
 
     it('does not render repository count in profile card', () => {
-      renderWithProviders(
-        <ResultHeader profile={baseProfile} totalRepos={42} metadata={metadata} />
-      )
+      renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
 
       // Repository count should NOT be in the profile card (it's in KPI cards instead)
       expect(screen.queryByText(/42 repositories/i)).not.toBeInTheDocument()
@@ -135,7 +131,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('150 Followers')).toBeInTheDocument()
     })
@@ -149,7 +145,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('75 Following')).toBeInTheDocument()
     })
@@ -164,7 +160,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('1,250 Followers')).toBeInTheDocument()
       expect(screen.getByText('340 Following')).toBeInTheDocument()
@@ -180,7 +176,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('100 Followers')).toBeInTheDocument()
       expect(screen.queryByText(/Members/i)).not.toBeInTheDocument()
@@ -197,7 +193,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('250 Members')).toBeInTheDocument()
     })
@@ -213,7 +209,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('250 Members')).toBeInTheDocument()
       expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
@@ -228,7 +224,7 @@ describe('ResultHeader', () => {
         // No statistics field
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       // Should render without errors
       expect(screen.getByText('testuser')).toBeInTheDocument()
@@ -243,7 +239,7 @@ describe('ResultHeader', () => {
         statistics: {},
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('testuser')).toBeInTheDocument()
       expect(screen.queryByText(/Followers/i)).not.toBeInTheDocument()
@@ -261,7 +257,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       // Zero values should still display
       expect(screen.getByText('0 Followers')).toBeInTheDocument()
@@ -278,7 +274,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('1,234,567 Followers')).toBeInTheDocument()
       expect(screen.getByText('9,876 Following')).toBeInTheDocument()
@@ -294,7 +290,7 @@ describe('ResultHeader', () => {
         },
       }
 
-      renderWithProviders(<ResultHeader profile={profile} totalRepos={10} metadata={metadata} />)
+      renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       expect(screen.getByText('100 Followers')).toBeInTheDocument()
       expect(screen.queryByText(/Following/i)).not.toBeInTheDocument()
