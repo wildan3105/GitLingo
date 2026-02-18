@@ -7,13 +7,13 @@ import { memo, useMemo } from 'react'
 import { Bar } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { barChartOptions } from '../../config/chartDefaults'
-import { normalizeSeries } from '../../utils/normalizeSeries'
+import { normalizeData } from '../../utils/normalizeData'
 import { LoadingState } from '../../../../shared/components/LoadingState'
-import type { LanguageSeries } from '../../../../contracts/api'
+import type { LanguageData } from '../../../../contracts/api'
 
 export type BarChartViewProps = {
-  /** Language statistics series data */
-  series: LanguageSeries[]
+  /** Language statistics data */
+  data: LanguageData[]
   /** Loading state */
   isLoading?: boolean
 }
@@ -29,21 +29,21 @@ export type BarChartViewProps = {
  *
  * @example
  * ```typescript
- * <BarChartView series={languageSeries} isLoading={false} />
+ * <BarChartView data={languageData} isLoading={false} />
  * ```
  */
 export const BarChartView = memo(function BarChartView({
-  series,
+  data,
   isLoading = false,
 }: BarChartViewProps) {
   // Memoize normalized data to prevent recalculation on every render
-  const { labels, values, colors } = useMemo(() => normalizeSeries(series), [series])
+  const { labels, values, colors } = useMemo(() => normalizeData(data), [data])
 
   // Calculate total for percentages
   const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
 
   // Memoize chart data object
-  const data = useMemo(
+  const chartData = useMemo(
     () => ({
       labels,
       datasets: [
@@ -87,7 +87,7 @@ export const BarChartView = memo(function BarChartView({
 
   return (
     <div className="h-[28rem] w-full" role="img" aria-label="Bar chart of programming languages">
-      <Bar data={data} options={options} />
+      <Bar data={chartData} options={options} />
     </div>
   )
 })

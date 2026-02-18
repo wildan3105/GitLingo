@@ -29,7 +29,7 @@ describe('gitlingoApi', () => {
           type: 'user',
           providerUserId: '1',
         },
-        series: [
+        data: [
           { key: 'JavaScript', label: 'JavaScript', value: 100, color: '#f1e05a' },
           { key: 'Python', label: 'Python', value: 10, color: '#3572A5' },
         ],
@@ -61,7 +61,7 @@ describe('gitlingoApi', () => {
 
       if (result.ok) {
         expect(result.profile.username).toBe('octocat')
-        expect(result.series).toHaveLength(2)
+        expect(result.data).toHaveLength(2)
         expect(result.provider).toBe('github')
       }
     })
@@ -186,7 +186,7 @@ describe('gitlingoApi', () => {
           type: 'user',
           providerUserId: '123',
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: '2026-02-14T02:10:00.000Z',
           unit: 'repos',
@@ -222,7 +222,7 @@ describe('gitlingoApi', () => {
           type: 'user',
           providerUserId: '1',
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: '2026-02-14T02:10:00.000Z',
           unit: 'repos',

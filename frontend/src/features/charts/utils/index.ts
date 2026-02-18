@@ -2,8 +2,8 @@
  * Chart Utilities
  */
 
-export { normalizeSeries } from './normalizeSeries'
-export type { NormalizedChartData, NormalizeOptions } from './normalizeSeries'
+export { normalizeData } from './normalizeData'
+export type { NormalizedChartData, NormalizeOptions } from './normalizeData'
 
 export { downloadChart, generateFilename } from './downloadChart'
 export type { DownloadOptions } from './downloadChart'

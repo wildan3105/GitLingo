@@ -3,27 +3,27 @@
  * Export language statistics data to CSV format
  */
 
-import type { LanguageSeries } from '../../../contracts/api'
+import type { LanguageData } from '../../../contracts/api'
 
 /**
- * Converts language series data to CSV format and triggers download
+ * Converts language data to CSV format and triggers download
  *
  * Format: Language, Repositories, Percentage
  * - Excludes forks from the export
  * - Calculates percentages based on total repositories
  * - Generates a downloadable CSV file
  *
- * @param series - Language statistics data
+ * @param data - Language statistics data
  * @param filename - Name for the downloaded file (without extension)
  *
  * @example
  * ```typescript
- * exportToCSV(languageSeries, 'octocat-github-languages')
+ * exportToCSV(languageData, 'octocat-github-languages')
  * ```
  */
-export function exportToCSV(series: LanguageSeries[], filename: string): void {
+export function exportToCSV(data: LanguageData[], filename: string): void {
   // Filter out forks and calculate total
-  const languages = series.filter((item) => item.key !== '__forks__')
+  const languages = data.filter((item) => item.key !== '__forks__')
   const totalRepos = languages.reduce((sum, item) => sum + item.value, 0)
 
   // Build CSV header

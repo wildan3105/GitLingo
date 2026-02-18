@@ -41,9 +41,9 @@ export type Profile = {
 }
 
 /**
- * Language series data point for charts
+ * Language data point for charts
  */
-export type LanguageSeries = {
+export type LanguageData = {
   key: string
   label: string
   value: number
@@ -92,7 +92,7 @@ export type SuccessResponse = {
   ok: true
   provider: string
   profile: Profile
-  series: LanguageSeries[]
+  data: LanguageData[]
   metadata: Metadata
 }
 

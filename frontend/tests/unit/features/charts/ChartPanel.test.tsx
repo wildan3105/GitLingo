@@ -7,7 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChartPanel } from '../../../../src/features/charts/components/ChartPanel'
 import { ToastProvider } from '../../../../src/shared/hooks/useToast'
-import type { LanguageSeries } from '../../../../src/contracts/api'
+import type { LanguageData } from '../../../../src/contracts/api'
 
 // Mock the chart components to avoid canvas rendering in tests
 vi.mock('../../../../src/features/charts/components/charts/BarChartView', () => ({
@@ -23,14 +23,14 @@ vi.mock('../../../../src/features/charts/components/charts/PolarAreaChartView', 
 }))
 
 describe('ChartPanel', () => {
-  const mockSeries: LanguageSeries[] = [
+  const mockData: LanguageData[] = [
     { key: 'JavaScript', label: 'JavaScript', value: 25, color: '#f1e05a' },
     { key: 'TypeScript', label: 'TypeScript', value: 15, color: '#3178c6' },
     { key: 'Python', label: 'Python', value: 10, color: '#3572A5' },
   ]
 
   const defaultProps = {
-    series: mockSeries,
+    data: mockData,
     username: 'testuser',
     isLoading: false,
     includeForks: true,
@@ -177,7 +177,7 @@ describe('ChartPanel', () => {
 
   describe('Share button state', () => {
     it('does not render Share button when no data is available', () => {
-      renderWithProviders(<ChartPanel {...defaultProps} series={[]} hasOriginalData={false} />)
+      renderWithProviders(<ChartPanel {...defaultProps} data={[]} hasOriginalData={false} />)
 
       // When there's no data, the whole toolbar shouldn't render
       const shareButton = screen.queryByText('Share')

@@ -18,7 +18,7 @@ import { downloadChart } from '../utils/downloadChart'
 import { exportToCSV } from '../../export/utils/exportToCSV'
 import { aggregateTopN, type TopNOption } from '../utils/aggregateTopN'
 import { useToast } from '../../../shared/hooks/useToast'
-import type { LanguageSeries } from '../../../contracts/api'
+import type { LanguageData } from '../../../contracts/api'
 
 // Top-N options for segmented control
 const TOP_N_OPTIONS: SegmentedOption<TopNOption>[] = [
@@ -28,8 +28,8 @@ const TOP_N_OPTIONS: SegmentedOption<TopNOption>[] = [
 ]
 
 export type ChartPanelProps = {
-  /** Language statistics series data */
-  series: LanguageSeries[]
+  /** Language statistics data */
+  data: LanguageData[]
   /** GitHub username */
   username: string
   /** Loading state */
@@ -62,7 +62,7 @@ export type ChartPanelProps = {
  * @example
  * ```typescript
  * <ChartPanel
- *   series={languageSeries}
+ *   data={languageData}
  *   username="octocat"
  *   isLoading={isLoading}
  *   error={error?.message}
@@ -70,7 +70,7 @@ export type ChartPanelProps = {
  * ```
  */
 export function ChartPanel({
-  series,
+  data,
   username,
   isLoading = false,
   error,
@@ -86,8 +86,8 @@ export function ChartPanel({
   const chartRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
 
-  // Apply Top-N aggregation to series
-  const aggregatedSeries = aggregateTopN(series, topN)
+  // Apply Top-N aggregation to data
+  const aggregatedData = aggregateTopN(data, topN)
 
   // Show error state
   if (error && !isLoading) {
@@ -99,7 +99,7 @@ export function ChartPanel({
   }
 
   // Show empty state only if user has no repositories at all
-  if (!isLoading && series.length === 0 && !hasOriginalData) {
+  if (!isLoading && data.length === 0 && !hasOriginalData) {
     return (
       <Card>
         <EmptyState
@@ -138,7 +138,7 @@ export function ChartPanel({
   const handleDownloadCSV = () => {
     try {
       const filename = `${username}-languages`
-      exportToCSV(series, filename)
+      exportToCSV(data, filename)
       showToast({ type: 'success', message: 'CSV exported successfully!' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Export failed'
@@ -212,7 +212,7 @@ export function ChartPanel({
 
   // Render chart based on selected type
   const renderChart = () => {
-    const chartProps = { series: aggregatedSeries, isLoading }
+    const chartProps = { data: aggregatedData, isLoading }
 
     switch (chartType) {
       case 'pie':
@@ -225,7 +225,7 @@ export function ChartPanel({
     }
   }
 
-  const hasData = !isLoading && series.length > 0
+  const hasData = !isLoading && data.length > 0
 
   return (
     <Card variant="prominent" padding="lg">
@@ -333,7 +333,7 @@ export function ChartPanel({
           aria-busy={isLoading}
           className="mt-6"
         >
-          {series.length === 0 && hasOriginalData ? (
+          {data.length === 0 && hasOriginalData ? (
             <div className="flex items-center justify-center h-[28rem] bg-secondary-50 rounded-lg border-2 border-dashed border-secondary-300 transition-all duration-200">
               <div className="text-center px-4">
                 <svg

@@ -7,13 +7,13 @@ import { memo, useMemo } from 'react'
 import { PolarArea } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { polarAreaChartOptions } from '../../config/chartDefaults'
-import { normalizeSeries } from '../../utils/normalizeSeries'
+import { normalizeData } from '../../utils/normalizeData'
 import { LoadingState } from '../../../../shared/components/LoadingState'
-import type { LanguageSeries } from '../../../../contracts/api'
+import type { LanguageData } from '../../../../contracts/api'
 
 export type PolarAreaChartViewProps = {
-  /** Language statistics series data */
-  series: LanguageSeries[]
+  /** Language statistics data */
+  data: LanguageData[]
   /** Loading state */
   isLoading?: boolean
 }
@@ -23,7 +23,7 @@ export type PolarAreaChartViewProps = {
  *
  * Features:
  * - Radial segments sized by repository count
- * - Displays all data from filtered series
+ * - Displays all data from filtered data
  * - Language colors preserved from API
  * - Legend with language names
  * - Tooltips with counts and percentages
@@ -31,21 +31,21 @@ export type PolarAreaChartViewProps = {
  *
  * @example
  * ```typescript
- * <PolarAreaChartView series={languageSeries} isLoading={false} />
+ * <PolarAreaChartView data={languageData} isLoading={false} />
  * ```
  */
 export const PolarAreaChartView = memo(function PolarAreaChartView({
-  series,
+  data,
   isLoading = false,
 }: PolarAreaChartViewProps) {
   // Memoize normalized data
-  const { labels, values, colors } = useMemo(() => normalizeSeries(series), [series])
+  const { labels, values, colors } = useMemo(() => normalizeData(data), [data])
 
   // Calculate total for percentages
   const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
 
   // Memoize chart data
-  const data = useMemo(
+  const chartData = useMemo(
     () => ({
       labels,
       datasets: [
@@ -93,7 +93,7 @@ export const PolarAreaChartView = memo(function PolarAreaChartView({
       role="img"
       aria-label="Polar area chart of programming languages"
     >
-      <PolarArea data={data} options={options} />
+      <PolarArea data={chartData} options={options} />
     </div>
   )
 })

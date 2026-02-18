@@ -17,7 +17,7 @@ import type { ApiResponse } from '../contracts/api'
  * ```ts
  * const result = await searchLanguageStatistics('octocat')
  * if (result.ok) {
- *   console.log(result.series) // Language statistics
+ *   console.log(result.data) // Language statistics
  * } else {
  *   console.error(result.error) // Error details
  * }

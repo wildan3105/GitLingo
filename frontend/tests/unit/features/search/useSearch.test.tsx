@@ -214,7 +214,7 @@ describe('useSearch', () => {
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 8,
           processedAt: '2024-01-01T00:00:00Z',
@@ -256,7 +256,7 @@ describe('useSearch', () => {
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 8,
           processedAt: '2024-01-01T00:00:00Z',
@@ -291,7 +291,7 @@ describe('useSearch', () => {
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 8,
           processedAt: '2024-01-01T00:00:00Z',
@@ -354,7 +354,7 @@ describe('useSearch', () => {
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 8,
           processedAt: '2024-01-01T00:00:00Z',
@@ -399,7 +399,7 @@ describe('useSearch', () => {
           name: 'User 1',
           avatarUrl: 'https://example.com/avatar1.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 5,
           processedAt: '2024-01-01T00:00:00Z',
@@ -414,7 +414,7 @@ describe('useSearch', () => {
           name: 'User 2',
           avatarUrl: 'https://example.com/avatar2.png',
         },
-        series: [],
+        data: [],
         metadata: {
           totalRepositories: 10,
           processedAt: '2024-01-01T00:00:00Z',
@@ -466,7 +466,7 @@ describe('useSearch', () => {
           type: 'user',
           providerUserId: '123',
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: '2024-01-01T00:00:00Z',
           unit: 'repos',
@@ -529,7 +529,7 @@ describe('useSearch', () => {
           type: 'user',
           providerUserId: '456',
         },
-        series: [],
+        data: [],
         metadata: {
           generatedAt: '2024-01-01T00:00:00Z',
           unit: 'repos',

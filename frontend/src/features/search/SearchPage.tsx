@@ -49,7 +49,7 @@ export function SearchPage() {
   const filteredData = data
     ? {
         ...data,
-        series: data.series.filter((item) => {
+        data: data.data.filter((item) => {
           // Filter out forks if not included
           if (!includeForks && item.key === '__forks__') {
             return false
@@ -259,23 +259,23 @@ export function SearchPage() {
           {filteredData &&
             !isLoading &&
             (() => {
-              // Calculate metrics from series data
-              const totalRepos = filteredData.series.reduce((sum, item) => sum + item.value, 0)
+              // Calculate metrics from data
+              const totalRepos = filteredData.data.reduce((sum, item) => sum + item.value, 0)
 
               // Find top language (excluding forks)
-              const languages = filteredData.series.filter((item) => item.key !== '__forks__')
+              const languages = filteredData.data.filter((item) => item.key !== '__forks__')
               const topLanguageItem =
                 languages.length > 0
                   ? languages.reduce((max, item) => (item.value > max.value ? item : max))
                   : null
 
               // Count unique languages (excluding forks)
-              const languageCount = filteredData.series.filter(
+              const languageCount = filteredData.data.filter(
                 (item) => item.key !== '__forks__'
               ).length
 
               // Calculate forks percentage
-              const forksItem = filteredData.series.find((item) => item.key === '__forks__')
+              const forksItem = filteredData.data.find((item) => item.key === '__forks__')
               const forksCount = forksItem?.value || 0
               const forksPercentage =
                 totalRepos > 0 ? ((forksCount / totalRepos) * 100).toFixed(1) : '0.0'
@@ -379,14 +379,14 @@ export function SearchPage() {
           {data && !isLoading && (
             <div className="animate-fade-in-up animate-delay-200 mt-12">
               <ChartPanel
-                series={filteredData?.series || []}
+                data={filteredData?.data || []}
                 username={username}
                 isLoading={isLoading}
                 includeForks={includeForks}
                 setIncludeForks={setIncludeForks}
                 includeUnknownLanguage={includeUnknownLanguage}
                 setIncludeUnknownLanguage={setIncludeUnknownLanguage}
-                hasOriginalData={data.series.length > 0}
+                hasOriginalData={data.data.length > 0}
               />
             </div>
           )}

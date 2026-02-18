@@ -1,13 +1,13 @@
 /**
- * normalizeSeries Utility Tests
+ * normalizeData Utility Tests
  */
 
 import { describe, it, expect } from 'vitest'
-import { normalizeSeries } from '../../../../src/features/charts/utils/normalizeSeries'
-import type { LanguageSeries } from '../../../../src/contracts/api'
+import { normalizeData } from '../../../../src/features/charts/utils/normalizeData'
+import type { LanguageData } from '../../../../src/contracts/api'
 
-describe('normalizeSeries', () => {
-  const mockSeries: LanguageSeries[] = [
+describe('normalizeData', () => {
+  const mockData: LanguageData[] = [
     { key: 'JavaScript', label: 'JavaScript', value: 25, color: '#f1e05a' },
     { key: 'TypeScript', label: 'TypeScript', value: 15, color: '#3178c6' },
     { key: 'Python', label: 'Python', value: 10, color: '#3572A5' },
@@ -16,8 +16,8 @@ describe('normalizeSeries', () => {
   ]
 
   describe('basic transformation', () => {
-    it('transforms series into separate arrays', () => {
-      const result = normalizeSeries(mockSeries)
+    it('transforms data into separate arrays', () => {
+      const result = normalizeData(mockData)
 
       expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', 'Forked repos', 'Go'])
       expect(result.values).toEqual([25, 15, 10, 5, 3])
@@ -25,14 +25,14 @@ describe('normalizeSeries', () => {
     })
 
     it('returns arrays of equal length', () => {
-      const result = normalizeSeries(mockSeries)
+      const result = normalizeData(mockData)
 
       expect(result.labels.length).toBe(result.values.length)
       expect(result.values.length).toBe(result.colors.length)
     })
 
-    it('preserves order from input series', () => {
-      const result = normalizeSeries(mockSeries)
+    it('preserves order from input data', () => {
+      const result = normalizeData(mockData)
 
       // First item should be JavaScript
       expect(result.labels[0]).toBe('JavaScript')
@@ -48,7 +48,7 @@ describe('normalizeSeries', () => {
 
   describe('excludeForks option', () => {
     it('excludes __forks__ when excludeForks is true', () => {
-      const result = normalizeSeries(mockSeries, { excludeForks: true })
+      const result = normalizeData(mockData, { excludeForks: true })
 
       expect(result.labels).not.toContain('Forked repos')
       expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python', 'Go'])
@@ -57,14 +57,14 @@ describe('normalizeSeries', () => {
     })
 
     it('includes __forks__ when excludeForks is false', () => {
-      const result = normalizeSeries(mockSeries, { excludeForks: false })
+      const result = normalizeData(mockData, { excludeForks: false })
 
       expect(result.labels).toContain('Forked repos')
       expect(result.labels.length).toBe(5)
     })
 
     it('includes __forks__ by default when option not provided', () => {
-      const result = normalizeSeries(mockSeries)
+      const result = normalizeData(mockData)
 
       expect(result.labels).toContain('Forked repos')
     })
@@ -72,7 +72,7 @@ describe('normalizeSeries', () => {
 
   describe('maxItems option', () => {
     it('limits to maxItems when specified', () => {
-      const result = normalizeSeries(mockSeries, { maxItems: 3 })
+      const result = normalizeData(mockData, { maxItems: 3 })
 
       expect(result.labels.length).toBe(3)
       expect(result.values.length).toBe(3)
@@ -80,20 +80,20 @@ describe('normalizeSeries', () => {
     })
 
     it('returns top N items by preserving original order', () => {
-      const result = normalizeSeries(mockSeries, { maxItems: 2 })
+      const result = normalizeData(mockData, { maxItems: 2 })
 
       expect(result.labels).toEqual(['JavaScript', 'TypeScript'])
       expect(result.values).toEqual([25, 15])
     })
 
-    it('returns all items when maxItems exceeds series length', () => {
-      const result = normalizeSeries(mockSeries, { maxItems: 100 })
+    it('returns all items when maxItems exceeds data length', () => {
+      const result = normalizeData(mockData, { maxItems: 100 })
 
-      expect(result.labels.length).toBe(mockSeries.length)
+      expect(result.labels.length).toBe(mockData.length)
     })
 
     it('returns empty arrays when maxItems is 0', () => {
-      const result = normalizeSeries(mockSeries, { maxItems: 0 })
+      const result = normalizeData(mockData, { maxItems: 0 })
 
       expect(result.labels).toEqual([])
       expect(result.values).toEqual([])
@@ -101,15 +101,15 @@ describe('normalizeSeries', () => {
     })
 
     it('ignores maxItems when not provided', () => {
-      const result = normalizeSeries(mockSeries)
+      const result = normalizeData(mockData)
 
-      expect(result.labels.length).toBe(mockSeries.length)
+      expect(result.labels.length).toBe(mockData.length)
     })
   })
 
   describe('combined options', () => {
     it('excludes forks and limits to maxItems', () => {
-      const result = normalizeSeries(mockSeries, {
+      const result = normalizeData(mockData, {
         excludeForks: true,
         maxItems: 2,
       })
@@ -121,7 +121,7 @@ describe('normalizeSeries', () => {
     })
 
     it('applies excludeForks before maxItems', () => {
-      const result = normalizeSeries(mockSeries, {
+      const result = normalizeData(mockData, {
         excludeForks: true,
         maxItems: 4,
       })
@@ -133,58 +133,58 @@ describe('normalizeSeries', () => {
   })
 
   describe('edge cases', () => {
-    it('handles empty series array', () => {
-      const result = normalizeSeries([])
+    it('handles empty data array', () => {
+      const result = normalizeData([])
 
       expect(result.labels).toEqual([])
       expect(result.values).toEqual([])
       expect(result.colors).toEqual([])
     })
 
-    it('handles series with only __forks__', () => {
-      const forksOnly: LanguageSeries[] = [
+    it('handles data with only __forks__', () => {
+      const forksOnly: LanguageData[] = [
         { key: '__forks__', label: 'Forked repos', value: 10, color: '#cccccc' },
       ]
 
-      const result = normalizeSeries(forksOnly, { excludeForks: true })
+      const result = normalizeData(forksOnly, { excludeForks: true })
 
       expect(result.labels).toEqual([])
       expect(result.values).toEqual([])
       expect(result.colors).toEqual([])
     })
 
-    it('handles series with single item', () => {
-      const singleItem: LanguageSeries[] = [
+    it('handles data with single item', () => {
+      const singleItem: LanguageData[] = [
         { key: 'Rust', label: 'Rust', value: 42, color: '#dea584' },
       ]
 
-      const result = normalizeSeries(singleItem)
+      const result = normalizeData(singleItem)
 
       expect(result.labels).toEqual(['Rust'])
       expect(result.values).toEqual([42])
       expect(result.colors).toEqual(['#dea584'])
     })
 
-    it('handles series with duplicate keys', () => {
-      const duplicates: LanguageSeries[] = [
+    it('handles data with duplicate keys', () => {
+      const duplicates: LanguageData[] = [
         { key: 'JavaScript', label: 'JavaScript', value: 10, color: '#f1e05a' },
         { key: 'JavaScript', label: 'JavaScript', value: 5, color: '#f1e05a' },
       ]
 
-      const result = normalizeSeries(duplicates)
+      const result = normalizeData(duplicates)
 
       expect(result.labels).toEqual(['JavaScript', 'JavaScript'])
       expect(result.values).toEqual([10, 5])
     })
 
-    it('handles series with zero values', () => {
-      const withZeros: LanguageSeries[] = [
+    it('handles data with zero values', () => {
+      const withZeros: LanguageData[] = [
         { key: 'JavaScript', label: 'JavaScript', value: 10, color: '#f1e05a' },
         { key: 'TypeScript', label: 'TypeScript', value: 0, color: '#3178c6' },
         { key: 'Python', label: 'Python', value: 5, color: '#3572A5' },
       ]
 
-      const result = normalizeSeries(withZeros)
+      const result = normalizeData(withZeros)
 
       expect(result.labels).toEqual(['JavaScript', 'TypeScript', 'Python'])
       expect(result.values).toEqual([10, 0, 5])
@@ -192,21 +192,21 @@ describe('normalizeSeries', () => {
   })
 
   describe('pure function behavior', () => {
-    it('does not mutate input series', () => {
-      const originalSeries = [...mockSeries]
-      const seriesCopy = [...mockSeries]
+    it('does not mutate input data', () => {
+      const originalData = [...mockData]
+      const dataCopy = [...mockData]
 
-      normalizeSeries(seriesCopy, { excludeForks: true, maxItems: 2 })
+      normalizeData(dataCopy, { excludeForks: true, maxItems: 2 })
 
-      expect(seriesCopy).toEqual(originalSeries)
+      expect(dataCopy).toEqual(originalData)
     })
 
     it('returns same result for same input', () => {
-      const result1 = normalizeSeries(mockSeries, {
+      const result1 = normalizeData(mockData, {
         excludeForks: true,
         maxItems: 3,
       })
-      const result2 = normalizeSeries(mockSeries, {
+      const result2 = normalizeData(mockData, {
         excludeForks: true,
         maxItems: 3,
       })

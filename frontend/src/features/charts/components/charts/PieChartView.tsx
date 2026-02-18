@@ -7,13 +7,13 @@ import { memo, useMemo } from 'react'
 import { Pie } from 'react-chartjs-2'
 import type { TooltipItem } from 'chart.js'
 import { pieChartOptions } from '../../config/chartDefaults'
-import { normalizeSeries } from '../../utils/normalizeSeries'
+import { normalizeData } from '../../utils/normalizeData'
 import { LoadingState } from '../../../../shared/components/LoadingState'
-import type { LanguageSeries } from '../../../../contracts/api'
+import type { LanguageData } from '../../../../contracts/api'
 
 export type PieChartViewProps = {
-  /** Language statistics series data */
-  series: LanguageSeries[]
+  /** Language statistics data */
+  data: LanguageData[]
   /** Loading state */
   isLoading?: boolean
 }
@@ -22,7 +22,7 @@ export type PieChartViewProps = {
  * Pie chart component for displaying language distribution
  *
  * Features:
- * - Displays all data from filtered series
+ * - Displays all data from filtered data
  * - Language colors preserved from API
  * - Legend with language names
  * - Tooltips with counts and percentages
@@ -30,21 +30,21 @@ export type PieChartViewProps = {
  *
  * @example
  * ```typescript
- * <PieChartView series={languageSeries} isLoading={false} />
+ * <PieChartView data={languageData} isLoading={false} />
  * ```
  */
 export const PieChartView = memo(function PieChartView({
-  series,
+  data,
   isLoading = false,
 }: PieChartViewProps) {
   // Memoize normalized data
-  const { labels, values, colors } = useMemo(() => normalizeSeries(series), [series])
+  const { labels, values, colors } = useMemo(() => normalizeData(data), [data])
 
   // Calculate total for percentages
   const total = useMemo(() => values.reduce((sum, value) => sum + value, 0), [values])
 
   // Memoize chart data
-  const data = useMemo(
+  const chartData = useMemo(
     () => ({
       labels,
       datasets: [
@@ -88,7 +88,7 @@ export const PieChartView = memo(function PieChartView({
 
   return (
     <div className="h-[28rem] w-full" role="img" aria-label="Pie chart of programming languages">
-      <Pie data={data} options={options} />
+      <Pie data={chartData} options={options} />
     </div>
   )
 })
