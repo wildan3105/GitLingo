@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from './Button'
+import { formatDuration } from '../utils/formatDuration'
 
 export type ErrorStateProps = {
   /** Error code */
@@ -155,7 +156,7 @@ export function ErrorState({
 
       {retryAfter && countdown > 0 && (
         <p className="mt-3 text-sm text-amber-700 font-medium">
-          Please wait {countdown} second{countdown !== 1 ? 's' : ''} before retrying
+          Please wait {formatDuration(countdown)} before retrying
         </p>
       )}
 
@@ -166,9 +167,9 @@ export function ErrorState({
             size="md"
             onClick={onRetry}
             disabled={!canRetry}
-            aria-label={canRetry ? 'Retry now' : `Retry in ${countdown} seconds`}
+            aria-label={canRetry ? 'Retry now' : `Retry in ${formatDuration(countdown)}`}
           >
-            {canRetry ? 'Try Again' : `Retry`}
+            {canRetry ? 'Try Again' : 'Retry'}
           </Button>
         </div>
       )}

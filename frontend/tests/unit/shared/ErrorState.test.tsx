@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '../../../src/test/test-utils'
 import { ErrorState } from '../../../src/shared/components/ErrorState'
+import { formatDuration } from '../../../src/shared/utils/formatDuration'
 
 describe('ErrorState', () => {
   beforeEach(() => {
@@ -92,24 +93,33 @@ describe('ErrorState', () => {
     vi.useFakeTimers() // Restore fake timers
   })
 
-  it('shows countdown for rate limit', () => {
+  it('shows countdown for rate limit — seconds range', () => {
     render(
-      <ErrorState code="rate_limited" message="Rate limited" retryAfter={60} onRetry={vi.fn()} />
+      <ErrorState code="rate_limited" message="Rate limited" retryAfter={45} onRetry={vi.fn()} />
     )
 
-    expect(screen.getByText(/please wait 60 seconds/i)).toBeInTheDocument()
-    expect(screen.getByRole('button')).toHaveTextContent('Retry in 60s')
+    expect(screen.getByText(/please wait 45s before retrying/i)).toBeInTheDocument()
+    expect(screen.getByRole('button')).toHaveTextContent('Retry')
     expect(screen.getByRole('button')).toBeDisabled()
   })
 
-  it('decrements countdown timer', () => {
-    // Test that countdown starts correctly
+  it('shows countdown for rate limit — minutes range', () => {
     render(
-      <ErrorState code="rate_limited" message="Rate limited" retryAfter={60} onRetry={vi.fn()} />
+      <ErrorState code="rate_limited" message="Rate limited" retryAfter={90} onRetry={vi.fn()} />
     )
 
-    expect(screen.getByText(/please wait 60 seconds/i)).toBeInTheDocument()
-    expect(screen.getByText('Retry in 60s')).toBeInTheDocument()
+    expect(screen.getByText(/please wait 1m 30s before retrying/i)).toBeInTheDocument()
+    expect(screen.getByRole('button')).toHaveTextContent('Retry')
+    expect(screen.getByRole('button')).toBeDisabled()
+  })
+
+  it('shows countdown for rate limit — hours range', () => {
+    render(
+      <ErrorState code="rate_limited" message="Rate limited" retryAfter={3600} onRetry={vi.fn()} />
+    )
+
+    expect(screen.getByText(/please wait 1h before retrying/i)).toBeInTheDocument()
+    expect(screen.getByRole('button')).toHaveTextContent('Retry')
     expect(screen.getByRole('button')).toBeDisabled()
   })
 
@@ -118,5 +128,43 @@ describe('ErrorState', () => {
 
     const alert = screen.getByRole('alert')
     expect(alert).toHaveAttribute('aria-live', 'assertive')
+  })
+})
+
+describe('formatDuration', () => {
+  it('formats seconds below 60', () => {
+    expect(formatDuration(1)).toBe('1s')
+    expect(formatDuration(30)).toBe('30s')
+    expect(formatDuration(59)).toBe('59s')
+  })
+
+  it('formats exactly 60 seconds as minutes', () => {
+    expect(formatDuration(60)).toBe('1m')
+  })
+
+  it('formats minutes and seconds', () => {
+    expect(formatDuration(90)).toBe('1m 30s')
+    expect(formatDuration(150)).toBe('2m 30s')
+    expect(formatDuration(3599)).toBe('59m 59s')
+  })
+
+  it('omits seconds when zero in minutes range', () => {
+    expect(formatDuration(120)).toBe('2m')
+    expect(formatDuration(1800)).toBe('30m')
+  })
+
+  it('formats exactly 1 hour', () => {
+    expect(formatDuration(3600)).toBe('1h')
+  })
+
+  it('formats hours and minutes', () => {
+    expect(formatDuration(3660)).toBe('1h 1m')
+    expect(formatDuration(5400)).toBe('1h 30m')
+    expect(formatDuration(7200)).toBe('2h')
+  })
+
+  it('omits minutes when zero in hours range', () => {
+    expect(formatDuration(7200)).toBe('2h')
+    expect(formatDuration(36000)).toBe('10h')
   })
 })
