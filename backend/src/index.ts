@@ -15,7 +15,6 @@ import { SearchService } from './application/services/SearchService';
 import { SearchController } from './interfaces/controllers/SearchController';
 import { createRoutes } from './interfaces/routes';
 import { errorHandler } from './interfaces/middleware/errorHandler';
-import { rateLimiter } from './interfaces/middleware/rateLimiter';
 
 // Initialize logger
 const logger = pino({ level: config.logLevel });
@@ -42,11 +41,6 @@ function createApp(): Application {
       autoLogging: true,
     })
   );
-
-  // Rate limiting middleware
-  if (config.useRateLimiter) {
-    app.use(rateLimiter);
-  }
 
   // Dependency injection
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);

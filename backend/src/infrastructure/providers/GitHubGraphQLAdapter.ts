@@ -230,7 +230,10 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       };
 
       // Re-throw INSUFFICIENT_SCOPES errors immediately — do not silently return partial data
-      if (graphqlError.errors?.some((e) => e.type === 'INSUFFICIENT_SCOPES')) {
+      if (
+        Array.isArray(graphqlError.errors) &&
+        graphqlError.errors.some((e) => e.type === 'INSUFFICIENT_SCOPES')
+      ) {
         throw error;
       }
 

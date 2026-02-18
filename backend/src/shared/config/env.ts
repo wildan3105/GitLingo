@@ -12,7 +12,6 @@ interface Config {
   githubToken: string | undefined;
   graphqlURL: string | undefined;
   logLevel: LogLevel;
-  useRateLimiter: boolean;
 }
 
 /**
@@ -62,20 +61,6 @@ function getLogLevel(): LogLevel {
 }
 
 /**
- * Parse and validate USE_RATE_LIMITER
- */
-function getUseRateLimiter(): boolean {
-  const value = process.env.USE_RATE_LIMITER;
-
-  // Default to false if not set
-  if (value === undefined || value === '') {
-    return false;
-  }
-
-  return value.toLowerCase() === 'true';
-}
-
-/**
  * Load and export configuration
  */
 export const config: Config = {
@@ -84,7 +69,6 @@ export const config: Config = {
   githubToken: process.env.GITHUB_TOKEN,
   graphqlURL: process.env.GRAPHQL_URL,
   logLevel: getLogLevel(),
-  useRateLimiter: getUseRateLimiter(),
 };
 
 /**
