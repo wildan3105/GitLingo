@@ -436,14 +436,14 @@ describe('API Integration Tests', () => {
       });
     });
 
-    it('should return 429 for rate limit exceeded', async () => {
+    it('should return 403 for rate limit exceeded (no reset header → fallback 60s)', async () => {
       const error: any = new Error('API rate limit exceeded');
       error.status = 403;
       mockGraphqlFn.mockRejectedValueOnce(error);
 
       const response = await request(app).get('/api/v1/search?username=testuser');
 
-      expect(response.status).toBe(429);
+      expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
         ok: false,
         error: {
@@ -451,6 +451,25 @@ describe('API Integration Tests', () => {
           retry_after_seconds: 60,
         },
       });
+    });
+
+    it('should return 403 with correct retry_after_seconds from x-ratelimit-reset header', async () => {
+      const resetAt = Math.floor(Date.now() / 1000) + 200;
+      const error: any = new Error('API rate limit exceeded');
+      error.status = 403;
+      error.response = { headers: { 'x-ratelimit-reset': String(resetAt) } };
+      mockGraphqlFn.mockRejectedValueOnce(error);
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: { code: 'rate_limited' },
+      });
+      const retryAfter = response.body.error.retry_after_seconds;
+      expect(retryAfter).toBeGreaterThanOrEqual(198);
+      expect(retryAfter).toBeLessThanOrEqual(200);
     });
 
     it('should handle network errors gracefully', async () => {

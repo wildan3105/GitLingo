@@ -267,12 +267,28 @@ export class GitHubGraphQLAdapter implements ProviderPort {
   }
 
   /**
+   * Compute seconds until rate limit resets from the x-ratelimit-reset header.
+   * Returns 60 as a fallback if the header is absent or unparseable.
+   */
+  private extractRetryAfter(err: { response?: { headers?: Record<string, string> } }): number {
+    const resetHeader = err.response?.headers?.['x-ratelimit-reset'];
+    if (resetHeader != null) {
+      const resetTimestamp = parseInt(resetHeader, 10);
+      if (!isNaN(resetTimestamp)) {
+        return Math.max(0, Math.ceil(resetTimestamp - Date.now() / 1000));
+      }
+    }
+    return 60;
+  }
+
+  /**
    * Handle GraphQL errors and convert to ProviderError
    */
   private handleGraphQLError(error: unknown, username: string): ProviderError {
     const err = error as Error & {
       errors?: Array<{ type?: string; message: string }>;
       status?: number;
+      response?: { headers?: Record<string, string> };
     };
 
     // Check for GraphQL errors array with type field (structured errors)
@@ -308,7 +324,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
         return new ProviderError({
           code: 'RATE_LIMITED',
           message: 'GitHub API rate limit exceeded',
-          retryAfter: 60,
+          retryAfter: this.extractRetryAfter(err),
           details: { username },
           cause: err,
         });
@@ -329,7 +345,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       return new ProviderError({
         code: 'RATE_LIMITED',
         message: 'GitHub API rate limit exceeded',
-        retryAfter: 60,
+        retryAfter: this.extractRetryAfter(err),
         details: { username },
         cause: err,
       });

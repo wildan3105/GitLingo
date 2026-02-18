@@ -240,19 +240,71 @@ describe('GitHubGraphQLAdapter', () => {
       });
     });
 
-    it('should throw RATE_LIMITED error on 403 status', async () => {
+    it('should throw RATE_LIMITED error on 403 status with fallback retryAfter when no header', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
       const error: any = new Error('API rate limit exceeded');
       error.status = 403;
+      // no response.headers set — should fall back to 60
 
-      mockGraphqlFn.mockRejectedValue(error); // Use mockRejectedValue instead of Once
+      mockGraphqlFn.mockRejectedValue(error);
 
       await expect(adapter.fetchRepositories('testuser')).rejects.toThrow(ProviderError);
       await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({
         code: 'RATE_LIMITED',
         retryAfter: 60,
       });
+    });
+
+    it('should compute retryAfter from x-ratelimit-reset header on 403 status', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const resetAt = Math.floor(Date.now() / 1000) + 300; // 300 seconds from now
+      const error: any = new Error('API rate limit exceeded');
+      error.status = 403;
+      error.response = { headers: { 'x-ratelimit-reset': String(resetAt) } };
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      const thrown = await adapter.fetchRepositories('testuser').catch((e) => e);
+      expect(thrown).toBeInstanceOf(ProviderError);
+      expect(thrown.code).toBe('RATE_LIMITED');
+      // Allow ±2s tolerance for test execution time
+      expect(thrown.retryAfter).toBeGreaterThanOrEqual(298);
+      expect(thrown.retryAfter).toBeLessThanOrEqual(300);
+    });
+
+    it('should return retryAfter of 0 when x-ratelimit-reset is in the past', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const resetAt = Math.floor(Date.now() / 1000) - 10; // 10 seconds ago
+      const error: any = new Error('API rate limit exceeded');
+      error.status = 403;
+      error.response = { headers: { 'x-ratelimit-reset': String(resetAt) } };
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      const thrown = await adapter.fetchRepositories('testuser').catch((e) => e);
+      expect(thrown).toBeInstanceOf(ProviderError);
+      expect(thrown.code).toBe('RATE_LIMITED');
+      expect(thrown.retryAfter).toBe(0);
+    });
+
+    it('should compute retryAfter from x-ratelimit-reset header on GraphQL RATE_LIMITED error', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const resetAt = Math.floor(Date.now() / 1000) + 120; // 120 seconds from now
+      const error: any = new Error('rate limit exceeded');
+      error.errors = [{ type: 'RATE_LIMITED', message: 'rate limit exceeded' }];
+      error.response = { headers: { 'x-ratelimit-reset': String(resetAt) } };
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      const thrown = await adapter.fetchRepositories('testuser').catch((e) => e);
+      expect(thrown).toBeInstanceOf(ProviderError);
+      expect(thrown.code).toBe('RATE_LIMITED');
+      expect(thrown.retryAfter).toBeGreaterThanOrEqual(118);
+      expect(thrown.retryAfter).toBeLessThanOrEqual(120);
     });
 
     it('should throw INVALID_TOKEN error on 401 status', async () => {

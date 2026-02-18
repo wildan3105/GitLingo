@@ -81,7 +81,7 @@ describe('SearchController', () => {
       expect(jsonMock).toHaveBeenCalledWith(errorResult);
     });
 
-    it('should return 429 for rate limit', async () => {
+    it('should return 403 for rate limit', async () => {
       const errorResult = {
         ok: false as const,
         provider: 'github',
@@ -100,7 +100,7 @@ describe('SearchController', () => {
       const controller = new SearchController(mockSearchService);
       await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(statusMock).toHaveBeenCalledWith(429);
+      expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith(errorResult);
     });
 

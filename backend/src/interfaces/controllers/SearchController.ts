@@ -66,7 +66,7 @@ export class SearchController {
       case 'user_not_found':
         return 404;
       case 'rate_limited':
-        return 429;
+        return 403;
       case 'invalid_token':
         return 401;
       case 'insufficient_scopes':
