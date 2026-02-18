@@ -255,6 +255,95 @@ describe('GitHubGraphQLAdapter', () => {
       });
     });
 
+    it('should throw INVALID_TOKEN error on 401 status', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const error: any = new Error('Bad credentials');
+      error.status = 401;
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      await expect(adapter.fetchRepositories('testuser')).rejects.toThrow(ProviderError);
+      await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({
+        code: 'INVALID_TOKEN',
+        message: 'The provided token is invalid. Please check your token and try again.',
+      });
+    });
+
+    it('should throw INVALID_TOKEN error when message contains "bad credentials"', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const error: any = new Error('Bad credentials');
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      await expect(adapter.fetchRepositories('testuser')).rejects.toThrow(ProviderError);
+      await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({
+        code: 'INVALID_TOKEN',
+        message: 'The provided token is invalid. Please check your token and try again.',
+      });
+    });
+
+    it('should throw INSUFFICIENT_SCOPES error when GraphQL errors contain INSUFFICIENT_SCOPES type', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      const error: any = new Error('Request failed due to following response errors');
+      error.errors = [
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          locations: [{ line: 9, column: 5 }],
+          message:
+            "Your token has not been granted the required scopes. The 'email' field requires ['user:email', 'read:user'].",
+        },
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          locations: [{ line: 20, column: 5 }],
+          message:
+            "Your token has not been granted the required scopes. The 'login' field requires ['read:org'].",
+        },
+      ];
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      await expect(adapter.fetchRepositories('testuser')).rejects.toThrow(ProviderError);
+      await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({
+        code: 'INSUFFICIENT_SCOPES',
+        message:
+          "The provided token does not have the required permissions. Please check your token's scopes and try again.",
+      });
+    });
+
+    it('should throw INSUFFICIENT_SCOPES even when partial data is returned alongside the error', async () => {
+      const adapter = new GitHubGraphQLAdapter('test_token');
+
+      // Simulate @octokit/graphql throwing with both data and errors
+      const error: any = new Error('Request failed due to following response errors');
+      error.errors = [
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          message: 'Your token has not been granted the required scopes.',
+        },
+      ];
+      error.data = {
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      };
+
+      mockGraphqlFn.mockRejectedValue(error);
+
+      await expect(adapter.fetchRepositories('testuser')).rejects.toMatchObject({
+        code: 'INSUFFICIENT_SCOPES',
+      });
+    });
+
     it('should return provider name as github', () => {
       const adapter = new GitHubGraphQLAdapter();
       expect(adapter.getProviderName()).toBe('github');

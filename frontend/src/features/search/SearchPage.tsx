@@ -90,13 +90,37 @@ export function SearchPage() {
         errorMessage =
           'The request took too long to complete. This can happen with large accounts. Please try again.'
         break
+      case 'invalid_token':
+        errorMessage =
+          'The configured token is invalid or has expired. Please check your token and try again.'
+        break
+      case 'insufficient_scopes':
+        errorMessage =
+          'The configured token does not have sufficient permissions to fetch this profile. Please update your token scopes and try again.'
+        break
     }
+
+    // Map unknown codes (e.g. future backend codes) to 'generic' so the icon always renders
+    const knownCodes = [
+      'user_not_found',
+      'rate_limited',
+      'network_error',
+      'server_error',
+      'validation_error',
+      'timeout',
+      'invalid_token',
+      'insufficient_scopes',
+      'generic',
+    ] as const
+    const displayCode = (knownCodes as readonly string[]).includes(errorCode)
+      ? (errorCode as (typeof knownCodes)[number])
+      : 'generic'
 
     return (
       <div className="animate-fade-in-up">
         <Card>
           <ErrorState
-            code={errorCode}
+            code={displayCode}
             message={errorMessage}
             onRetry={handleSearch}
             retryAfter={error.error.retry_after_seconds}

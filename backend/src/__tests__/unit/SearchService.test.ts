@@ -191,5 +191,147 @@ describe('SearchService', () => {
       expect(result.error.message).toBe('User not found');
       expect(result.provider).toBe('failing-provider');
     });
+
+    it('should not include actual_error in details when ProviderError has no cause', async () => {
+      class FailingProvider implements ProviderPort {
+        async fetchRepositories(_username: string): Promise<AccountData> {
+          throw new ProviderError({
+            code: 'USER_NOT_FOUND',
+            message: 'User not found',
+            details: { username: 'testuser' },
+          });
+        }
+
+        getProviderName(): string {
+          return 'failing-provider';
+        }
+      }
+
+      const provider = new FailingProvider();
+      const service = new SearchService(provider);
+
+      const result = await service.searchLanguageStatistics('testuser');
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+
+      expect(result.error.details).not.toHaveProperty('actual_error');
+      expect(result.error.details).toMatchObject({ username: 'testuser' });
+    });
+
+    it('should include actual_error with message and status when cause has HTTP error', async () => {
+      class FailingProvider implements ProviderPort {
+        async fetchRepositories(_username: string): Promise<AccountData> {
+          const cause = Object.assign(new Error('Bad credentials'), { status: 401 });
+          throw new ProviderError({
+            code: 'PROVIDER_ERROR',
+            message: 'The provided token is invalid.',
+            details: { username: 'testuser' },
+            cause,
+          });
+        }
+
+        getProviderName(): string {
+          return 'failing-provider';
+        }
+      }
+
+      const provider = new FailingProvider();
+      const service = new SearchService(provider);
+
+      const result = await service.searchLanguageStatistics('testuser');
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+
+      expect(result.error.details).toMatchObject({
+        username: 'testuser',
+        actual_error: {
+          message: 'Bad credentials',
+          status: 401,
+        },
+      });
+      expect(
+        (result.error.details?.actual_error as Record<string, unknown>)?.errors
+      ).toBeUndefined();
+    });
+
+    it('should include actual_error with message and errors when cause has GraphQL errors', async () => {
+      class FailingProvider implements ProviderPort {
+        async fetchRepositories(_username: string): Promise<AccountData> {
+          const cause = Object.assign(new Error('GraphQL error'), {
+            errors: [{ type: 'INSUFFICIENT_SCOPES', message: 'Token lacks required scopes.' }],
+          });
+          throw new ProviderError({
+            code: 'PROVIDER_ERROR',
+            message: 'The provided token does not have the required permissions.',
+            details: { username: 'testuser' },
+            cause,
+          });
+        }
+
+        getProviderName(): string {
+          return 'failing-provider';
+        }
+      }
+
+      const provider = new FailingProvider();
+      const service = new SearchService(provider);
+
+      const result = await service.searchLanguageStatistics('testuser');
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+
+      expect(result.error.details).toMatchObject({
+        username: 'testuser',
+        actual_error: {
+          message: 'GraphQL error',
+          errors: [{ type: 'INSUFFICIENT_SCOPES', message: 'Token lacks required scopes.' }],
+        },
+      });
+      expect(
+        (result.error.details?.actual_error as Record<string, unknown>)?.status
+      ).toBeUndefined();
+    });
+
+    it('should include actual_error with only message when cause has no errors or status', async () => {
+      class FailingProvider implements ProviderPort {
+        async fetchRepositories(_username: string): Promise<AccountData> {
+          const cause = new Error('Network connection refused');
+          throw new ProviderError({
+            code: 'NETWORK_ERROR',
+            message: 'Network error while connecting to GitHub API',
+            details: { username: 'testuser' },
+            cause,
+          });
+        }
+
+        getProviderName(): string {
+          return 'failing-provider';
+        }
+      }
+
+      const provider = new FailingProvider();
+      const service = new SearchService(provider);
+
+      const result = await service.searchLanguageStatistics('testuser');
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+
+      expect(result.error.details).toMatchObject({
+        username: 'testuser',
+        actual_error: {
+          message: 'Network connection refused',
+        },
+      });
+      expect(
+        (result.error.details?.actual_error as Record<string, unknown>)?.errors
+      ).toBeUndefined();
+      expect(
+        (result.error.details?.actual_error as Record<string, unknown>)?.status
+      ).toBeUndefined();
+    });
   });
 });

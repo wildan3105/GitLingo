@@ -103,13 +103,29 @@ export class SearchService {
 
     // Handle ProviderError
     if (error instanceof ProviderError) {
+      const cause = error.cause as
+        | (Error & { errors?: Array<{ type?: string; message: string }>; status?: number })
+        | undefined;
+
+      const actualError =
+        cause != null
+          ? {
+              message: cause.message,
+              ...(cause.errors != null && { errors: cause.errors }),
+              ...(cause.status != null && { status: cause.status }),
+            }
+          : undefined;
+
       return {
         ok: false,
         provider: providerName,
         error: {
           code: error.code.toLowerCase(),
           message: error.message,
-          details: error.details ?? { username },
+          details: {
+            ...(error.details ?? { username }),
+            ...(actualError != null && { actual_error: actualError }),
+          },
           ...(error.retryAfter !== undefined && { retry_after_seconds: error.retryAfter }),
         },
         meta: {

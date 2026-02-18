@@ -225,9 +225,14 @@ export class GitHubGraphQLAdapter implements ProviderPort {
       // Handle partial errors: if we got data for user OR org, use it
       // GitHub returns errors when one of the queries fails (e.g., user exists but not org)
       const graphqlError = error as {
-        errors?: Array<{ message: string }>;
+        errors?: Array<{ type?: string; message: string }>;
         data?: GitHubUserQueryResponse;
       };
+
+      // Re-throw INSUFFICIENT_SCOPES errors immediately — do not silently return partial data
+      if (graphqlError.errors?.some((e) => e.type === 'INSUFFICIENT_SCOPES')) {
+        throw error;
+      }
 
       // If we have data (either user or org), return it despite errors
       if (graphqlError.data !== null && typeof graphqlError.data === 'object') {
@@ -269,6 +274,18 @@ export class GitHubGraphQLAdapter implements ProviderPort {
 
     // Check for GraphQL errors array with type field (structured errors)
     if (err.errors && Array.isArray(err.errors)) {
+      // Insufficient scopes: token lacks required permissions
+      const hasInsufficientScopes = err.errors.some((e) => e.type === 'INSUFFICIENT_SCOPES');
+      if (hasInsufficientScopes) {
+        return new ProviderError({
+          code: 'INSUFFICIENT_SCOPES',
+          message:
+            "The provided token does not have the required permissions. Please check your token's scopes and try again.",
+          details: { username },
+          cause: err,
+        });
+      }
+
       // User not found: Check if all errors are NOT_FOUND type
       const allNotFound = err.errors.every((e) => e.type === 'NOT_FOUND');
       if (allNotFound && err.errors.length > 0) {
@@ -296,6 +313,15 @@ export class GitHubGraphQLAdapter implements ProviderPort {
     }
 
     // Fallback: HTTP status-based detection
+    if (err.status === 401 || err.message?.toLowerCase().includes('bad credentials')) {
+      return new ProviderError({
+        code: 'INVALID_TOKEN',
+        message: 'The provided token is invalid. Please check your token and try again.',
+        details: { username },
+        cause: err,
+      });
+    }
+
     if (err.status === 403 || err.message?.toLowerCase().includes('rate limit')) {
       return new ProviderError({
         code: 'RATE_LIMITED',

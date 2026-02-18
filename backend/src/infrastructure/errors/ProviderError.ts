@@ -7,6 +7,8 @@ export type ProviderErrorCode =
   | 'USER_NOT_FOUND'
   | 'RATE_LIMITED'
   | 'NETWORK_ERROR'
+  | 'INVALID_TOKEN'
+  | 'INSUFFICIENT_SCOPES'
   | 'PROVIDER_ERROR';
 
 export interface ProviderErrorOptions {

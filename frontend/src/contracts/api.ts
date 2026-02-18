@@ -70,6 +70,8 @@ export type ErrorDetail = {
     | 'server_error'
     | 'validation_error'
     | 'timeout'
+    | 'invalid_token'
+    | 'insufficient_scopes'
     | 'generic'
   message: string
   details?: Record<string, unknown>

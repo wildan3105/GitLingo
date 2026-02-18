@@ -468,6 +468,101 @@ describe('API Integration Tests', () => {
       });
     });
 
+    it('should return 401 with invalid_token code for bad credentials (HTTP 401)', async () => {
+      const error: any = new Error('Bad credentials');
+      error.status = 401;
+      mockGraphqlFn.mockRejectedValueOnce(error);
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 'invalid_token',
+          message: 'The provided token is invalid. Please check your token and try again.',
+        },
+      });
+    });
+
+    it('should return 401 with invalid_token code when message contains bad credentials', async () => {
+      const error: any = new Error('Bad credentials');
+      mockGraphqlFn.mockRejectedValueOnce(error);
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 'invalid_token',
+          message: 'The provided token is invalid. Please check your token and try again.',
+        },
+      });
+    });
+
+    it('should return 403 with insufficient_scopes code for INSUFFICIENT_SCOPES GraphQL errors', async () => {
+      const error: any = new Error('Request failed due to following response errors');
+      error.errors = [
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          message:
+            "Your token has not been granted the required scopes. The 'email' field requires ['user:email', 'read:user'].",
+        },
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          message:
+            "Your token has not been granted the required scopes. The 'login' field requires ['read:org'].",
+        },
+      ];
+      mockGraphqlFn.mockRejectedValueOnce(error);
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 'insufficient_scopes',
+          message:
+            "The provided token does not have the required permissions. Please check your token's scopes and try again.",
+        },
+      });
+    });
+
+    it('should return 403 with insufficient_scopes even when partial data is returned alongside errors', async () => {
+      const error: any = new Error('Request failed due to following response errors');
+      error.errors = [
+        {
+          type: 'INSUFFICIENT_SCOPES',
+          message: 'Your token has not been granted the required scopes.',
+        },
+      ];
+      error.data = {
+        user: {
+          login: 'testuser',
+          id: '123',
+          repositories: {
+            nodes: [{ name: 'repo1', primaryLanguage: { name: 'JavaScript' }, isFork: false }],
+            pageInfo: { hasNextPage: false, endCursor: null },
+            totalCount: 1,
+          },
+        },
+        organization: null,
+      };
+      mockGraphqlFn.mockRejectedValueOnce(error);
+
+      const response = await request(app).get('/api/v1/search?username=testuser');
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 'insufficient_scopes',
+        },
+      });
+    });
+
     it('should return statistics for user with followers and following', async () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: {

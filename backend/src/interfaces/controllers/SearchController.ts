@@ -67,14 +67,18 @@ export class SearchController {
         return 404;
       case 'rate_limited':
         return 429;
+      case 'invalid_token':
+        return 401;
+      case 'insufficient_scopes':
+        return 403;
       case 'validation_error':
         return 400;
       case 'not_implemented':
-        return 501; // Not implemented
+        return 501;
       case 'network_error':
-        return 503; // Service unavailable
+        return 503;
       case 'timeout':
-        return 504; // Gateway timeout
+        return 504;
       default:
         return 500;
     }

@@ -46,6 +46,25 @@ describe('ErrorState', () => {
     expect(screen.getByText('Server error')).toBeInTheDocument()
   })
 
+  it('renders invalid_token error', () => {
+    render(<ErrorState code="invalid_token" message="The token is invalid or expired" />)
+
+    expect(screen.getByText('The token is invalid or expired')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+
+  it('renders insufficient_scopes error', () => {
+    render(
+      <ErrorState
+        code="insufficient_scopes"
+        message="The token does not have sufficient permissions"
+      />
+    )
+
+    expect(screen.getByText('The token does not have sufficient permissions')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+
   it('renders details when provided', () => {
     render(<ErrorState code="generic" message="Error" details="Additional error information" />)
 
