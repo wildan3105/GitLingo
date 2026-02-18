@@ -75,9 +75,9 @@ export function useSearch(): UseSearchReturn {
   const [username, setUsernameState] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
 
-  // Filter state - both default to true
-  const [includeForks, setIncludeForks] = useState(true)
-  const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(true)
+  // Filter state - both default to false
+  const [includeForks, setIncludeForks] = useState(false)
+  const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(false)
 
   // React Query mutation for API call
   const mutation = useMutation<ApiResponse, Error, { username: string }>({
@@ -118,7 +118,7 @@ export function useSearch(): UseSearchReturn {
   /**
    * Resets all state to defaults
    * - Clears username
-   * - Resets filters to true
+   * - Resets filters to false
    * - Clears API data and errors
    * - Clears validation errors
    * - Resets URL to root

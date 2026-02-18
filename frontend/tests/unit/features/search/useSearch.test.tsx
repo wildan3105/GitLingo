@@ -87,20 +87,20 @@ describe('useSearch', () => {
       expect(result.current.username).toBe('octocat')
     })
 
-    it('has includeForks set to true by default', () => {
+    it('has includeForks set to false by default', () => {
       const { result } = renderHook(() => useSearch(), {
         wrapper: createWrapper(),
       })
 
-      expect(result.current.includeForks).toBe(true)
+      expect(result.current.includeForks).toBe(false)
     })
 
-    it('has includeUnknownLanguage set to true by default', () => {
+    it('has includeUnknownLanguage set to false by default', () => {
       const { result } = renderHook(() => useSearch(), {
         wrapper: createWrapper(),
       })
 
-      expect(result.current.includeUnknownLanguage).toBe(true)
+      expect(result.current.includeUnknownLanguage).toBe(false)
     })
 
     it('updates includeForks when setIncludeForks is called', () => {
