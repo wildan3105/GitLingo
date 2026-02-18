@@ -286,9 +286,7 @@ export function SearchPage() {
                     label="Top Language"
                     value={topLanguageItem?.label || 'None'}
                     subtitle={
-                      topLanguageItem
-                        ? `${topLanguageItem.value} ${topLanguageItem.value === 1 ? 'repository' : 'repositories'}`
-                        : 'no languages detected'
+                      topLanguageItem ? `by repo count (excluding forks)` : 'no languages detected'
                     }
                     color="success"
                     icon={
