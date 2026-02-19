@@ -41,10 +41,13 @@ npm run dev
 
 ```bash
 # Health check
-curl http://localhost:3001/health
+curl http://localhost:3001/api/v1/health
 
 # Get language stats for a user
 curl "http://localhost:3001/api/v1/search?username=octocat"
+
+# Get top searched users leaderboard
+curl "http://localhost:3001/api/v1/topsearch"
 ```
 
 ## Environment Variables
@@ -126,74 +129,255 @@ npm run lint         # Check code quality
 
 ## API Endpoints
 
-### `GET /health`
+All endpoints are prefixed with `/api/v1`. Every response has an `ok` boolean at the top level — check this first before reading `data`.
 
-Health check endpoint.
+---
 
-**Response:**
+### `GET /api/v1/health`
+
+Application health check. Always returns HTTP 200 — inspect `ok` and `data.services` to determine actual health.
+
+**Response — healthy:**
 ```json
 {
-  "status": "ok",
-  "uptime": 123.45,
-  "timestamp": "2026-02-14T..."
+  "ok": true,
+  "data": {
+    "uptime": 2008.08,
+    "timestamp": "2026-02-19T01:16:28.050Z",
+    "services": {
+      "database": "ok"
+    }
+  }
 }
 ```
 
-### `GET /api/v1/search?username=<username>`
+**Response — degraded (e.g. DB unreachable):**
+```json
+{
+  "ok": false,
+  "data": {
+    "uptime": 2008.08,
+    "timestamp": "2026-02-19T01:16:28.050Z",
+    "services": {
+      "database": "error"
+    }
+  }
+}
+```
 
-Get language statistics for a GitHub user.
+| Field | Type | Description |
+|---|---|---|
+| `ok` | `boolean` | `true` when all services are healthy |
+| `data.uptime` | `number` | Process uptime in seconds |
+| `data.timestamp` | `string` | ISO 8601 timestamp of the check |
+| `data.services.database` | `"ok" \| "error"` | SQLite connection status |
+
+---
+
+### `GET /api/v1/search`
+
+Fetch language statistics for a GitHub user or organization.
 
 **Query Parameters:**
-- `username` (required): GitHub username or organization
 
-**Success Response:**
+| Parameter | Required | Default | Constraints | Description |
+|---|---|---|---|---|
+| `username` | ✅ | — | 1–39 chars, letters/numbers/hyphens only | GitHub username or org name |
+| `provider` | ❌ | `github` | `github`, `gitlab`, `bitbucket` | VCS provider (only `github` is active) |
+
+**Success Response (HTTP 200):**
 ```json
 {
   "ok": true,
   "provider": "github",
   "profile": {
-    "username": "octocat",
+    "username": "torvalds",
+    "name": "Linus Torvalds",
     "type": "user",
-    "avatarUrl": "https://avatars.githubusercontent.com/u/583231?v=4",
-    "websiteUrl": "https://github.com/octocat"
+    "providerUserId": "1024",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/1024?v=4",
+    "providerBaseUrl": "https://github.com",
+    "isVerified": true,
+    "createdAt": "2011-09-03T15:26:12Z",
+    "location": "Portland, OR",
+    "websiteUrl": "https://www.linuxfoundation.org",
+    "statistics": {
+      "followers": 231000,
+      "following": 0
+    }
   },
   "data": [
-    {
-      "key": "JavaScript",
-      "label": "JavaScript",
-      "value": 10,
-      "color": "#f1e05a"
-    }
+    { "key": "C",          "label": "C",          "value": 6,  "color": "#555555" },
+    { "key": "Shell",      "label": "Shell",       "value": 2,  "color": "#89e051" },
+    { "key": "__forks__",  "label": "Forked repos","value": 3,  "color": "#ededed" }
   ],
   "metadata": {
-    "generatedAt": "2026-02-14T...",
-    "unit": "repos",
-    "limit": 10
+    "generatedAt": "2026-02-19T01:16:28.050Z",
+    "unit": "repos"
   }
 }
 ```
+
+**Profile fields:**
+
+| Field | Type | Always present | Description |
+|---|---|---|---|
+| `username` | `string` | ✅ | Login handle |
+| `name` | `string` | ❌ | Display name (omitted if null/blank) |
+| `type` | `"user" \| "organization"` | ✅ | Account type |
+| `providerUserId` | `string` | ✅ | Provider's internal ID |
+| `avatarUrl` | `string` | ❌ | Profile avatar URL |
+| `providerBaseUrl` | `string` | ❌ | Base URL of the provider instance (e.g. `https://github.com` or a GHE URL) |
+| `isVerified` | `boolean` | ✅ | Users: has a public email. Orgs: GitHub-verified badge |
+| `createdAt` | `string` | ❌ | ISO 8601 account creation date |
+| `location` | `string` | ❌ | Self-reported location |
+| `websiteUrl` | `string` | ❌ | Profile website |
+| `statistics` | `object` | ❌ | See below |
+
+**`statistics` field** (omitted if data is unavailable):
+
+| Account type | Fields |
+|---|---|
+| `user` | `{ followers: number, following: number }` |
+| `organization` | `{ members: number }` |
+
+**Data array fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `key` | `string` | Language identifier, or `"__forks__"` for the forks bucket |
+| `label` | `string` | Human-readable label (e.g. `"JavaScript"`, `"Forked repos"`) |
+| `value` | `number` | Number of repositories |
+| `color` | `string` | Hex color for charts (e.g. `"#f1e05a"`) |
+
+> **Ordering:** sorted by `value` descending. The `__forks__` entry is always last.
 
 **Error Response:**
 ```json
 {
   "ok": false,
+  "provider": "github",
   "error": {
     "code": "user_not_found",
-    "message": "User not found"
+    "message": "GitHub user or organization 'nobody' not found",
+    "details": {},
+    "retry_after_seconds": 60
+  },
+  "meta": {
+    "generatedAt": "2026-02-19T01:16:28.050Z"
   }
 }
 ```
 
+> `details` and `retry_after_seconds` are only present on relevant error codes (see table below).
+
+---
+
+### `GET /api/v1/topsearch`
+
+Paginated leaderboard of the most-searched usernames. A record is created (or its hit count incremented) automatically each time a successful search is performed.
+
+**Query Parameters:**
+
+| Parameter | Required | Default | Constraints | Description |
+|---|---|---|---|---|
+| `provider` | ❌ | `github` | `github`, `gitlab`, `bitbucket` | Filter by provider |
+| `limit` | ❌ | `10` | Integer, 1–100 | Max entries to return |
+| `offset` | ❌ | `0` | Integer ≥ 0 | Number of entries to skip |
+
+**Success Response (HTTP 200):**
+```json
+{
+  "ok": true,
+  "data": [
+    {
+      "username": "torvalds",
+      "provider": "github",
+      "hit": 42,
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1024?v=4",
+      "createdAt": "2026-02-01T10:00:00.000Z",
+      "updatedAt": "2026-02-19T01:16:28.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 150,
+    "count": 10,
+    "offset": 0,
+    "limit": 10
+  }
+}
+```
+
+**Data entry fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `username` | `string` | Normalized (lowercase) username |
+| `provider` | `string` | Provider the search was made against |
+| `hit` | `number` | Total number of times this username has been searched |
+| `avatarUrl` | `string \| null` | Avatar from the last successful search (may be `null`) |
+| `createdAt` | `string` | ISO 8601 — when this username was first searched |
+| `updatedAt` | `string` | ISO 8601 — when the hit count was last incremented |
+
+**Pagination fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `total` | `number` | Total records matching the provider filter |
+| `count` | `number` | Records in this response page |
+| `offset` | `number` | Offset used in this query |
+| `limit` | `number` | Limit used in this query |
+
+> **Ordering:** by `hit` descending, then `username` ascending for ties.
+
+> **Always returns HTTP 200**, even when the DB is empty or a DB error occurs — errors return an empty `data: []` with `total: 0`.
+
+---
+
 ## Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `validation_error` | 400 | Invalid query parameters |
-| `user_not_found` | 404 | GitHub user not found |
-| `rate_limited` | 429 | API rate limit exceeded |
-| `timeout` | 504 | Request timeout (>90s) |
-| `network_error` | 503 | Network issues |
-| `provider_error` | 500 | GitHub API error |
+| Code | HTTP Status | Endpoint | Description |
+|---|---|---|---|
+| `validation_error` | 400 | all | Missing/invalid query parameters |
+| `user_not_found` | 404 | `/search` | Username doesn't exist on the provider |
+| `invalid_token` | 401 | `/search` | Token is missing or invalid |
+| `insufficient_scopes` | 403 | `/search` | Token lacks required OAuth scopes |
+| `rate_limited` | 403 | `/search` | GitHub rate limit hit — check `retry_after_seconds` |
+| `not_implemented` | 501 | `/search` | Provider exists but isn't supported yet (e.g. `gitlab`) |
+| `network_error` | 503 | `/search` | Could not reach the provider |
+| `timeout` | 504 | `/search` | Request to provider timed out |
+
+**Rate limit response example:**
+```json
+{
+  "ok": false,
+  "provider": "github",
+  "error": {
+    "code": "rate_limited",
+    "message": "GitHub API rate limit exceeded. Please wait before retrying.",
+    "retry_after_seconds": 187
+  },
+  "meta": { "generatedAt": "2026-02-19T01:16:28.050Z" }
+}
+```
+
+**Validation error response example:**
+```json
+{
+  "ok": false,
+  "provider": "unknown",
+  "error": {
+    "code": "validation_error",
+    "message": "Invalid query parameters",
+    "details": {
+      "errors": [
+        { "field": "username", "message": "Username is required" }
+      ]
+    }
+  },
+  "meta": { "generatedAt": "2026-02-19T01:16:28.050Z" }
+}
+```
 
 ## Fork Handling
 
@@ -251,6 +435,7 @@ backend/
 - **TypeScript** - Type safety
 - **Zod** - Schema validation
 - **@octokit/graphql** - GitHub API client
+- **better-sqlite3** - Persistent storage (topsearch leaderboard)
 - **Pino** - Logging
 - **Jest** - Testing
 
