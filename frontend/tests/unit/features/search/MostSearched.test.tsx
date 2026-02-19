@@ -77,11 +77,11 @@ describe('MostSearched', () => {
   })
 
   describe('chip rendering', () => {
-    it('shows the inspiration caption when data is present', async () => {
+    it('shows the section caption when data is present', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
       renderMostSearched()
       await waitFor(() => {
-        expect(screen.getByText(/need some inspiration/i)).toBeInTheDocument()
+        expect(screen.getByText(/most searched github users on gitlingo/i)).toBeInTheDocument()
       })
     })
 
@@ -253,6 +253,114 @@ describe('MostSearched', () => {
       fireEvent.keyDown(chip, { key: 'Escape' })
 
       expect(onSearch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('arrow key navigation', () => {
+    it('ArrowRight moves focus from first chip to second chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[0].focus()
+      fireEvent.keyDown(buttons[0], { key: 'ArrowRight' })
+
+      expect(document.activeElement).toBe(buttons[1])
+    })
+
+    it('ArrowLeft moves focus from second chip to first chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[1].focus()
+      fireEvent.keyDown(buttons[1], { key: 'ArrowLeft' })
+
+      expect(document.activeElement).toBe(buttons[0])
+    })
+
+    it('ArrowRight wraps from last chip to first chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      const lastIndex = buttons.length - 1
+      buttons[lastIndex].focus()
+      fireEvent.keyDown(buttons[lastIndex], { key: 'ArrowRight' })
+
+      expect(document.activeElement).toBe(buttons[0])
+    })
+
+    it('ArrowLeft wraps from first chip to last chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[0].focus()
+      fireEvent.keyDown(buttons[0], { key: 'ArrowLeft' })
+
+      expect(document.activeElement).toBe(buttons[buttons.length - 1])
+    })
+
+    it('ArrowRight does not call onSearch', async () => {
+      const onSearch = vi.fn()
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
+      renderMostSearched(onSearch)
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[0].focus()
+      fireEvent.keyDown(buttons[0], { key: 'ArrowRight' })
+
+      expect(onSearch).not.toHaveBeenCalled()
+    })
+
+    it('ArrowLeft does not call onSearch', async () => {
+      const onSearch = vi.fn()
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
+      renderMostSearched(onSearch)
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[1].focus()
+      fireEvent.keyDown(buttons[1], { key: 'ArrowLeft' })
+
+      expect(onSearch).not.toHaveBeenCalled()
+    })
+
+    it('ArrowRight works across pyramid rows (top-row last → bottom-row first)', async () => {
+      // 5 items: topRow=[0,1,2], bottomRow=[3,4]; DOM order matches allItems order
+      const usernames = ['a', 'b', 'c', 'd', 'e']
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(usernames))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@a'))
+
+      const buttons = screen.getAllByRole('button')
+      // button[2] is last of top row ('c'), button[3] is first of bottom row ('d')
+      buttons[2].focus()
+      fireEvent.keyDown(buttons[2], { key: 'ArrowRight' })
+
+      expect(document.activeElement).toBe(buttons[3])
+    })
+
+    it('Enter still triggers search after arrow-key focus move', async () => {
+      const onSearch = vi.fn()
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
+      renderMostSearched(onSearch)
+      await waitFor(() => screen.getByText('@alice'))
+
+      const buttons = screen.getAllByRole('button')
+      buttons[0].focus()
+      fireEvent.keyDown(buttons[0], { key: 'ArrowRight' })
+      // Now focus is on buttons[1] ('bob')
+      fireEvent.keyDown(buttons[1], { key: 'Enter' })
+
+      expect(onSearch).toHaveBeenCalledOnce()
+      expect(onSearch).toHaveBeenCalledWith('bob')
     })
   })
 })

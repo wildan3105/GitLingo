@@ -4,6 +4,7 @@
  * Only rendered on the homepage empty state; returns null when data is unavailable.
  */
 
+import { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getTopSearch } from '../../../services/gitlingoApi'
 import { computePyramidRows } from '../utils/pyramidRows'
@@ -17,9 +18,10 @@ type MostSearchedProps = {
 type UserChipProps = {
   item: TopSearchItem
   onSearch: (username: string) => void
+  onNavigate: (username: string, direction: 'prev' | 'next') => void
 }
 
-function UserChip({ item, onSearch }: UserChipProps) {
+function UserChip({ item, onSearch, onNavigate }: UserChipProps) {
   const tooltipId = `chip-tooltip-${item.username}`
   const hitLabel = `${item.hit} ${item.hit === 1 ? 'hit' : 'hits'}`
 
@@ -27,6 +29,12 @@ function UserChip({ item, onSearch }: UserChipProps) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onSearch(item.username)
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      onNavigate(item.username, 'next')
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      onNavigate(item.username, 'prev')
     }
   }
 
@@ -69,6 +77,8 @@ function UserChip({ item, onSearch }: UserChipProps) {
 }
 
 export function MostSearched({ onSearch }: MostSearchedProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const { data } = useQuery({
     queryKey: ['topSearch'],
     queryFn: () => getTopSearch(9),
@@ -82,21 +92,44 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
 
   const [topRow, bottomRow] = computePyramidRows(items)
 
+  // All items in display order (top row first, then bottom row) so the index
+  // aligns with the DOM order of buttons inside the container.
+  const allItems = [...topRow, ...bottomRow]
+
+  const handleChipNavigate = (currentUsername: string, direction: 'prev' | 'next') => {
+    const currentIndex = allItems.findIndex((item) => item.username === currentUsername)
+    const count = allItems.length
+    const nextIndex =
+      direction === 'next' ? (currentIndex + 1) % count : (currentIndex - 1 + count) % count
+    const buttons = containerRef.current?.querySelectorAll<HTMLButtonElement>('button')
+    buttons?.[nextIndex]?.focus()
+  }
+
   return (
-    <div className="border-t border-secondary-100 pt-5 space-y-3">
+    <div ref={containerRef} className="border-t border-secondary-100 pt-5 space-y-3">
       <p className="text-sm text-secondary-500 text-center">
-        Need some inspiration? Here are our &ldquo;most searched&rdquo; users on GitLingo:
+        Most searched GitHub users on GitLingo:
       </p>
       <div className="flex flex-col items-center gap-3">
         <div className="flex flex-wrap justify-center gap-3">
           {topRow.map((item) => (
-            <UserChip key={item.username} item={item} onSearch={onSearch} />
+            <UserChip
+              key={item.username}
+              item={item}
+              onSearch={onSearch}
+              onNavigate={handleChipNavigate}
+            />
           ))}
         </div>
         {bottomRow.length > 0 && (
           <div className="flex flex-wrap justify-center gap-3">
             {bottomRow.map((item) => (
-              <UserChip key={item.username} item={item} onSearch={onSearch} />
+              <UserChip
+                key={item.username}
+                item={item}
+                onSearch={onSearch}
+                onNavigate={handleChipNavigate}
+              />
             ))}
           </div>
         )}
