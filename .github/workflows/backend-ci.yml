@@ -64,7 +64,7 @@ jobs:
           npm start &
           SERVER_PID=$!
           sleep 5
-          curl -f http://localhost:3001/health || exit 1
+          curl -f http://localhost:3001/api/v1/health || exit 1
           kill $SERVER_PID
 
   docker:
