@@ -221,7 +221,7 @@ describe('useSearch', () => {
       expect(searchSpy).not.toHaveBeenCalled()
     })
 
-    it.skip('clears previous validation error on new search', async () => {
+    it('clears previous validation error on new search', async () => {
       const mockSuccessResponse: ApiResponse = {
         ok: true,
         provider: 'github',
@@ -229,11 +229,14 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
         },
         data: [],
         metadata: {
-          totalRepositories: 8,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
@@ -253,6 +256,8 @@ describe('useSearch', () => {
       // Second valid search should clear error
       act(() => {
         result.current.setUsername('octocat')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
@@ -263,7 +268,7 @@ describe('useSearch', () => {
   })
 
   describe('API calls', () => {
-    it.skip('calls API with correct parameters when validation passes', async () => {
+    it('calls API with correct parameters when validation passes', async () => {
       const mockSuccessResponse: ApiResponse = {
         ok: true,
         provider: 'github',
@@ -271,11 +276,14 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
         },
         data: [],
         metadata: {
-          totalRepositories: 8,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
@@ -289,16 +297,17 @@ describe('useSearch', () => {
 
       act(() => {
         result.current.setUsername('octocat')
-        result.current.setProvider('github')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
       await waitFor(() => {
-        expect(searchSpy).toHaveBeenCalledWith('octocat', 'github')
+        expect(searchSpy).toHaveBeenCalledWith('octocat')
       })
     })
 
-    it.skip('updates data state on successful API call', async () => {
+    it('updates data state on successful API call', async () => {
       const mockSuccessResponse: ApiResponse = {
         ok: true,
         provider: 'github',
@@ -306,11 +315,14 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
         },
         data: [],
         metadata: {
-          totalRepositories: 8,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
@@ -322,6 +334,8 @@ describe('useSearch', () => {
 
       act(() => {
         result.current.setUsername('octocat')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
@@ -331,7 +345,7 @@ describe('useSearch', () => {
       })
     })
 
-    it.skip('updates error state on failed API call', async () => {
+    it('updates error state on failed API call', async () => {
       const mockErrorResponse: ApiResponse = {
         ok: false,
         provider: 'github',
@@ -352,6 +366,8 @@ describe('useSearch', () => {
 
       act(() => {
         result.current.setUsername('nonexistent')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
@@ -361,7 +377,7 @@ describe('useSearch', () => {
       })
     })
 
-    it.skip('sets isLoading to true during API call', async () => {
+    it('sets isLoading to true during API call', async () => {
       const mockSuccessResponse: ApiResponse = {
         ok: true,
         provider: 'github',
@@ -369,18 +385,23 @@ describe('useSearch', () => {
           username: 'octocat',
           name: 'The Octocat',
           avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
         },
         data: [],
         metadata: {
-          totalRepositories: 8,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
+      // Use a manually-controlled promise so we can reliably observe the loading state
+      let resolveSearch!: (value: ApiResponse) => void
       vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockImplementation(
         () =>
           new Promise((resolve) => {
-            setTimeout(() => resolve(mockSuccessResponse), 100)
+            resolveSearch = resolve
           })
       )
 
@@ -390,15 +411,21 @@ describe('useSearch', () => {
 
       act(() => {
         result.current.setUsername('octocat')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
-      // Should be loading immediately after calling handleSearch
+      // Mutation is in-flight — isLoading must be true
       await waitFor(() => {
         expect(result.current.isLoading).toBe(true)
       })
 
-      // Should not be loading after API call completes
+      // Resolve the promise and verify loading stops
+      await act(async () => {
+        resolveSearch(mockSuccessResponse)
+      })
+
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
@@ -406,7 +433,7 @@ describe('useSearch', () => {
   })
 
   describe('multiple searches', () => {
-    it.skip('handles consecutive searches correctly', async () => {
+    it('handles consecutive searches correctly', async () => {
       const mockResponse1: ApiResponse = {
         ok: true,
         provider: 'github',
@@ -414,11 +441,14 @@ describe('useSearch', () => {
           username: 'user1',
           name: 'User 1',
           avatarUrl: 'https://example.com/avatar1.png',
+          type: 'user',
+          providerUserId: '1',
         },
         data: [],
         metadata: {
-          totalRepositories: 5,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
@@ -429,11 +459,14 @@ describe('useSearch', () => {
           username: 'user2',
           name: 'User 2',
           avatarUrl: 'https://example.com/avatar2.png',
+          type: 'user',
+          providerUserId: '2',
         },
         data: [],
         metadata: {
-          totalRepositories: 10,
-          processedAt: '2024-01-01T00:00:00Z',
+          generatedAt: '2024-01-01T00:00:00Z',
+          unit: 'repos',
+          limit: 100,
         },
       }
 
@@ -449,6 +482,8 @@ describe('useSearch', () => {
       // First search
       act(() => {
         result.current.setUsername('user1')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
@@ -459,6 +494,8 @@ describe('useSearch', () => {
       // Second search
       act(() => {
         result.current.setUsername('user2')
+      })
+      act(() => {
         result.current.handleSearch()
       })
 
