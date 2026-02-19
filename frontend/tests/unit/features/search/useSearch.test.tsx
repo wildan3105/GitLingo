@@ -765,6 +765,34 @@ describe('useSearch', () => {
 
       expect(searchSpy).not.toHaveBeenCalled()
     })
+
+    it('calls the API exactly once for a valid username', async () => {
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue({
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'torvalds',
+          name: null,
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '1024',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      })
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.handleSearchFor('torvalds')
+      })
+
+      await waitFor(() => {
+        expect(searchSpy).toHaveBeenCalledOnce()
+      })
+    })
   })
 
   describe('cache invalidation', () => {
