@@ -16,8 +16,10 @@ import { config } from './shared/config/env';
 import { GitHubGraphQLAdapter } from './infrastructure/providers/GitHubGraphQLAdapter';
 import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
+import { SQLiteHealthAdapter } from './infrastructure/persistence/SQLiteHealthAdapter';
 import { SearchService } from './application/services/SearchService';
 import { TopSearchService } from './application/services/TopSearchService';
+import { HealthService } from './application/services/HealthService';
 import { SearchController } from './interfaces/controllers/SearchController';
 import { TopSearchController } from './interfaces/controllers/TopSearchController';
 import { createRoutes } from './interfaces/routes';
@@ -67,13 +69,16 @@ function createApp(): { app: Application; db: Database.Database } {
   const topSearchService = new TopSearchService(topSearchAdapter);
   const topSearchController = new TopSearchController(topSearchService);
 
+  const healthAdapter = new SQLiteHealthAdapter(db);
+  const healthService = new HealthService(healthAdapter);
+
   // Provider + search
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
   const searchService = new SearchService(githubAdapter);
   const searchController = new SearchController(searchService, topSearchService);
 
   // Mount routes
-  app.use(createRoutes(searchController));
+  app.use(createRoutes(searchController, healthService));
   app.use('/api/v1', createTopSearchRoutes(topSearchController));
 
   // Global error handler (must be last)

@@ -27,7 +27,9 @@ jest.mock('@octokit/graphql', () => ({
 
 import { createDatabase } from '../../infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from '../../infrastructure/persistence/SQLiteTopSearchAdapter';
+import { SQLiteHealthAdapter } from '../../infrastructure/persistence/SQLiteHealthAdapter';
 import { TopSearchService } from '../../application/services/TopSearchService';
+import { HealthService } from '../../application/services/HealthService';
 import { TopSearchController } from '../../interfaces/controllers/TopSearchController';
 import { GitHubGraphQLAdapter } from '../../infrastructure/providers/GitHubGraphQLAdapter';
 import { SearchService } from '../../application/services/SearchService';
@@ -51,11 +53,14 @@ function createTestApp(db: Database.Database): Application {
   const topSearchService = new TopSearchService(topSearchAdapter);
   const topSearchController = new TopSearchController(topSearchService);
 
+  const healthAdapter = new SQLiteHealthAdapter(db);
+  const healthService = new HealthService(healthAdapter);
+
   const githubAdapter = new GitHubGraphQLAdapter('test_token');
   const searchService = new SearchService(githubAdapter);
   const searchController = new SearchController(searchService, topSearchService);
 
-  app.use(createRoutes(searchController));
+  app.use(createRoutes(searchController, healthService));
   app.use('/api/v1', createTopSearchRoutes(topSearchController));
   app.use(errorHandler);
 
@@ -276,6 +281,46 @@ describe('TopSearch Integration Tests', () => {
 
       const res = await request(app).get('/api/v1/topsearch');
       expect(res.body.data[0].avatarUrl).toBe(avatarUrl);
+    });
+  });
+
+  // ── GET /health (with SQLite wired) ──────────────────────────────────────
+
+  describe('GET /api/v1/health', () => {
+    it('should return 200 with ok=true and services.database=ok when DB is healthy', async () => {
+      const res = await request(app).get('/api/v1/health');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        data: {
+          uptime: expect.any(Number),
+          timestamp: expect.any(String),
+          services: {
+            database: 'ok',
+          },
+        },
+      });
+    });
+
+    it('should return ok=false and services.database=error when DB is closed', async () => {
+      // Close the DB before the request to simulate an unhealthy connection
+      db.close();
+
+      const res = await request(app).get('/api/v1/health');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        data: {
+          services: {
+            database: 'error',
+          },
+        },
+      });
+
+      // Prevent afterEach from closing the already-closed DB
+      db = createDatabase(':memory:');
     });
   });
 });

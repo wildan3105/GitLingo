@@ -51,15 +51,17 @@ describe('API Integration Tests', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /health', () => {
-    it('should return health status', async () => {
-      const response = await request(app).get('/health');
+  describe('GET /api/v1/health', () => {
+    it('should return health status with the correct response shape', async () => {
+      const response = await request(app).get('/api/v1/health');
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
-        status: 'ok',
-        uptime: expect.any(Number),
-        timestamp: expect.any(String),
+        ok: true,
+        data: {
+          uptime: expect.any(Number),
+          timestamp: expect.any(String),
+        },
       });
     });
   });
