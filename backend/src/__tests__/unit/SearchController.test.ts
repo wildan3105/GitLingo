@@ -5,6 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SearchController } from '../../interfaces/controllers/SearchController';
 import { SearchService } from '../../application/services/SearchService';
+import { TopSearchService } from '../../application/services/TopSearchService';
 
 describe('SearchController', () => {
   let mockRequest: Partial<Request>;
@@ -13,6 +14,7 @@ describe('SearchController', () => {
   let jsonMock: jest.Mock;
   let statusMock: jest.Mock;
   let mockSearchService: jest.Mocked<SearchService>;
+  let mockTopSearchService: jest.Mocked<TopSearchService>;
 
   beforeEach(() => {
     jsonMock = jest.fn();
@@ -30,6 +32,11 @@ describe('SearchController', () => {
     mockSearchService = {
       searchLanguageStatistics: jest.fn(),
     } as any;
+
+    mockTopSearchService = {
+      record: jest.fn(),
+      getTopSearches: jest.fn(),
+    } as unknown as jest.Mocked<TopSearchService>;
   });
 
   describe('search', () => {
@@ -202,6 +209,59 @@ describe('SearchController', () => {
 
       expect(statusMock).toHaveBeenCalledWith(200);
       expect(mockSearchService.searchLanguageStatistics).toHaveBeenCalledWith('testuser');
+    });
+
+    it('should call topSearchService.record with correct args after successful search', async () => {
+      const successResult = {
+        ok: true as const,
+        provider: 'github',
+        profile: {
+          username: 'testuser',
+          type: 'user' as const,
+          providerUserId: '123',
+          isVerified: true,
+          avatarUrl: 'https://avatars.example.com/testuser',
+        },
+        data: [],
+        metadata: { generatedAt: new Date().toISOString(), unit: 'repos' as const },
+      };
+
+      mockSearchService.searchLanguageStatistics.mockResolvedValue(successResult);
+      const controller = new SearchController(mockSearchService, mockTopSearchService);
+
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockTopSearchService.record).toHaveBeenCalledWith(
+        'testuser',
+        'github',
+        'https://avatars.example.com/testuser'
+      );
+    });
+
+    it('should NOT call topSearchService.record when search returns an error', async () => {
+      const errorResult = {
+        ok: false as const,
+        provider: 'github',
+        error: { code: 'user_not_found', message: 'Not found' },
+        meta: { generatedAt: new Date().toISOString() },
+      };
+
+      mockSearchService.searchLanguageStatistics.mockResolvedValue(errorResult);
+      const controller = new SearchController(mockSearchService, mockTopSearchService);
+
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockTopSearchService.record).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call topSearchService.record for unsupported provider', async () => {
+      mockRequest.query = { username: 'testuser', provider: 'gitlab' };
+      const controller = new SearchController(mockSearchService, mockTopSearchService);
+
+      await controller.search(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockTopSearchService.record).not.toHaveBeenCalled();
+      expect(statusMock).toHaveBeenCalledWith(501);
     });
   });
 });

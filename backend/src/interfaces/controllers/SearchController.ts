@@ -5,14 +5,17 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { SearchService } from '../../application/services/SearchService';
+import { TopSearchService } from '../../application/services/TopSearchService';
 import { SearchQuery } from '../validation/searchSchema';
 import { DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 export class SearchController {
   private readonly searchService: SearchService;
+  private readonly topSearchService: TopSearchService | undefined;
 
-  constructor(searchService: SearchService) {
+  constructor(searchService: SearchService, topSearchService?: TopSearchService) {
     this.searchService = searchService;
+    this.topSearchService = topSearchService;
   }
 
   /**
@@ -47,6 +50,7 @@ export class SearchController {
       // Determine HTTP status code based on result
       if (result.ok) {
         res.status(200).json(result);
+        this.topSearchService?.record(username, provider, result.profile.avatarUrl ?? null);
         return;
       }
 
