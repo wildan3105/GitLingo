@@ -25,8 +25,20 @@ type UserChipProps = {
   onNavigate: (username: string, direction: 'prev' | 'next') => void
 }
 
+/** Number of top-searched chips to request from the API and to mirror in the skeleton. */
+const CHIP_LIMIT = 9
+
 /** Maximum opacity drop applied to the lowest-ranked chip (0 = no fade, 1 = invisible). */
 const OPACITY_RANGE = 0.5
+
+function ChipSkeleton() {
+  return (
+    <div className="flex items-center gap-3 px-5 py-2.5 bg-secondary-100 border border-secondary-200 rounded-xl animate-pulse">
+      <div className="w-7 h-7 rounded-full bg-secondary-300 flex-shrink-0" />
+      <div className="h-3 w-20 rounded bg-secondary-300" />
+    </div>
+  )
+}
 
 function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
   const tooltipId = `chip-tooltip-${item.username}`
@@ -89,11 +101,35 @@ function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
 export function MostSearched({ onSearch }: MostSearchedProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['topSearch'],
-    queryFn: () => getTopSearch(9),
+    queryFn: () => getTopSearch(CHIP_LIMIT),
     staleTime: 5 * 60 * 1000,
   })
+
+  if (isLoading) {
+    const skeletonIndices = Array.from({ length: CHIP_LIMIT }, (_, i) => i)
+    const [skeletonTop, skeletonBottom] = computePyramidRows(skeletonIndices)
+    return (
+      <div className="border-t border-secondary-100 pt-3 space-y-3">
+        <div className="h-3.5 w-52 bg-secondary-200 rounded animate-pulse mx-auto" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
+            {skeletonTop.map((_, i) => (
+              <ChipSkeleton key={i} />
+            ))}
+          </div>
+          {skeletonBottom.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3">
+              {skeletonBottom.map((_, i) => (
+                <ChipSkeleton key={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const items = data?.data ?? []
 

@@ -54,6 +54,62 @@ describe('MostSearched', () => {
     vi.clearAllMocks()
   })
 
+  describe('loading skeleton', () => {
+    it('renders skeleton chips while the query is in-flight', () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockReturnValue(new Promise(() => {}))
+      const { container } = renderMostSearched()
+
+      // No interactive chip buttons yet
+      expect(screen.queryAllByRole('button')).toHaveLength(0)
+      // Skeleton placeholders are present
+      expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0)
+    })
+
+    it('renders CHIP_LIMIT (9) chip skeletons plus one caption skeleton', () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockReturnValue(new Promise(() => {}))
+      const { container } = renderMostSearched()
+
+      // 9 chip skeletons + 1 caption skeleton = 10 total animate-pulse elements
+      expect(container.querySelectorAll('.animate-pulse')).toHaveLength(10)
+    })
+
+    it('arranges chip skeletons in pyramid: 5 top row, 4 bottom row', () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockReturnValue(new Promise(() => {}))
+      const { container } = renderMostSearched()
+
+      const rows = container.querySelectorAll('.flex.flex-wrap.justify-center')
+      expect(rows).toHaveLength(2)
+      expect(rows[0].querySelectorAll('.animate-pulse')).toHaveLength(5)
+      expect(rows[1].querySelectorAll('.animate-pulse')).toHaveLength(4)
+    })
+
+    it('replaces skeleton with real chips once data loads', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      const { container } = renderMostSearched()
+
+      // Skeleton is present on first render
+      expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0)
+
+      // After data arrives skeleton is gone and real chips are shown
+      await waitFor(() => screen.getByText('@alice'))
+      expect(container.querySelectorAll('.animate-pulse')).toHaveLength(0)
+      expect(screen.getAllByRole('button')).toHaveLength(3)
+    })
+
+    it('renders nothing (no skeleton) once the query resolves to empty data', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue({
+        ok: true,
+        data: [],
+        pagination: { total: 0, count: 0, offset: 0, limit: 9 },
+      })
+      const { container } = renderMostSearched()
+
+      await waitFor(() => {
+        expect(container.firstChild).toBeNull()
+      })
+    })
+  })
+
   describe('fallback — renders nothing', () => {
     it('renders nothing when API returns empty data array', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue({
