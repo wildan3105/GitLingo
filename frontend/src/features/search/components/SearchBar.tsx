@@ -21,9 +21,21 @@ export type SearchBarProps = {
 }
 
 export function SearchBar({ value, onChange, onSubmit, isLoading = false, error }: SearchBarProps) {
+  const [prevValue, setPrevValue] = useState(value)
   const [touched, setTouched] = useState(false)
   const [validationError, setValidationError] = useState<string | undefined>()
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // getDerivedStateFromProps equivalent: when the value prop changes to a non-empty string
+  // from outside (e.g. a chip click), clear internal validation state that may have been
+  // set by the blur event that fires just before the click handler runs.
+  if (value !== prevValue) {
+    setPrevValue(value)
+    if (value) {
+      setValidationError(undefined)
+      setTouched(false)
+    }
+  }
 
   // Auto-focus input on mount for better UX
   useEffect(() => {

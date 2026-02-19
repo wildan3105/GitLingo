@@ -25,6 +25,8 @@ export type UseSearchReturn = {
   setIncludeUnknownLanguage: (value: boolean) => void
   /** Trigger search (validates and calls API) */
   handleSearch: () => void
+  /** Search for a specific username directly — avoids state timing issues when triggered from chips */
+  handleSearchFor: (targetUsername: string) => void
   /** Reset all state to defaults */
   handleReset: () => void
   /** Whether API call is in progress */
@@ -116,6 +118,25 @@ export function useSearch(): UseSearchReturn {
   }
 
   /**
+   * Search for a specific username directly.
+   * Sets the input value and triggers an API call in one step, bypassing the
+   * async state timing issue that would occur with setUsername + handleSearch.
+   */
+  const handleSearchFor = (targetUsername: string) => {
+    setUsernameState(targetUsername)
+    setValidationError(null)
+    mutation.reset()
+
+    const validation = validateUsername(targetUsername)
+    if (!validation.isValid) {
+      setValidationError(validation.error || 'Invalid username')
+      return
+    }
+
+    mutation.mutate({ username: targetUsername })
+  }
+
+  /**
    * Resets all state to defaults
    * - Clears username
    * - Resets filters to false
@@ -186,6 +207,7 @@ export function useSearch(): UseSearchReturn {
     includeUnknownLanguage,
     setIncludeUnknownLanguage,
     handleSearch,
+    handleSearchFor,
     handleReset,
     isLoading: mutation.isPending,
     error,

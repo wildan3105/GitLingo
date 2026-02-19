@@ -619,4 +619,65 @@ describe('useSearch', () => {
       expect(window.location.pathname).toBe('/')
     })
   })
+
+  describe('handleSearchFor', () => {
+    it('sets username to the provided value', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.handleSearchFor('torvalds')
+      })
+
+      expect(result.current.username).toBe('torvalds')
+    })
+
+    it('clears any existing validation error', () => {
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // First trigger a validation error via handleSearch
+      act(() => {
+        result.current.handleSearch() // empty username → validation error
+      })
+      expect(result.current.validationError).not.toBeNull()
+
+      // handleSearchFor should clear it
+      act(() => {
+        result.current.handleSearchFor('torvalds')
+      })
+      expect(result.current.validationError).toBeNull()
+    })
+
+    it('sets a validation error and does not call API for an invalid username', () => {
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.handleSearchFor('invalid username with spaces')
+      })
+
+      expect(result.current.validationError).not.toBeNull()
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+
+    it('does not call API for an empty string', () => {
+      const searchSpy = vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      act(() => {
+        result.current.handleSearchFor('')
+      })
+
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+  })
 })

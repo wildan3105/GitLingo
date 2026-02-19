@@ -125,3 +125,30 @@ export function isSuccessResponse(response: ApiResponse): response is SuccessRes
 export function isErrorResponse(response: ApiResponse): response is ErrorResponse {
   return response.ok === false
 }
+
+/**
+ * Individual entry from the top search leaderboard
+ */
+export type TopSearchItem = {
+  username: string
+  provider: string
+  hit: number
+  avatarUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+/**
+ * Response from GET /api/v1/topsearch
+ * Always returns ok: true (empty data on error/empty DB)
+ */
+export type TopSearchResponse = {
+  ok: true
+  data: TopSearchItem[]
+  pagination: {
+    total: number
+    count: number
+    offset: number
+    limit: number
+  }
+}

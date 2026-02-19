@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { searchLanguageStatistics } from '../../../src/services/gitlingoApi'
-import type { SuccessResponse, ErrorResponse } from '../../../src/contracts/api'
+import { searchLanguageStatistics, getTopSearch } from '../../../src/services/gitlingoApi'
+import type { SuccessResponse, ErrorResponse, TopSearchResponse } from '../../../src/contracts/api'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
@@ -247,6 +247,110 @@ describe('gitlingoApi', () => {
         expect.stringContaining('provider='),
         expect.any(Object)
       )
+    })
+  })
+
+  describe('getTopSearch', () => {
+    const mockTopSearchResponse: TopSearchResponse = {
+      ok: true,
+      data: [
+        {
+          username: 'torvalds',
+          provider: 'github',
+          hit: 42,
+          avatarUrl: 'https://avatars.githubusercontent.com/u/1024?v=4',
+          createdAt: '2026-02-01T10:00:00.000Z',
+          updatedAt: '2026-02-19T01:16:28.000Z',
+        },
+      ],
+      pagination: { total: 1, count: 1, offset: 0, limit: 9 },
+    }
+
+    it('returns TopSearchResponse on success', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockTopSearchResponse,
+      })
+
+      const result = await getTopSearch(9)
+
+      expect(result).not.toBeNull()
+      expect(result?.ok).toBe(true)
+      expect(result?.data).toHaveLength(1)
+      expect(result?.data[0].username).toBe('torvalds')
+    })
+
+    it('calls the correct endpoint with provider=github, limit, and offset=0', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockTopSearchResponse,
+      })
+
+      await getTopSearch(9)
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/topsearch'),
+        expect.any(Object)
+      )
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('provider=github'),
+        expect.any(Object)
+      )
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('limit=9'), expect.any(Object))
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('offset=0'),
+        expect.any(Object)
+      )
+    })
+
+    it('uses the provided limit parameter', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ ...mockTopSearchResponse, data: [] }),
+      })
+
+      await getTopSearch(5)
+
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('limit=5'), expect.any(Object))
+    })
+
+    it('returns null when fetch throws a network error', async () => {
+      mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+      const result = await getTopSearch(9)
+
+      expect(result).toBeNull()
+    })
+
+    it('returns null when request times out (AbortError)', async () => {
+      const abortError = new Error('The operation was aborted')
+      abortError.name = 'AbortError'
+      mockFetch.mockRejectedValueOnce(abortError)
+
+      const result = await getTopSearch(9)
+
+      expect(result).toBeNull()
+    })
+
+    it('returns empty data array when API reports empty results', async () => {
+      const emptyResponse: TopSearchResponse = {
+        ok: true,
+        data: [],
+        pagination: { total: 0, count: 0, offset: 0, limit: 9 },
+      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => emptyResponse,
+      })
+
+      const result = await getTopSearch(9)
+
+      expect(result).not.toBeNull()
+      expect(result?.data).toEqual([])
     })
   })
 })

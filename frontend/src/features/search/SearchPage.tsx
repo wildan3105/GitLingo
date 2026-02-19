@@ -6,6 +6,7 @@
 import { useSearch } from './hooks/useSearch'
 import { SearchBar } from './components/SearchBar'
 import { ResultHeader } from './components/ResultHeader'
+import { MostSearched } from './components/MostSearched'
 import { ChartPanel } from '../charts/components/ChartPanel'
 import { Card } from '../../shared/components/Card'
 import { EmptyState } from '../../shared/components/EmptyState'
@@ -38,6 +39,7 @@ export function SearchPage() {
     includeUnknownLanguage,
     setIncludeUnknownLanguage,
     handleSearch,
+    handleSearchFor,
     handleReset,
     isLoading,
     error,
@@ -135,6 +137,7 @@ export function SearchPage() {
     return (
       <Card>
         <EmptyState
+          className="pb-4"
           title="Search a GitHub Username"
           description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
           icon={
@@ -153,6 +156,7 @@ export function SearchPage() {
             </svg>
           }
         />
+        <MostSearched onSearch={handleSearchFor} />
       </Card>
     )
   }

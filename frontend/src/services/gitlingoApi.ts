@@ -4,7 +4,7 @@
  */
 
 import { apiClient } from './apiClient'
-import type { ApiResponse } from '../contracts/api'
+import type { ApiResponse, TopSearchResponse } from '../contracts/api'
 
 /**
  * Search for language statistics for a given username
@@ -23,6 +23,27 @@ import type { ApiResponse } from '../contracts/api'
  * }
  * ```
  */
+/**
+ * Fetch the most-searched usernames leaderboard
+ *
+ * Always resolves — returns null on network failure (component falls back to empty state).
+ * The API itself always returns HTTP 200, so null only occurs on a fetch-level error.
+ *
+ * @param limit - Max entries to return (default 9)
+ */
+export async function getTopSearch(limit = 9): Promise<TopSearchResponse | null> {
+  try {
+    const params = new URLSearchParams({
+      provider: 'github',
+      limit: String(limit),
+      offset: '0',
+    })
+    return await apiClient.get<TopSearchResponse>(`/api/v1/topsearch?${params.toString()}`)
+  } catch {
+    return null
+  }
+}
+
 export async function searchLanguageStatistics(username: string): Promise<ApiResponse> {
   try {
     // Build query params
