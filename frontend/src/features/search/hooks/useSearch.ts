@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { searchLanguageStatistics } from '../../../services/gitlingoApi'
 import { validateUsername } from '../utils/validation'
 import type { ApiResponse, SuccessResponse, ErrorResponse } from '../../../contracts/api'
@@ -81,9 +81,19 @@ export function useSearch(): UseSearchReturn {
   const [includeForks, setIncludeForks] = useState(false)
   const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(false)
 
+  const queryClient = useQueryClient()
+
   // React Query mutation for API call
   const mutation = useMutation<ApiResponse, Error, { username: string }>({
     mutationFn: ({ username }) => searchLanguageStatistics(username),
+    onSuccess: (data) => {
+      // Invalidate the top-search cache so the leaderboard reflects the new hit
+      // count the next time the empty state is shown. React Query refetches in
+      // the background, so there is no loading flash for the user.
+      if (isSuccessResponse(data)) {
+        queryClient.invalidateQueries({ queryKey: ['topSearch'] })
+      }
+    },
   })
 
   /**

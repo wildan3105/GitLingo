@@ -25,6 +25,22 @@ function createWrapper() {
   }
 }
 
+// Variant that also exposes the QueryClient for spy assertions
+function createWrapperWithClient() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+      mutations: { retry: false },
+    },
+  })
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+
+  return { queryClient, wrapper }
+}
+
 describe('useSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -678,6 +694,85 @@ describe('useSearch', () => {
       })
 
       expect(searchSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('cache invalidation', () => {
+    const makeSuccessResponse = (): ApiResponse => ({
+      ok: true,
+      provider: 'github',
+      profile: {
+        username: 'torvalds',
+        name: null,
+        type: 'user',
+        providerUserId: '1024',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/1024?v=4',
+      },
+      data: [],
+      metadata: { generatedAt: '2026-02-19T00:00:00.000Z', unit: 'repos', limit: 0 },
+    })
+
+    const makeErrorResponse = (): ApiResponse => ({
+      ok: false,
+      provider: 'github',
+      error: { code: 'user_not_found', message: 'Not found' },
+      meta: { generatedAt: '2026-02-19T00:00:00.000Z' },
+    })
+
+    it('invalidates the topSearch query after a successful search', async () => {
+      const { queryClient, wrapper } = createWrapperWithClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(makeSuccessResponse())
+
+      const { result } = renderHook(() => useSearch(), { wrapper })
+
+      act(() => {
+        result.current.handleSearchFor('torvalds')
+      })
+
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['topSearch'] })
+      })
+    })
+
+    it('does NOT invalidate topSearch cache when the search returns an error', async () => {
+      const { queryClient, wrapper } = createWrapperWithClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(makeErrorResponse())
+
+      const { result } = renderHook(() => useSearch(), { wrapper })
+
+      act(() => {
+        result.current.handleSearchFor('nobody')
+      })
+
+      await waitFor(() => {
+        expect(result.current.error).not.toBeNull()
+      })
+
+      expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['topSearch'] })
+    })
+
+    it('invalidates topSearch when search is triggered via handleSearch too', async () => {
+      const { queryClient, wrapper } = createWrapperWithClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(makeSuccessResponse())
+
+      const { result } = renderHook(() => useSearch(), { wrapper })
+
+      act(() => {
+        result.current.setUsername('torvalds')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
+
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['topSearch'] })
+      })
     })
   })
 })
