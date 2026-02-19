@@ -137,7 +137,7 @@ export function SearchPage() {
     return (
       <Card>
         <EmptyState
-          className="pb-4"
+          className="pt-6 pb-3"
           title="Search a GitHub Username"
           description="Enter a GitHub username or organization name"
           icon={

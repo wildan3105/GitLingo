@@ -35,7 +35,7 @@ function UserChip({ item, onSearch }: UserChipProps) {
       <button
         onClick={() => onSearch(item.username)}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-2 px-3 py-1.5 bg-white border border-secondary-200 rounded-full text-sm font-medium text-secondary-700 hover:border-primary-400 hover:text-primary-700 hover:shadow-md hover:scale-105 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 active:scale-95 cursor-pointer"
+        className="flex items-center gap-3 px-5 py-2.5 bg-white border border-secondary-200 rounded-xl text-sm font-medium text-secondary-700 hover:border-primary-400 hover:text-primary-700 hover:shadow-md hover:scale-105 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 active:scale-95 cursor-pointer"
         aria-label={`Search for ${item.username}`}
         aria-describedby={tooltipId}
       >
@@ -43,18 +43,18 @@ function UserChip({ item, onSearch }: UserChipProps) {
           <img
             src={item.avatarUrl}
             alt=""
-            className="w-5 h-5 rounded-full flex-shrink-0"
+            className="w-7 h-7 rounded-full flex-shrink-0"
             aria-hidden="true"
           />
         ) : (
           <span
-            className="w-5 h-5 rounded-full bg-secondary-200 flex items-center justify-center text-xs font-semibold text-secondary-600 flex-shrink-0"
+            className="w-7 h-7 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-semibold text-secondary-600 flex-shrink-0"
             aria-hidden="true"
           >
             {item.username[0].toUpperCase()}
           </span>
         )}
-        <span className="max-w-[120px] truncate">{item.username}</span>
+        <span className="max-w-[140px] truncate">@{item.username}</span>
       </button>
 
       <span
@@ -87,14 +87,14 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
       <p className="text-sm text-secondary-500 text-center">
         Need some inspiration? Here are our &ldquo;most searched&rdquo; users on GitLingo:
       </p>
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {topRow.map((item) => (
             <UserChip key={item.username} item={item} onSearch={onSearch} />
           ))}
         </div>
         {bottomRow.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-3">
             {bottomRow.map((item) => (
               <UserChip key={item.username} item={item} onSearch={onSearch} />
             ))}

@@ -85,13 +85,13 @@ describe('MostSearched', () => {
       })
     })
 
-    it('renders one chip per item', async () => {
+    it('renders one chip per item with @ prefix', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
       renderMostSearched()
       await waitFor(() => {
-        expect(screen.getByText('alice')).toBeInTheDocument()
-        expect(screen.getByText('bob')).toBeInTheDocument()
-        expect(screen.getByText('carol')).toBeInTheDocument()
+        expect(screen.getByText('@alice')).toBeInTheDocument()
+        expect(screen.getByText('@bob')).toBeInTheDocument()
+        expect(screen.getByText('@carol')).toBeInTheDocument()
       })
     })
 
@@ -210,7 +210,7 @@ describe('MostSearched', () => {
       const onSearch = vi.fn()
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('torvalds'))
+      await waitFor(() => screen.getByText('@torvalds'))
 
       await userEvent.click(screen.getByRole('button', { name: /search for torvalds/i }))
 
@@ -222,7 +222,7 @@ describe('MostSearched', () => {
       const onSearch = vi.fn()
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('octocat'))
+      await waitFor(() => screen.getByText('@octocat'))
 
       const chip = screen.getByRole('button', { name: /search for octocat/i })
       fireEvent.keyDown(chip, { key: 'Enter' })
@@ -234,7 +234,7 @@ describe('MostSearched', () => {
       const onSearch = vi.fn()
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('octocat'))
+      await waitFor(() => screen.getByText('@octocat'))
 
       const chip = screen.getByRole('button', { name: /search for octocat/i })
       fireEvent.keyDown(chip, { key: ' ' })
@@ -246,7 +246,7 @@ describe('MostSearched', () => {
       const onSearch = vi.fn()
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('octocat'))
+      await waitFor(() => screen.getByText('@octocat'))
 
       const chip = screen.getByRole('button', { name: /search for octocat/i })
       fireEvent.keyDown(chip, { key: 'Tab' })
