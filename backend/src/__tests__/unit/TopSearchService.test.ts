@@ -193,6 +193,38 @@ describe('TopSearchService', () => {
       expect(result.pagination.limit).toBe(5);
     });
 
+    it('should return only one entry when limit=1', () => {
+      const port = new MockTopSearchPort();
+      port.findResult = {
+        data: [makeTopSearch({ hit: 10 })], // port already applies limit — return 1 row
+        total: 5,
+      };
+      const service = new TopSearchService(port);
+
+      const result = service.getTopSearches({ provider: 'github', limit: 1, offset: 0 });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.limit).toBe(1);
+      expect(result.pagination.count).toBe(1);
+    });
+
+    it('should reflect offset=1 in pagination even when port skips top result', () => {
+      const port = new MockTopSearchPort();
+      // Simulates port returning the 2nd-place entry after offset=1
+      port.findResult = {
+        data: [makeTopSearch({ username: 'second', hit: 5 })],
+        total: 3,
+      };
+      const service = new TopSearchService(port);
+
+      const result = service.getTopSearches({ provider: 'github', limit: 10, offset: 1 });
+
+      expect(result.pagination.offset).toBe(1);
+      expect(result.data[0]!.username).toBe('second');
+      expect(result.pagination.total).toBe(3);
+      expect(result.pagination.count).toBe(1);
+    });
+
     it('should map domain model fields to TopSearchEntry correctly', () => {
       const port = new MockTopSearchPort();
       port.findResult = {

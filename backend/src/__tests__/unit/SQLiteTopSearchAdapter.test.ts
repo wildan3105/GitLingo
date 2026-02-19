@@ -240,5 +240,21 @@ describe('SQLiteTopSearchAdapter', () => {
       expect(result.total).toBe(1); // total is still the full count
       db.close();
     });
+
+    it('should order tied hit counts by username ASC as tiebreaker', () => {
+      const { adapter, db } = makeAdapter();
+
+      // All three have hit=1; tiebreaker is username ASC
+      adapter.upsert({ provider: 'github', username: 'zebra', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'apple', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'mango', avatarUrl: null });
+
+      const result = adapter.findTopSearches({ provider: 'github', limit: 10, offset: 0 });
+
+      expect(result.data[0]!.username).toBe('apple');
+      expect(result.data[1]!.username).toBe('mango');
+      expect(result.data[2]!.username).toBe('zebra');
+      db.close();
+    });
   });
 });

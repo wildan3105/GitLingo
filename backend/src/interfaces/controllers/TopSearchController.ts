@@ -28,7 +28,13 @@ export class TopSearchController {
         provider = DEFAULT_PROVIDER,
       } = req.query as unknown as TopSearchQuery;
 
-      const result = this.topSearchService.getTopSearches({ provider, limit, offset });
+      // Coerce to numbers: the Zod middleware validates but Express req.query values are
+      // always strings; the service and pagination must receive numeric types.
+      const result = this.topSearchService.getTopSearches({
+        provider,
+        limit: Number(limit),
+        offset: Number(offset),
+      });
 
       res.status(200).json(result);
     } catch (error) {

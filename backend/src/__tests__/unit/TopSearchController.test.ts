@@ -5,6 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { TopSearchController } from '../../interfaces/controllers/TopSearchController';
 import { TopSearchService } from '../../application/services/TopSearchService';
+import { validateTopSearchQuery } from '../../interfaces/validation/topSearchSchema';
 
 describe('TopSearchController', () => {
   let jsonMock: jest.Mock;
@@ -73,7 +74,7 @@ describe('TopSearchController', () => {
       });
     });
 
-    it('should pass limit, offset, and provider through to the service', async () => {
+    it('should pass limit, offset, and provider through to the service as numbers', async () => {
       mockRequest.query = { limit: '5', offset: '20', provider: 'github' };
       const controller = new TopSearchController(mockTopSearchService);
 
@@ -81,8 +82,8 @@ describe('TopSearchController', () => {
 
       expect(mockTopSearchService.getTopSearches).toHaveBeenCalledWith({
         provider: 'github',
-        limit: '5', // raw query string — coercion happens in validation middleware
-        offset: '20',
+        limit: 5, // coerced to number in the controller
+        offset: 20,
       });
     });
 
@@ -106,6 +107,84 @@ describe('TopSearchController', () => {
       await controller.getTopSearches(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(boom);
+      expect(statusMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('validateTopSearchQuery middleware', () => {
+    function makeValidationMocks(): {
+      jsonMock: jest.Mock;
+      statusMock: jest.Mock;
+      req: Partial<Request>;
+      res: Partial<Response>;
+      next: jest.Mock;
+    } {
+      const jsonMock = jest.fn();
+      const statusMock = jest.fn().mockReturnValue({ json: jsonMock });
+      return {
+        jsonMock,
+        statusMock,
+        req: { query: {} },
+        res: { status: statusMock },
+        next: jest.fn(),
+      };
+    }
+
+    it('should return 400 when limit exceeds 100', () => {
+      const { jsonMock, statusMock, res, next } = makeValidationMocks();
+      const req = { query: { limit: '200' } } as Partial<Request>;
+
+      validateTopSearchQuery(req as Request, res as Response, next as NextFunction);
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ok: false,
+          error: expect.objectContaining({ code: 'validation_error' }),
+        })
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when limit is 0', () => {
+      const { jsonMock, statusMock, res, next } = makeValidationMocks();
+      const req = { query: { limit: '0' } } as Partial<Request>;
+
+      validateTopSearchQuery(req as Request, res as Response, next as NextFunction);
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when offset is negative', () => {
+      const { jsonMock, statusMock, res, next } = makeValidationMocks();
+      const req = { query: { offset: '-1' } } as Partial<Request>;
+
+      validateTopSearchQuery(req as Request, res as Response, next as NextFunction);
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should call next() when all params are valid', () => {
+      const { statusMock, res, next } = makeValidationMocks();
+      const req = { query: { limit: '5', offset: '10', provider: 'github' } } as Partial<Request>;
+
+      validateTopSearchQuery(req as Request, res as Response, next as NextFunction);
+
+      expect(next).toHaveBeenCalledWith();
+      expect(statusMock).not.toHaveBeenCalled();
+    });
+
+    it('should call next() with no params (all defaults are valid)', () => {
+      const { statusMock, res, next } = makeValidationMocks();
+      const req = { query: {} } as Partial<Request>;
+
+      validateTopSearchQuery(req as Request, res as Response, next as NextFunction);
+
+      expect(next).toHaveBeenCalledWith();
       expect(statusMock).not.toHaveBeenCalled();
     });
   });
