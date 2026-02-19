@@ -12,6 +12,7 @@ interface Config {
   githubToken: string | undefined;
   graphqlURL: string | undefined;
   logLevel: LogLevel;
+  dbPath: string;
 }
 
 /**
@@ -69,6 +70,7 @@ export const config: Config = {
   githubToken: process.env.GITHUB_TOKEN,
   graphqlURL: process.env.GRAPHQL_URL,
   logLevel: getLogLevel(),
+  dbPath: process.env.DB_PATH ?? './data/gitlingo.db',
 };
 
 /**

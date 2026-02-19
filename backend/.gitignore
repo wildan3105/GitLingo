@@ -36,3 +36,6 @@ coverage/
 *.temp
 .cache/
 debug/
+
+# SQLite database files
+data/
