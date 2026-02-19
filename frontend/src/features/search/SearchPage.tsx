@@ -139,7 +139,7 @@ export function SearchPage() {
         <EmptyState
           className="pb-4"
           title="Search a GitHub Username"
-          description="Enter a GitHub username to visualize their programming language statistics with beautiful charts."
+          description="Enter a GitHub username or organization name"
           icon={
             <svg
               className="w-16 h-16 text-secondary-400"

@@ -20,6 +20,9 @@ type UserChipProps = {
 }
 
 function UserChip({ item, onSearch }: UserChipProps) {
+  const tooltipId = `chip-tooltip-${item.username}`
+  const hitLabel = `${item.hit} ${item.hit === 1 ? 'hit' : 'hits'}`
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -28,29 +31,40 @@ function UserChip({ item, onSearch }: UserChipProps) {
   }
 
   return (
-    <button
-      onClick={() => onSearch(item.username)}
-      onKeyDown={handleKeyDown}
-      className="flex items-center gap-2 px-3 py-1.5 bg-white border border-secondary-200 rounded-full text-sm font-medium text-secondary-700 hover:border-primary-400 hover:text-primary-700 hover:shadow-md hover:scale-105 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 active:scale-95 cursor-pointer"
-      aria-label={`Search for ${item.username}`}
-    >
-      {item.avatarUrl ? (
-        <img
-          src={item.avatarUrl}
-          alt=""
-          className="w-5 h-5 rounded-full flex-shrink-0"
-          aria-hidden="true"
-        />
-      ) : (
-        <span
-          className="w-5 h-5 rounded-full bg-secondary-200 flex items-center justify-center text-xs font-semibold text-secondary-600 flex-shrink-0"
-          aria-hidden="true"
-        >
-          {item.username[0].toUpperCase()}
-        </span>
-      )}
-      <span className="max-w-[120px] truncate">{item.username}</span>
-    </button>
+    <div className="relative group">
+      <button
+        onClick={() => onSearch(item.username)}
+        onKeyDown={handleKeyDown}
+        className="flex items-center gap-2 px-3 py-1.5 bg-white border border-secondary-200 rounded-full text-sm font-medium text-secondary-700 hover:border-primary-400 hover:text-primary-700 hover:shadow-md hover:scale-105 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 active:scale-95 cursor-pointer"
+        aria-label={`Search for ${item.username}`}
+        aria-describedby={tooltipId}
+      >
+        {item.avatarUrl ? (
+          <img
+            src={item.avatarUrl}
+            alt=""
+            className="w-5 h-5 rounded-full flex-shrink-0"
+            aria-hidden="true"
+          />
+        ) : (
+          <span
+            className="w-5 h-5 rounded-full bg-secondary-200 flex items-center justify-center text-xs font-semibold text-secondary-600 flex-shrink-0"
+            aria-hidden="true"
+          >
+            {item.username[0].toUpperCase()}
+          </span>
+        )}
+        <span className="max-w-[120px] truncate">{item.username}</span>
+      </button>
+
+      <span
+        id={tooltipId}
+        role="tooltip"
+        className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {hitLabel}
+      </span>
+    </div>
   )
 }
 

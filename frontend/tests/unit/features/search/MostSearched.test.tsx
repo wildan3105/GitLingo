@@ -125,6 +125,56 @@ describe('MostSearched', () => {
         expect(screen.getByRole('button', { name: 'Search for testuser' })).toBeInTheDocument()
       })
     })
+
+    it('shows hit count in tooltip (singular: "1 hit")', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue({
+        ok: true,
+        data: [
+          {
+            username: 'torvalds',
+            provider: 'github',
+            hit: 1,
+            avatarUrl: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-02-01T00:00:00.000Z',
+          },
+        ],
+        pagination: { total: 1, count: 1, offset: 0, limit: 9 },
+      })
+      renderMostSearched()
+      await waitFor(() => {
+        expect(screen.getByRole('tooltip')).toHaveTextContent('1 hit')
+      })
+    })
+
+    it('shows hit count in tooltip (plural: "n hits")', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue({
+        ok: true,
+        data: [
+          {
+            username: 'torvalds',
+            provider: 'github',
+            hit: 42,
+            avatarUrl: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-02-01T00:00:00.000Z',
+          },
+        ],
+        pagination: { total: 1, count: 1, offset: 0, limit: 9 },
+      })
+      renderMostSearched()
+      await waitFor(() => {
+        expect(screen.getByRole('tooltip')).toHaveTextContent('42 hits')
+      })
+    })
+
+    it('renders one tooltip per chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
+      renderMostSearched()
+      await waitFor(() => {
+        expect(screen.getAllByRole('tooltip')).toHaveLength(3)
+      })
+    })
   })
 
   describe('inverted pyramid layout', () => {
