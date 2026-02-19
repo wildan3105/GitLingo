@@ -80,19 +80,20 @@ describe('SearchBar', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows validation error on blur with empty username', async () => {
+  it('does not show a validation error on blur with empty username', async () => {
     const user = userEvent.setup()
 
     render(<SearchBar {...defaultProps} value="" />)
 
     const input = screen.getByLabelText('Username')
 
-    // Focus and blur without typing
+    // Focus and blur without typing — empty field errors only surface on submit,
+    // not on blur, so that clicking a chip never flashes "Username is required".
     await user.click(input)
     await user.tab()
 
     await waitFor(() => {
-      expect(screen.getByText('Username is required')).toBeInTheDocument()
+      expect(screen.queryByText('Username is required')).not.toBeInTheDocument()
     })
   })
 
@@ -133,23 +134,29 @@ describe('SearchBar', () => {
     const user = userEvent.setup()
     const handleChange = vi.fn()
 
-    render(<SearchBar {...defaultProps} value="" onChange={handleChange} />)
+    render(<SearchBar {...defaultProps} value="invalid@user" onChange={handleChange} />)
 
     const input = screen.getByLabelText('Username')
 
-    // Trigger validation error
+    // Trigger validation error via blur on non-empty invalid value
     await user.click(input)
     await user.tab()
 
     await waitFor(() => {
-      expect(screen.getByText('Username is required')).toBeInTheDocument()
+      expect(
+        screen.getByText(/can only contain alphanumeric characters and hyphens/i)
+      ).toBeInTheDocument()
     })
 
-    // Start typing
+    // Start typing — error clears immediately
     await user.click(input)
     await user.type(input, 'a')
 
-    // Error should be cleared (note: it won't show in DOM since we're not actually updating value prop)
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/can only contain alphanumeric characters and hyphens/i)
+      ).not.toBeInTheDocument()
+    })
     expect(handleChange).toHaveBeenCalled()
   })
 
@@ -191,9 +198,8 @@ describe('SearchBar', () => {
 
     const input = screen.getByLabelText('Username')
 
-    // Trigger error
-    await user.click(input)
-    await user.tab()
+    // Trigger error via submit attempt (Enter on empty still shows "Username is required")
+    await user.type(input, '{Enter}')
 
     await waitFor(() => {
       expect(input).toHaveAttribute('aria-invalid', 'true')
@@ -207,8 +213,8 @@ describe('SearchBar', () => {
     render(<SearchBar {...defaultProps} value="" />)
 
     const input = screen.getByLabelText('Username')
-    await user.click(input)
-    await user.tab()
+    // Trigger error via submit attempt (Enter on empty still shows "Username is required")
+    await user.type(input, '{Enter}')
 
     await waitFor(() => {
       const errorMessage = screen.getByRole('alert')
@@ -255,6 +261,23 @@ describe('SearchBar', () => {
 
       unmount()
     }
+  })
+
+  it('clears error state when value prop changes to chip username after submit error', async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(<SearchBar {...defaultProps} value="" />)
+
+    const input = screen.getByLabelText('Username')
+
+    // Trigger "Username is required" via Enter
+    await user.type(input, '{Enter}')
+    expect(screen.getByText('Username is required')).toBeInTheDocument()
+
+    // Simulate chip click: parent updates value prop to the chip's username
+    rerender(<SearchBar {...defaultProps} value="octocat" />)
+
+    // Error should clear immediately — no flash of red while valid search runs
+    expect(screen.queryByText('Username is required')).not.toBeInTheDocument()
   })
 
   it('rejects invalid GitHub usernames', async () => {

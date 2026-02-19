@@ -55,7 +55,12 @@ export function SearchBar({ value, onChange, onSubmit, isLoading = false, error 
   const handleBlur = () => {
     setTouched(true)
 
-    // Validate on blur
+    // Don't validate an empty field on blur — that error only surfaces when the
+    // user explicitly tries to submit (via handleSearch / the Search button).
+    // Validating empty on blur would flash "Username is required" in the brief
+    // window between the input losing focus and a chip's click handler running.
+    if (!value) return
+
     const validation = validateUsername(value)
     if (!validation.isValid) {
       setValidationError(validation.error)
