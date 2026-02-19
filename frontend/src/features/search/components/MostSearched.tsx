@@ -17,13 +17,23 @@ type MostSearchedProps = {
 
 type UserChipProps = {
   item: TopSearchItem
+  /** 0-based rank index; used to compute opacity gradient */
+  rank: number
+  /** Total number of chips rendered; used to compute opacity gradient */
+  total: number
   onSearch: (username: string) => void
   onNavigate: (username: string, direction: 'prev' | 'next') => void
 }
 
-function UserChip({ item, onSearch, onNavigate }: UserChipProps) {
+/** Maximum opacity drop applied to the lowest-ranked chip (0 = no fade, 1 = invisible). */
+const OPACITY_RANGE = 0.5
+
+function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
   const tooltipId = `chip-tooltip-${item.username}`
   const hitLabel = `${item.hit} ${item.hit === 1 ? 'hit' : 'hits'}`
+  // Fade from 1.0 (rank 1) down to (1 - OPACITY_RANGE) for the last rank.
+  // When there is only one chip there is nothing to rank against, so keep full opacity.
+  const opacity = total <= 1 ? 1 : 1 - (rank / (total - 1)) * OPACITY_RANGE
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -39,7 +49,7 @@ function UserChip({ item, onSearch, onNavigate }: UserChipProps) {
   }
 
   return (
-    <div className="relative group">
+    <div className="relative group" style={{ opacity }}>
       <button
         onClick={() => onSearch(item.username)}
         onKeyDown={handleKeyDown}
@@ -51,12 +61,12 @@ function UserChip({ item, onSearch, onNavigate }: UserChipProps) {
           <img
             src={item.avatarUrl}
             alt=""
-            className="w-7 h-7 rounded-full flex-shrink-0"
+            className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-secondary-200"
             aria-hidden="true"
           />
         ) : (
           <span
-            className="w-7 h-7 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-semibold text-secondary-600 flex-shrink-0"
+            className="w-7 h-7 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-semibold text-secondary-600 flex-shrink-0 ring-1 ring-secondary-200"
             aria-hidden="true"
           >
             {item.username[0].toUpperCase()}
@@ -112,10 +122,12 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
       </p>
       <div className="flex flex-col items-center gap-3">
         <div className="flex flex-wrap justify-center gap-3">
-          {topRow.map((item) => (
+          {topRow.map((item, i) => (
             <UserChip
               key={item.username}
               item={item}
+              rank={i}
+              total={allItems.length}
               onSearch={onSearch}
               onNavigate={handleChipNavigate}
             />
@@ -123,10 +135,12 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
         </div>
         {bottomRow.length > 0 && (
           <div className="flex flex-wrap justify-center gap-3">
-            {bottomRow.map((item) => (
+            {bottomRow.map((item, i) => (
               <UserChip
                 key={item.username}
                 item={item}
+                rank={topRow.length + i}
+                total={allItems.length}
                 onSearch={onSearch}
                 onNavigate={handleChipNavigate}
               />

@@ -363,4 +363,78 @@ describe('MostSearched', () => {
       expect(onSearch).toHaveBeenCalledWith('bob')
     })
   })
+
+  describe('rank opacity gradient', () => {
+    it('first chip has opacity 1 (highest rank)', async () => {
+      const usernames = Array.from({ length: 9 }, (_, i) => `user${i}`)
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(usernames))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@user0'))
+
+      const firstWrapper = screen.getAllByRole('button')[0].parentElement as HTMLElement
+      expect(parseFloat(firstWrapper.style.opacity)).toBe(1)
+    })
+
+    it('last chip has lower opacity than first chip', async () => {
+      const usernames = Array.from({ length: 9 }, (_, i) => `user${i}`)
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(usernames))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@user0'))
+
+      const buttons = screen.getAllByRole('button')
+      const firstOpacity = parseFloat((buttons[0].parentElement as HTMLElement).style.opacity)
+      const lastOpacity = parseFloat(
+        (buttons[buttons.length - 1].parentElement as HTMLElement).style.opacity
+      )
+      expect(firstOpacity).toBeGreaterThan(lastOpacity)
+    })
+
+    it('opacities strictly decrease from first to last', async () => {
+      const usernames = Array.from({ length: 9 }, (_, i) => `user${i}`)
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(usernames))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@user0'))
+
+      const opacities = screen
+        .getAllByRole('button')
+        .map((btn) => parseFloat((btn.parentElement as HTMLElement).style.opacity))
+
+      for (let i = 1; i < opacities.length; i++) {
+        expect(opacities[i]).toBeLessThan(opacities[i - 1])
+      }
+    })
+
+    it('single chip has opacity 1 (no ranking contrast needed)', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['solo']))
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@solo'))
+
+      const wrapper = screen.getByRole('button').parentElement as HTMLElement
+      expect(parseFloat(wrapper.style.opacity)).toBe(1)
+    })
+  })
+
+  describe('avatar border ring', () => {
+    it('avatar image has a ring border', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
+        makeResponse(['torvalds'], { avatarUrl: 'https://avatars.github.com/u/1' })
+      )
+      renderMostSearched()
+      await waitFor(() => screen.getByText('@torvalds'))
+
+      const img = document.querySelector('img[aria-hidden="true"]') as HTMLImageElement
+      expect(img.className).toContain('ring-1')
+    })
+
+    it('fallback initial span has a ring border', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
+        makeResponse(['torvalds'], { avatarUrl: null })
+      )
+      renderMostSearched()
+      await waitFor(() => screen.getByText('T'))
+
+      const initial = screen.getByText('T')
+      expect(initial.className).toContain('ring-1')
+    })
+  })
 })
