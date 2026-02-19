@@ -181,6 +181,7 @@ export const LANGUAGE_COLORS: Record<string, string> = {
   HCL: '#844FBA',
   HIP: '#4F3A4F',
   HLSL: '#aace60',
+  HTML: '#e44b23',
   Hack: '#878787',
   Harbour: '#0e60e3',
   Hare: '#9d7424',

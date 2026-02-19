@@ -106,8 +106,8 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
   }
 
   return (
-    <div ref={containerRef} className="border-t border-secondary-100 pt-5 space-y-3">
-      <p className="text-sm text-secondary-500 text-center">
+    <div ref={containerRef} className="border-t border-secondary-100 pt-3 space-y-3">
+      <p className="text-sm font-medium text-secondary-500 text-center">
         Most searched GitHub users on GitLingo:
       </p>
       <div className="flex flex-col items-center gap-3">

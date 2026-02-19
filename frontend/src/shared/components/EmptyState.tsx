@@ -54,7 +54,7 @@ export function EmptyState({ title, description, icon, action, className = '' }:
 
       <h3 className="text-lg font-semibold text-secondary-900">{title}</h3>
 
-      {description && <p className="mt-2 text-sm text-secondary-600 max-w-md">{description}</p>}
+      {description && <p className="mt-2 text-xs text-secondary-600 max-w-md">{description}</p>}
 
       {action && (
         <div className="mt-6">
