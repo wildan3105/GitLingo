@@ -97,13 +97,20 @@ export function useSearch(): UseSearchReturn {
   })
 
   /**
-   * Custom setUsername that resets error/data state when user types
+   * Custom setUsername that resets error/data state when user types.
+   * When the field is cleared, also resets the URL to root so the address
+   * bar always matches the visible UI state.
    */
   const setUsername = (value: string) => {
     setUsernameState(value)
     // Clear previous search results and errors when user starts typing
     mutation.reset()
     setValidationError(null)
+    // When the field is cleared, navigate back to root so the URL doesn't
+    // linger at /github/<username> while the empty-state UI is showing.
+    if (!value && window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/')
+    }
   }
 
   /**

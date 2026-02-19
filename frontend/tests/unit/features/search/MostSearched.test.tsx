@@ -470,6 +470,50 @@ describe('MostSearched', () => {
     })
   })
 
+  describe('tooltip positioning', () => {
+    it('tooltip has z-10 so it stacks above neighboring chips', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
+      const { container } = renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const tooltips = container.querySelectorAll('[role="tooltip"]')
+      tooltips.forEach((tooltip) => {
+        expect(tooltip.className).toContain('z-10')
+      })
+    })
+
+    it('tooltip is pointer-events-none so it never blocks chip clicks', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
+      const { container } = renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const tooltips = container.querySelectorAll('[role="tooltip"]')
+      tooltips.forEach((tooltip) => {
+        expect(tooltip.className).toContain('pointer-events-none')
+      })
+    })
+
+    it('tooltip is consistently placed above the chip (negative top offset)', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
+      const { container } = renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const tooltip = container.querySelector('[role="tooltip"]') as HTMLElement
+      // -top-8 class means 2rem above the chip — confirms consistent upward placement
+      expect(tooltip.className).toContain('-top-8')
+    })
+
+    it('tooltip is horizontally centered on its chip', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
+      const { container } = renderMostSearched()
+      await waitFor(() => screen.getByText('@alice'))
+
+      const tooltip = container.querySelector('[role="tooltip"]') as HTMLElement
+      expect(tooltip.className).toContain('left-1/2')
+      expect(tooltip.className).toContain('-translate-x-1/2')
+    })
+  })
+
   describe('avatar border ring', () => {
     it('avatar image has a ring border', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(

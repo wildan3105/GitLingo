@@ -551,6 +551,39 @@ describe('useSearch', () => {
       )
     })
 
+    it('resets URL to root when username is cleared after a search', () => {
+      // Simulate the address bar already showing a user result page
+      window.history.pushState({}, '', '/github/octocat')
+      expect(window.location.pathname).toBe('/github/octocat')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // User clears the search field
+      act(() => {
+        result.current.setUsername('')
+      })
+
+      // URL must go back to root so the address bar matches the empty-state UI
+      expect(window.location.pathname).toBe('/')
+    })
+
+    it('does not change URL when typing a non-empty username', () => {
+      window.history.pushState({}, '', '/github/octocat')
+
+      const { result } = renderHook(() => useSearch(), {
+        wrapper: createWrapper(),
+      })
+
+      // Simulate partially editing the username — URL should stay until search succeeds
+      act(() => {
+        result.current.setUsername('oct')
+      })
+
+      expect(window.location.pathname).toBe('/github/octocat')
+    })
+
     it('resets URL to root when handleReset is called', () => {
       // Set URL to a user page
       window.history.pushState({}, '', '/github/testuser')
