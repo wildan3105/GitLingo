@@ -423,7 +423,7 @@ describe('MostSearched', () => {
       await waitFor(() => screen.getByText('@torvalds'))
 
       const img = document.querySelector('img[aria-hidden="true"]') as HTMLImageElement
-      expect(img.className).toContain('ring-1')
+      expect(img.className).toContain('ring-2')
     })
 
     it('fallback initial span has a ring border', async () => {
@@ -434,7 +434,7 @@ describe('MostSearched', () => {
       await waitFor(() => screen.getByText('T'))
 
       const initial = screen.getByText('T')
-      expect(initial.className).toContain('ring-1')
+      expect(initial.className).toContain('ring-2')
     })
   })
 })

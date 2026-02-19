@@ -61,12 +61,12 @@ function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
           <img
             src={item.avatarUrl}
             alt=""
-            className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-secondary-200"
+            className="w-7 h-7 rounded-full flex-shrink-0 ring-2 ring-secondary-300"
             aria-hidden="true"
           />
         ) : (
           <span
-            className="w-7 h-7 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-semibold text-secondary-600 flex-shrink-0 ring-1 ring-secondary-200"
+            className="w-7 h-7 rounded-full bg-secondary-200 flex items-center justify-center text-sm font-semibold text-secondary-600 flex-shrink-0 ring-2 ring-secondary-300"
             aria-hidden="true"
           >
             {item.username[0].toUpperCase()}
