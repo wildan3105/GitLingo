@@ -124,9 +124,9 @@ export class SearchService {
           message: error.message,
           details: {
             ...(error.details ?? { username }),
-            ...(actualError != null && { actual_error: actualError }),
+            ...(actualError != null && { actualError }),
           },
-          ...(error.retryAfter !== undefined && { retry_after_seconds: error.retryAfter }),
+          ...(error.retryAfter !== undefined && { retryAfterSeconds: error.retryAfter }),
         },
         meta: {
           generatedAt,

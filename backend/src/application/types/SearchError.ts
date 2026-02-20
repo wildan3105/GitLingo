@@ -36,7 +36,7 @@ export interface SearchError {
     /**
      * Seconds to wait before retrying (for rate limit errors)
      */
-    retry_after_seconds?: number;
+    retryAfterSeconds?: number;
   };
 
   /**

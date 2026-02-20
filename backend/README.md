@@ -261,7 +261,7 @@ Fetch language statistics for a GitHub user or organization.
     "code": "user_not_found",
     "message": "GitHub user or organization 'nobody' not found",
     "details": {},
-    "retry_after_seconds": 60
+    "retryAfterSeconds": 60
   },
   "meta": {
     "generatedAt": "2026-02-19T01:16:28.050Z"
@@ -269,7 +269,7 @@ Fetch language statistics for a GitHub user or organization.
 }
 ```
 
-> `details` and `retry_after_seconds` are only present on relevant error codes (see table below).
+> `details` and `retryAfterSeconds` are only present on relevant error codes (see table below).
 
 ---
 
@@ -342,7 +342,7 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
 | `user_not_found` | 404 | `/search` | Username doesn't exist on the provider |
 | `invalid_token` | 401 | `/search` | Token is missing or invalid |
 | `insufficient_scopes` | 403 | `/search` | Token lacks required OAuth scopes |
-| `rate_limited` | 403 | `/search` | GitHub rate limit hit — check `retry_after_seconds` |
+| `rate_limited` | 403 | `/search` | GitHub rate limit hit — check `retryAfterSeconds` |
 | `not_implemented` | 501 | `/search` | Provider exists but isn't supported yet (e.g. `gitlab`) |
 | `network_error` | 503 | `/search` | Could not reach the provider |
 | `timeout` | 504 | `/search` | Request to provider timed out |
@@ -355,7 +355,7 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
   "error": {
     "code": "rate_limited",
     "message": "GitHub API rate limit exceeded. Please wait before retrying.",
-    "retry_after_seconds": 187
+    "retryAfterSeconds": 187
   },
   "meta": { "generatedAt": "2026-02-19T01:16:28.050Z" }
 }

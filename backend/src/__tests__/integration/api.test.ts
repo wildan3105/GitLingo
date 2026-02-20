@@ -450,12 +450,12 @@ describe('API Integration Tests', () => {
         ok: false,
         error: {
           code: 'rate_limited',
-          retry_after_seconds: 60,
+          retryAfterSeconds: 60,
         },
       });
     });
 
-    it('should return 403 with correct retry_after_seconds from x-ratelimit-reset header', async () => {
+    it('should return 403 with correct retryAfterSeconds from x-ratelimit-reset header', async () => {
       const resetAt = Math.floor(Date.now() / 1000) + 200;
       const error: any = new Error('API rate limit exceeded');
       error.status = 403;
@@ -469,7 +469,7 @@ describe('API Integration Tests', () => {
         ok: false,
         error: { code: 'rate_limited' },
       });
-      const retryAfter = response.body.error.retry_after_seconds;
+      const retryAfter = response.body.error.retryAfterSeconds;
       expect(retryAfter).toBeGreaterThanOrEqual(198);
       expect(retryAfter).toBeLessThanOrEqual(200);
     });

@@ -192,7 +192,7 @@ describe('SearchService', () => {
       expect(result.provider).toBe('failing-provider');
     });
 
-    it('should not include actual_error in details when ProviderError has no cause', async () => {
+    it('should not include actualError in details when ProviderError has no cause', async () => {
       class FailingProvider implements ProviderPort {
         async fetchRepositories(_username: string): Promise<AccountData> {
           throw new ProviderError({
@@ -215,11 +215,11 @@ describe('SearchService', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
 
-      expect(result.error.details).not.toHaveProperty('actual_error');
+      expect(result.error.details).not.toHaveProperty('actualError');
       expect(result.error.details).toMatchObject({ username: 'testuser' });
     });
 
-    it('should include actual_error with message and status when cause has HTTP error', async () => {
+    it('should include actualError with message and status when cause has HTTP error', async () => {
       class FailingProvider implements ProviderPort {
         async fetchRepositories(_username: string): Promise<AccountData> {
           const cause = Object.assign(new Error('Bad credentials'), { status: 401 });
@@ -246,17 +246,17 @@ describe('SearchService', () => {
 
       expect(result.error.details).toMatchObject({
         username: 'testuser',
-        actual_error: {
+        actualError: {
           message: 'Bad credentials',
           status: 401,
         },
       });
       expect(
-        (result.error.details?.actual_error as Record<string, unknown>)?.errors
+        (result.error.details?.actualError as Record<string, unknown>)?.errors
       ).toBeUndefined();
     });
 
-    it('should include actual_error with message and errors when cause has GraphQL errors', async () => {
+    it('should include actualError with message and errors when cause has GraphQL errors', async () => {
       class FailingProvider implements ProviderPort {
         async fetchRepositories(_username: string): Promise<AccountData> {
           const cause = Object.assign(new Error('GraphQL error'), {
@@ -285,17 +285,17 @@ describe('SearchService', () => {
 
       expect(result.error.details).toMatchObject({
         username: 'testuser',
-        actual_error: {
+        actualError: {
           message: 'GraphQL error',
           errors: [{ type: 'INSUFFICIENT_SCOPES', message: 'Token lacks required scopes.' }],
         },
       });
       expect(
-        (result.error.details?.actual_error as Record<string, unknown>)?.status
+        (result.error.details?.actualError as Record<string, unknown>)?.status
       ).toBeUndefined();
     });
 
-    it('should include actual_error with only message when cause has no errors or status', async () => {
+    it('should include actualError with only message when cause has no errors or status', async () => {
       class FailingProvider implements ProviderPort {
         async fetchRepositories(_username: string): Promise<AccountData> {
           const cause = new Error('Network connection refused');
@@ -322,15 +322,15 @@ describe('SearchService', () => {
 
       expect(result.error.details).toMatchObject({
         username: 'testuser',
-        actual_error: {
+        actualError: {
           message: 'Network connection refused',
         },
       });
       expect(
-        (result.error.details?.actual_error as Record<string, unknown>)?.errors
+        (result.error.details?.actualError as Record<string, unknown>)?.errors
       ).toBeUndefined();
       expect(
-        (result.error.details?.actual_error as Record<string, unknown>)?.status
+        (result.error.details?.actualError as Record<string, unknown>)?.status
       ).toBeUndefined();
     });
   });

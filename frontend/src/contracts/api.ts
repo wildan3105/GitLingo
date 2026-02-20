@@ -75,7 +75,7 @@ export type ErrorDetail = {
     | 'generic'
   message: string
   details?: Record<string, unknown>
-  retry_after_seconds?: number
+  retryAfterSeconds?: number
 }
 
 /**

@@ -100,7 +100,7 @@ export function SearchPage() {
         errorMessage = `We couldn't find a GitHub user or organization with the username "${username}". Please check the spelling and try again.`
         break
       case 'rate_limited':
-        errorMessage = "GitHub's API rate limit has been reached. Please try again in a moment."
+        errorMessage = "Uh oh. GitHub's API rate limit has been reached."
         break
       case 'network_error':
         errorMessage =
@@ -147,7 +147,7 @@ export function SearchPage() {
             code={displayCode}
             message={errorMessage}
             onRetry={handleSearch}
-            retryAfter={error.error.retry_after_seconds}
+            retryAfter={error.error.retryAfterSeconds}
           />
         </Card>
       </div>

@@ -95,7 +95,7 @@ describe('SearchController', () => {
         error: {
           code: 'rate_limited',
           message: 'Rate limited',
-          retry_after_seconds: 60,
+          retryAfterSeconds: 60,
         },
         meta: {
           generatedAt: new Date().toISOString(),

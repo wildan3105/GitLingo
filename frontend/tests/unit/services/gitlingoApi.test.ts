@@ -102,7 +102,7 @@ describe('gitlingoApi', () => {
         error: {
           code: 'rate_limited',
           message: 'API rate limit exceeded',
-          retry_after_seconds: 60,
+          retryAfterSeconds: 60,
         },
         meta: {
           generatedAt: '2026-02-14T02:10:00.000Z',
@@ -120,7 +120,7 @@ describe('gitlingoApi', () => {
       expect(result.ok).toBe(false)
       if (!result.ok) {
         expect(result.error.code).toBe('rate_limited')
-        expect(result.error.retry_after_seconds).toBe(60)
+        expect(result.error.retryAfterSeconds).toBe(60)
       }
     })
 
