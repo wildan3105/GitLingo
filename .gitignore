@@ -33,3 +33,6 @@ coverage/
 
 # internal docs
 internal-docs/
+
+# claude
+CLAUDE.md

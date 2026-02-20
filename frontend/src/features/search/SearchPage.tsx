@@ -24,7 +24,7 @@ import type { LanguageData } from '../../contracts/api'
  *
  * Returns:
  * - pct:      integer percentage of repos with a detected language (0–100)
- * - subtitle: human-readable subtitle including an unclassified hint when relevant
+ * - subtitle: human-readable subtitle including an unknown hint when relevant
  */
 function computeLanguageCoverage(rawData: LanguageData[]): { pct: number; subtitle: string } {
   const total = rawData.reduce((sum, item) => sum + item.value, 0)
@@ -32,7 +32,7 @@ function computeLanguageCoverage(rawData: LanguageData[]): { pct: number; subtit
   const pct = total > 0 ? Math.round(((total - unknown) / total) * 100) : 100
   const subtitle =
     unknown > 0
-      ? `repos have detected language (${unknown} unclassified)`
+      ? `repos have detected language (${unknown} unknown)`
       : 'repos have detected language'
   return { pct, subtitle }
 }

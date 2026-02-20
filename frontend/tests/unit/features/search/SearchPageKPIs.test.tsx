@@ -4,7 +4,7 @@
  * Covers:
  * - Label rendered correctly
  * - Coverage % computed correctly from raw API data
- * - Subtitle shows unclassified hint when unknownCount > 0
+ * - Subtitle shows unknown hint when unknownCount > 0
  * - Subtitle omits hint when unknownCount is 0
  * - 0 % edge case (all repos Unknown)
  * - Empty data edge case (no divide-by-zero, shows 100%)
@@ -132,12 +132,12 @@ describe('SearchPage — Language Coverage KPI', () => {
     expect(screen.getByText('80%')).toBeInTheDocument()
   })
 
-  it('includes the unclassified count in the subtitle when there are Unknown repos', async () => {
+  it('includes the unknown count in the subtitle when there are Unknown repos', async () => {
     await renderAndSearch([
       { key: 'TypeScript', label: 'TypeScript', value: 8, color: '#3178c6' },
       { key: 'Unknown', label: 'Unknown', value: 2, color: '#aaaaaa' },
     ])
-    expect(screen.getByText('repos have detected language (2 unclassified)')).toBeInTheDocument()
+    expect(screen.getByText('repos have detected language (2 unknown)')).toBeInTheDocument()
   })
 
   it('shows 0% when all repos are Unknown', async () => {
