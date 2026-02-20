@@ -14,6 +14,28 @@ import { ErrorState } from '../../shared/components/ErrorState'
 import { Button } from '../../shared/components/Button'
 import { LoadingState } from '../../shared/components/LoadingState'
 import { KPICard } from '../../shared/components/KPICard'
+import type { LanguageData } from '../../contracts/api'
+
+/**
+ * Computes language coverage from the raw (unfiltered) API data.
+ *
+ * Must use raw data — not filteredData — so the "show Unknown" toggle does not
+ * artificially inflate the metric to 100%.
+ *
+ * Returns:
+ * - pct:      integer percentage of repos with a detected language (0–100)
+ * - subtitle: human-readable subtitle including an unclassified hint when relevant
+ */
+function computeLanguageCoverage(rawData: LanguageData[]): { pct: number; subtitle: string } {
+  const total = rawData.reduce((sum, item) => sum + item.value, 0)
+  const unknown = rawData.find((item) => item.key === 'Unknown')?.value ?? 0
+  const pct = total > 0 ? Math.round(((total - unknown) / total) * 100) : 100
+  const subtitle =
+    unknown > 0
+      ? `repos have detected language (${unknown} unclassified)`
+      : 'repos have detected language'
+  return { pct, subtitle }
+}
 
 /**
  * Main search page component
@@ -278,11 +300,9 @@ export function SearchPage() {
                 (item) => item.key !== '__forks__'
               ).length
 
-              // Calculate forks percentage
-              const forksItem = filteredData.data.find((item) => item.key === '__forks__')
-              const forksCount = forksItem?.value || 0
-              const forksPercentage =
-                totalRepos > 0 ? ((forksCount / totalRepos) * 100).toFixed(1) : '0.0'
+              const { pct: coveragePct, subtitle: coverageSubtitle } = computeLanguageCoverage(
+                data!.data
+              )
 
               return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up animate-delay-100">
@@ -355,9 +375,9 @@ export function SearchPage() {
                   />
 
                   <KPICard
-                    label="Forks"
-                    value={`${forksPercentage}%`}
-                    subtitle="of repositories"
+                    label="Language Coverage"
+                    value={`${coveragePct}%`}
+                    subtitle={coverageSubtitle}
                     color="warning"
                     icon={
                       <svg
@@ -370,7 +390,7 @@ export function SearchPage() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                         />
                       </svg>
                     }
