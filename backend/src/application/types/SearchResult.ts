@@ -40,5 +40,17 @@ export interface SearchResult {
      * Unit of measurement (always "repos")
      */
     unit: string;
+
+    /**
+     * ISO timestamp when the result was cached.
+     * Present only when the cache is enabled and the result was stored.
+     */
+    cachedAt?: string;
+
+    /**
+     * ISO timestamp when the cached result expires.
+     * Present only when the cache is enabled and the result was stored.
+     */
+    cachedUntil?: string;
   };
 }
