@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import userEvent from '@testing-library/user-event'
 import { ChartPanel } from '../../../../src/features/charts/components/ChartPanel'
 import { ToastProvider } from '../../../../src/shared/hooks/useToast'
