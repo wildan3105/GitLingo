@@ -259,9 +259,14 @@ describe('SearchPage — Language Coverage KPI', () => {
     expect(screen.getByText('0%')).toBeInTheDocument()
   })
 
-  it('shows 100% when data is empty (no divide-by-zero)', async () => {
+  it('shows 0% when data is empty (no repos analyzed)', async () => {
     await renderAndSearch([])
-    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.getByText('0%')).toBeInTheDocument()
+  })
+
+  it('shows "no repositories analyzed" subtitle when data is empty', async () => {
+    await renderAndSearch([])
+    expect(screen.getByText('no repositories analyzed')).toBeInTheDocument()
   })
 
   it('rounds coverage to the nearest integer', async () => {

@@ -28,8 +28,11 @@ import type { LanguageData } from '../../contracts/api'
  */
 function computeLanguageCoverage(rawData: LanguageData[]): { pct: number; subtitle: string } {
   const total = rawData.reduce((sum, item) => sum + item.value, 0)
+  if (total === 0) {
+    return { pct: 0, subtitle: 'no repositories analyzed' }
+  }
   const unknown = rawData.find((item) => item.key === 'Unknown')?.value ?? 0
-  const pct = total > 0 ? Math.round(((total - unknown) / total) * 100) : 100
+  const pct = Math.round(((total - unknown) / total) * 100)
   const subtitle =
     unknown > 0
       ? `repos have detected language (${unknown} unknown)`
