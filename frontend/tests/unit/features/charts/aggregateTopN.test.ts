@@ -26,7 +26,7 @@ describe('aggregateTopN', () => {
     })
 
     it('handles empty data', () => {
-      const result = aggregateTopN([], 'all')
+      const result = aggregateTopN([], 'top10')
 
       expect(result).toEqual([])
       expect(result.length).toBe(0)
@@ -129,7 +129,7 @@ describe('aggregateTopN', () => {
         { key: 'ts', label: 'TypeScript', value: 50, color: '#3178c6' },
       ]
 
-      const result = aggregateTopN(data, 'all')
+      const result = aggregateTopN(data, 'top10')
 
       expect(result[0]).toEqual(data[0])
       expect(result[1]).toEqual(data[1])
