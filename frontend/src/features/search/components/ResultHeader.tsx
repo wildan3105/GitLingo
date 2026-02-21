@@ -139,7 +139,10 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
       {/* Row 1: Identity + Actions */}
       <div className="flex items-center justify-between gap-4">
         {/* Left: Avatar + Name + Badge */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div
+          data-testid="profile-identity"
+          className="flex items-center gap-3 min-w-0 flex-1 max-w-[50%]"
+        >
           {profile.avatarUrl && (
             <img
               src={profile.avatarUrl}
@@ -149,7 +152,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           )}
 
           <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <h3 className="text-lg font-semibold text-secondary-900 truncate">
+            <h3 className="text-lg font-semibold text-secondary-900 truncate min-w-0">
               {profile.name || profile.username}
             </h3>
 

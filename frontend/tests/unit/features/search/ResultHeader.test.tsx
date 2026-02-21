@@ -767,4 +767,67 @@ describe('ResultHeader', () => {
       expect(right).toContainElement(screen.getByTestId('cache-freshness-chip'))
     })
   })
+
+  // ---------------------------------------------------------------------------
+  // Boundary layout — maximum display name (GitHub allows up to 255 chars)
+  //
+  // The full name must never overflow into the action buttons (Open GitHub /
+  // Copy Link). We enforce this via two CSS guarantees:
+  //   1. profile-identity container: max-w-[50%] — the entire name+badge area
+  //      is capped at half the card width, leaving space for the buttons.
+  //   2. h3 name heading: min-w-0 — overrides the flex default of
+  //      min-width:auto so overflow:hidden (from `truncate`) can actually fire.
+  // ---------------------------------------------------------------------------
+
+  describe('boundary layout — maximum display name', () => {
+    const MAX_NAME = 'W'.repeat(255) // GitHub profile name max length
+
+    const maxNameProfile: Profile = {
+      ...baseProfile,
+      name: MAX_NAME,
+      isVerified: true, // include badges to ensure they coexist correctly
+    }
+
+    it('renders without error with a 255-char display name', () => {
+      expect(() =>
+        renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      ).not.toThrow()
+    })
+
+    it('name heading has truncate so it clips with ellipsis', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      expect(screen.getByRole('heading', { level: 3 }).className).toContain('truncate')
+    })
+
+    it('name heading has min-w-0 so overflow-hidden can fire inside a flex container', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      expect(screen.getByRole('heading', { level: 3 }).className).toContain('min-w-0')
+    })
+
+    it('profile-identity area has max-w-[50%] to cap name at half the card width', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      expect(screen.getByTestId('profile-identity').className).toContain('max-w-[50%]')
+    })
+
+    it('action buttons remain accessible alongside a maximum-length name', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      expect(screen.getByRole('link', { name: /open github/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /copy link/i })).toBeInTheDocument()
+    })
+
+    it('name heading is a descendant of profile-identity', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      const identityArea = screen.getByTestId('profile-identity')
+      expect(identityArea).toContainElement(screen.getByRole('heading', { level: 3 }))
+    })
+
+    it('profile-identity and action buttons share the same row container', () => {
+      renderWithProviders(<ResultHeader profile={maxNameProfile} metadata={metadata} />)
+      const identityArea = screen.getByTestId('profile-identity')
+      const openGitHub = screen.getByRole('link', { name: /open github/i })
+      // The link is inside the actions div; both that div and profile-identity are direct
+      // children of the same row — so going up one level from each must reach the same node.
+      expect(identityArea.parentElement).toBe(openGitHub.parentElement?.parentElement)
+    })
+  })
 })
