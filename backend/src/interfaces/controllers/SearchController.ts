@@ -3,19 +3,26 @@
  * Handles HTTP requests for the search endpoint
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, Router } from 'express';
 import { SearchPort } from '../../application/ports/SearchPort';
 import { TopSearchService } from '../../application/services/TopSearchService';
-import { SearchQuery } from '../validation/searchSchema';
+import { SearchQuery, validateSearchQuery } from '../validation/searchSchema';
 import { DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 export class SearchController {
+  private readonly router: Router;
   private readonly searchService: SearchPort;
   private readonly topSearchService: TopSearchService | undefined;
 
   constructor(searchService: SearchPort, topSearchService?: TopSearchService) {
     this.searchService = searchService;
     this.topSearchService = topSearchService;
+    this.router = Router();
+    this.router.get('/search', validateSearchQuery, this.search);
+  }
+
+  getRouter(): Router {
+    return this.router;
   }
 
   /**

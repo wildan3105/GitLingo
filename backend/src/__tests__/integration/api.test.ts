@@ -20,7 +20,8 @@ jest.mock('@octokit/graphql', () => ({
 import { GitHubGraphQLAdapter } from '../../infrastructure/providers/GitHubGraphQLAdapter';
 import { SearchService } from '../../application/services/SearchService';
 import { SearchController } from '../../interfaces/controllers/SearchController';
-import { createRoutes } from '../../interfaces/routes';
+import { HealthController } from '../../interfaces/controllers/HealthController';
+import { HealthService } from '../../application/services/HealthService';
 import { errorHandler } from '../../interfaces/middleware/errorHandler';
 
 function createTestApp(): Application {
@@ -34,7 +35,11 @@ function createTestApp(): Application {
   const searchService = new SearchService(githubAdapter);
   const searchController = new SearchController(searchService);
 
-  app.use(createRoutes(searchController));
+  const healthService = new HealthService({ ping: () => true } as any);
+  const healthController = new HealthController(healthService);
+
+  app.use('/api/v1', healthController.getRouter());
+  app.use('/api/v1', searchController.getRouter());
   app.use(errorHandler);
 
   return app;

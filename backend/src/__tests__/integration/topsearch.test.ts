@@ -31,11 +31,11 @@ import { SQLiteHealthAdapter } from '../../infrastructure/persistence/SQLiteHeal
 import { TopSearchService } from '../../application/services/TopSearchService';
 import { HealthService } from '../../application/services/HealthService';
 import { TopSearchController } from '../../interfaces/controllers/TopSearchController';
+import { HealthController } from '../../interfaces/controllers/HealthController';
 import { GitHubGraphQLAdapter } from '../../infrastructure/providers/GitHubGraphQLAdapter';
 import { SearchService } from '../../application/services/SearchService';
 import { SearchController } from '../../interfaces/controllers/SearchController';
 import { createRoutes } from '../../interfaces/routes';
-import { createTopSearchRoutes } from '../../interfaces/routes/topSearchRoutes';
 import { errorHandler } from '../../interfaces/middleware/errorHandler';
 
 /**
@@ -55,13 +55,13 @@ function createTestApp(db: Database.Database): Application {
 
   const healthAdapter = new SQLiteHealthAdapter(db);
   const healthService = new HealthService(healthAdapter);
+  const healthController = new HealthController(healthService);
 
   const githubAdapter = new GitHubGraphQLAdapter('test_token');
   const searchService = new SearchService(githubAdapter);
   const searchController = new SearchController(searchService, topSearchService);
 
-  app.use(createRoutes(searchController, healthService));
-  app.use('/api/v1', createTopSearchRoutes(topSearchController));
+  app.use(createRoutes(searchController, topSearchController, healthController));
   app.use(errorHandler);
 
   return app;

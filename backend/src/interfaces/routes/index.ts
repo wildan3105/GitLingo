@@ -1,42 +1,27 @@
 /**
  * Routes Index
- * Mounts all application routes
+ * Single assembly point — mounts all controllers under /api/v1.
+ * Route definitions live in each controller's getRouter().
  */
 
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { SearchController } from '../controllers/SearchController';
-import { HealthService } from '../../application/services/HealthService';
-import { createSearchRoutes } from './searchRoutes';
+import { TopSearchController } from '../controllers/TopSearchController';
+import { HealthController } from '../controllers/HealthController';
 
 export function createRoutes(
   searchController: SearchController,
-  healthService?: HealthService
+  topSearchController: TopSearchController,
+  healthController: HealthController
 ): Router {
   const router = Router();
+  const v1 = Router();
 
-  /**
-   * Health check endpoint
-   * GET /api/v1/health
-   */
-  router.get('/api/v1/health', (_req: Request, res: Response) => {
-    const data: Record<string, unknown> = {
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    };
+  v1.use(healthController.getRouter());
+  v1.use(searchController.getRouter());
+  v1.use(topSearchController.getRouter());
 
-    if (healthService) {
-      const { ok, services } = healthService.check();
-      data.services = services;
-      res.status(200).json({ ok, data });
-    } else {
-      res.status(200).json({ ok: true, data });
-    }
-  });
-
-  /**
-   * Mount API routes
-   */
-  router.use('/api/v1', createSearchRoutes(searchController));
+  router.use('/api/v1', v1);
 
   return router;
 }

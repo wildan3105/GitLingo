@@ -3,16 +3,23 @@
  * Handles HTTP requests for GET /api/v1/topsearch
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, Router } from 'express';
 import { TopSearchService } from '../../application/services/TopSearchService';
-import { TopSearchQuery } from '../validation/topSearchSchema';
+import { TopSearchQuery, validateTopSearchQuery } from '../validation/topSearchSchema';
 import { DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 export class TopSearchController {
+  private readonly router: Router;
   private readonly topSearchService: TopSearchService;
 
   constructor(topSearchService: TopSearchService) {
     this.topSearchService = topSearchService;
+    this.router = Router();
+    this.router.get('/topsearch', validateTopSearchQuery, this.getTopSearches);
+  }
+
+  getRouter(): Router {
+    return this.router;
   }
 
   /**

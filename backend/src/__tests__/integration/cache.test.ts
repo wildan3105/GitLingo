@@ -28,7 +28,6 @@ import { CachedSearchService } from '../../application/services/CachedSearchServ
 import { SQLiteCacheAdapter } from '../../infrastructure/persistence/SQLiteCacheAdapter';
 import { createDatabase } from '../../infrastructure/persistence/database';
 import { SearchController } from '../../interfaces/controllers/SearchController';
-import { createRoutes } from '../../interfaces/routes';
 import { errorHandler } from '../../interfaces/middleware/errorHandler';
 
 const PROVIDER_BASE_URL = 'https://github.com';
@@ -125,7 +124,7 @@ function createCachedTestApp(db: Database.Database, ttlSeconds = TTL_SECONDS): A
   const cachedService = new CachedSearchService(searchService, cacheAdapter, PROVIDER_BASE_URL);
   const controller = new SearchController(cachedService);
 
-  app.use(createRoutes(controller));
+  app.use('/api/v1', controller.getRouter());
   app.use(errorHandler);
 
   return app;
@@ -142,7 +141,7 @@ function createUncachedTestApp(): Application {
   const searchService = new SearchService(githubAdapter);
   const controller = new SearchController(searchService);
 
-  app.use(createRoutes(controller));
+  app.use('/api/v1', controller.getRouter());
   app.use(errorHandler);
 
   return app;

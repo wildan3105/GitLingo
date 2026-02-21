@@ -26,8 +26,8 @@ import { HealthService } from './application/services/HealthService';
 import { SQLiteCacheAdapter } from './infrastructure/persistence/SQLiteCacheAdapter';
 import { SearchController } from './interfaces/controllers/SearchController';
 import { TopSearchController } from './interfaces/controllers/TopSearchController';
+import { HealthController } from './interfaces/controllers/HealthController';
 import { createRoutes } from './interfaces/routes';
-import { createTopSearchRoutes } from './interfaces/routes/topSearchRoutes';
 import { errorHandler } from './interfaces/middleware/errorHandler';
 
 /**
@@ -77,6 +77,7 @@ function createApp(): { app: Application; db: Database.Database } {
 
   const healthAdapter = new SQLiteHealthAdapter(db);
   const healthService = new HealthService(healthAdapter);
+  const healthController = new HealthController(healthService);
 
   // Provider + search
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
@@ -92,8 +93,7 @@ function createApp(): { app: Application; db: Database.Database } {
   const searchController = new SearchController(searchService, topSearchService);
 
   // Mount routes
-  app.use(createRoutes(searchController, healthService));
-  app.use('/api/v1', createTopSearchRoutes(topSearchController));
+  app.use(createRoutes(searchController, topSearchController, healthController));
 
   // Global error handler (must be last)
   app.use(errorHandler);
