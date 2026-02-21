@@ -8,7 +8,7 @@ import type { SuccessResponse, ErrorResponse, TopSearchResponse } from '../../..
 
 // Mock fetch globally
 const mockFetch = vi.fn()
-global.fetch = mockFetch
+vi.stubGlobal('fetch', mockFetch)
 
 describe('gitlingoApi', () => {
   beforeEach(() => {
@@ -26,6 +26,8 @@ describe('gitlingoApi', () => {
         provider: 'github',
         profile: {
           username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/583231?v=4',
           type: 'user',
           providerUserId: '1',
         },
@@ -183,6 +185,8 @@ describe('gitlingoApi', () => {
         provider: 'github',
         profile: {
           username: 'test-user',
+          name: null,
+          avatarUrl: 'https://avatars.githubusercontent.com/u/123?v=4',
           type: 'user',
           providerUserId: '123',
         },
@@ -219,6 +223,8 @@ describe('gitlingoApi', () => {
         provider: 'github',
         profile: {
           username: 'testuser',
+          name: null,
+          avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
           type: 'user',
           providerUserId: '1',
         },
