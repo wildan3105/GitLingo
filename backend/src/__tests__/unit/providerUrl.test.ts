@@ -2,7 +2,7 @@
  * Tests for Provider URL Utilities
  */
 
-import { extractProviderBaseUrl } from '../../shared/utils/providerUrl';
+import { extractProviderBaseUrl, deriveProviderBaseUrl } from '../../shared/utils/providerUrl';
 
 describe('extractProviderBaseUrl', () => {
   describe('GitHub.com cases', () => {
@@ -118,6 +118,56 @@ describe('extractProviderBaseUrl', () => {
     it('should handle enterprise with complex subdomain', () => {
       const avatarUrl = 'https://avatars.github.enterprise.company.co.uk/u/42';
       expect(extractProviderBaseUrl(avatarUrl)).toBe('https://github.enterprise.company.co.uk');
+    });
+  });
+});
+
+describe('deriveProviderBaseUrl', () => {
+  describe('default GitHub.com', () => {
+    it('should return https://github.com for undefined', () => {
+      expect(deriveProviderBaseUrl(undefined)).toBe('https://github.com');
+    });
+
+    it('should return https://github.com for empty string', () => {
+      expect(deriveProviderBaseUrl('')).toBe('https://github.com');
+    });
+
+    it('should return https://github.com for whitespace-only string', () => {
+      expect(deriveProviderBaseUrl('   ')).toBe('https://github.com');
+    });
+  });
+
+  describe('GitHub Enterprise endpoint URLs', () => {
+    it('should extract origin from GHE graphql URL', () => {
+      expect(deriveProviderBaseUrl('https://ghe.company.com/api/graphql')).toBe(
+        'https://ghe.company.com'
+      );
+    });
+
+    it('should extract origin from GHE API base URL', () => {
+      expect(deriveProviderBaseUrl('https://ghe.company.com/api')).toBe('https://ghe.company.com');
+    });
+
+    it('should preserve port number', () => {
+      expect(deriveProviderBaseUrl('https://ghe.company.com:8443/api')).toBe(
+        'https://ghe.company.com:8443'
+      );
+    });
+
+    it('should handle http protocol', () => {
+      expect(deriveProviderBaseUrl('http://ghe.internal.com/api')).toBe('http://ghe.internal.com');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should return default for invalid URL', () => {
+      expect(deriveProviderBaseUrl('not-a-url')).toBe('https://github.com');
+    });
+
+    it('should strip path, query, and fragment — return origin only', () => {
+      expect(deriveProviderBaseUrl('https://ghe.company.com/api?foo=bar#baz')).toBe(
+        'https://ghe.company.com'
+      );
     });
   });
 });

@@ -17,9 +17,12 @@ import { GitHubGraphQLAdapter } from './infrastructure/providers/GitHubGraphQLAd
 import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
 import { SQLiteHealthAdapter } from './infrastructure/persistence/SQLiteHealthAdapter';
+import { deriveProviderBaseUrl } from './shared/utils/providerUrl';
 import { SearchService } from './application/services/SearchService';
+import { CachedSearchService } from './application/services/CachedSearchService';
 import { TopSearchService } from './application/services/TopSearchService';
 import { HealthService } from './application/services/HealthService';
+import { SQLiteCacheAdapter } from './infrastructure/persistence/SQLiteCacheAdapter';
 import { SearchController } from './interfaces/controllers/SearchController';
 import { TopSearchController } from './interfaces/controllers/TopSearchController';
 import { createRoutes } from './interfaces/routes';
@@ -74,7 +77,19 @@ function createApp(): { app: Application; db: Database.Database } {
 
   // Provider + search
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
-  const searchService = new SearchService(githubAdapter);
+  let searchService: SearchService = new SearchService(githubAdapter);
+
+  if (config.enableCache) {
+    const providerBaseUrl = deriveProviderBaseUrl(config.graphqlURL);
+    const cacheAdapter = new SQLiteCacheAdapter(db, config.cacheTtlHours * 3600);
+    searchService = new CachedSearchService(
+      searchService,
+      cacheAdapter,
+      providerBaseUrl
+    ) as unknown as SearchService;
+    logger.info({ cacheTtlHours: config.cacheTtlHours, providerBaseUrl }, 'Cache enabled');
+  }
+
   const searchController = new SearchController(searchService, topSearchService);
 
   // Mount routes

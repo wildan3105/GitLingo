@@ -13,6 +13,8 @@ interface Config {
   graphqlURL: string | undefined;
   logLevel: LogLevel;
   dbPath: string;
+  enableCache: boolean;
+  cacheTtlHours: number;
 }
 
 /**
@@ -71,6 +73,11 @@ export const config: Config = {
   graphqlURL: process.env.GRAPHQL_URL,
   logLevel: getLogLevel(),
   dbPath: process.env.DB_PATH ?? './data/gitlingo.db',
+  enableCache: process.env.ENABLE_CACHE === 'true',
+  cacheTtlHours: (() => {
+    const val = Number(process.env.CACHE_TTL_HOURS);
+    return Number.isFinite(val) && val > 0 ? val : 12;
+  })(),
 };
 
 /**

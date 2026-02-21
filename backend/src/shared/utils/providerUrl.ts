@@ -17,6 +17,38 @@
  * extractProviderBaseUrl('https://avatars.ghe.your-company.com/u/16')
  * // Returns: 'https://ghe.your-company.com'
  */
+/**
+ * Derive the provider base URL from any provider API endpoint URL.
+ * Used when an avatar URL is not yet available (e.g., at startup for cache key construction).
+ *
+ * @param endpointUrl - Any URL from the provider (e.g., GraphQL endpoint URL)
+ * @returns Origin of the URL (protocol + hostname + optional port),
+ *          or 'https://github.com' as the default fallback
+ *
+ * @example
+ * deriveProviderBaseUrl(undefined)
+ * // Returns: 'https://github.com'
+ *
+ * @example
+ * deriveProviderBaseUrl('https://ghe.your-company.com/api/graphql')
+ * // Returns: 'https://ghe.your-company.com'
+ */
+export function deriveProviderBaseUrl(endpointUrl: string | undefined): string {
+  const DEFAULT_BASE_URL = 'https://github.com';
+
+  if (!endpointUrl || endpointUrl.trim() === '') {
+    return DEFAULT_BASE_URL;
+  }
+
+  try {
+    const url = new URL(endpointUrl);
+    const port = url.port ? `:${url.port}` : '';
+    return `${url.protocol}//${url.hostname}${port}`;
+  } catch {
+    return DEFAULT_BASE_URL;
+  }
+}
+
 export function extractProviderBaseUrl(avatarUrl: string | undefined): string {
   const DEFAULT_BASE_URL = 'https://github.com';
 
