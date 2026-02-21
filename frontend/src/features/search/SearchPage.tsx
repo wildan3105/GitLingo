@@ -161,7 +161,6 @@ export function SearchPage() {
         <EmptyState
           className="pt-6 pb-3"
           title="Search a GitHub Username"
-          description="Enter a GitHub username or organization name"
           icon={
             <svg
               className="w-16 h-16 text-secondary-400"
@@ -235,6 +234,12 @@ export function SearchPage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSearch}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleSearch()
+                      }
+                    }}
                     disabled={isLoading || !!validationError}
                     variant="primary"
                     className="flex-1 md:flex-none px-8"
@@ -256,7 +261,14 @@ export function SearchPage() {
                     Search
                   </Button>
                   <button
+                    type="button"
                     onClick={handleReset}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleReset()
+                      }
+                    }}
                     disabled={isLoading}
                     className="
                       relative inline-flex items-center justify-center gap-2

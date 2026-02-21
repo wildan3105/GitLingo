@@ -157,6 +157,58 @@ describe('SearchPage — Reset button', () => {
   })
 })
 
+describe('SearchPage — keyboard interaction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    window.history.pushState({}, '', '/')
+    vi.spyOn(gitlingoApi, 'getTopSearch').mockResolvedValue({
+      ok: true,
+      data: [],
+      pagination: { total: 0, count: 0, offset: 0, limit: 9 },
+    })
+  })
+
+  function renderPage() {
+    render(<SearchPage />, { wrapper: createWrapper() })
+  }
+
+  it('fires search when Enter is pressed on the focused Search button', async () => {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(
+      buildResponse([{ key: 'TypeScript', label: 'TypeScript', value: 10, color: '#3178c6' }])
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+
+    // Tab once from the input → focus lands on Search button
+    await user.tab()
+    expect(screen.getByRole('button', { name: /^search$/i })).toHaveFocus()
+
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(gitlingoApi.searchLanguageStatistics).toHaveBeenCalled())
+  })
+
+  it('clears the username field when Enter is pressed on the focused Reset button', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    const input = screen.getByLabelText('Username') as HTMLInputElement
+    await user.type(input, 'octocat')
+    expect(input.value).toBe('octocat')
+
+    // Tab twice from the input → Search button → Reset button
+    await user.tab()
+    await user.tab()
+    expect(screen.getByRole('button', { name: /^reset$/i })).toHaveFocus()
+
+    await user.keyboard('{Enter}')
+
+    expect(input.value).toBe('')
+  })
+})
+
 describe('SearchPage — Language Coverage KPI', () => {
   beforeEach(() => {
     vi.clearAllMocks()
