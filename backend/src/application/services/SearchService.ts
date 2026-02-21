@@ -10,8 +10,9 @@ import { getLanguageColor, FORK_COLOR } from '../../shared/constants/languageCol
 import { ProviderError } from '../../infrastructure/errors/ProviderError';
 import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
+import { SearchPort } from '../ports/SearchPort';
 
-export class SearchService {
+export class SearchService implements SearchPort {
   private readonly provider: ProviderPort;
 
   constructor(provider: ProviderPort) {

@@ -245,6 +245,12 @@ export function ChartPanel({
             <ChartTypeSelect value={chartType} onChange={setChartType} />
           </div>
 
+          {/* Divider */}
+          <div
+            className="hidden lg:block w-px h-6 bg-secondary-200 flex-shrink-0"
+            aria-hidden="true"
+          />
+
           {/* Middle: Top-N Selector */}
           <div className="flex-shrink-0">
             <SegmentedControl

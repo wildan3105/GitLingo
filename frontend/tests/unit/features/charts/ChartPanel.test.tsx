@@ -196,4 +196,143 @@ describe('ChartPanel', () => {
       expect(shareButton.closest('button')).not.toBeDisabled()
     })
   })
+
+  describe('Custom Charts dropdown', () => {
+    it('renders a "Custom Charts" button in the chart type selector', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      expect(screen.getByRole('tab', { name: /custom charts/i })).toBeInTheDocument()
+    })
+
+    it('renders a "Bar" tab button', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      expect(screen.getByRole('tab', { name: /^bar$/i })).toBeInTheDocument()
+    })
+
+    it('does not render Pie or Polar Area as top-level tabs', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      const tabs = screen.getAllByRole('tab')
+      const tabLabels = tabs.map((t) => t.textContent?.trim())
+      expect(tabLabels).not.toContain('Pie')
+      expect(tabLabels).not.toContain('Polar Area')
+    })
+
+    it('dropdown is closed by default', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
+    })
+
+    it('opens the dropdown when "Custom Charts" is clicked', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+
+      expect(screen.getByRole('listbox', { name: /custom chart types/i })).toBeInTheDocument()
+    })
+
+    it('dropdown contains Pie Chart and Polar Area options', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+
+      expect(screen.getByRole('option', { name: /pie chart/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /polar area/i })).toBeInTheDocument()
+    })
+
+    it('selecting Pie Chart renders the pie chart', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /pie chart/i }))
+
+      expect(screen.getByTestId('pie-chart')).toBeInTheDocument()
+      expect(screen.queryByTestId('bar-chart')).not.toBeInTheDocument()
+    })
+
+    it('selecting Polar Area renders the polar chart', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /polar area/i }))
+
+      expect(screen.getByTestId('polar-chart')).toBeInTheDocument()
+      expect(screen.queryByTestId('bar-chart')).not.toBeInTheDocument()
+    })
+
+    it('closes the dropdown after selecting a chart type', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /pie chart/i }))
+
+      expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
+    })
+
+    it('highlights the Custom Charts button when Pie Chart is active', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /pie chart/i }))
+
+      const customBtn = screen.getByRole('tab', { name: /custom charts/i })
+      expect(customBtn).toHaveAttribute('aria-selected', 'true')
+    })
+
+    it('highlights the Custom Charts button when Polar Area is active', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /polar area/i }))
+
+      const customBtn = screen.getByRole('tab', { name: /custom charts/i })
+      expect(customBtn).toHaveAttribute('aria-selected', 'true')
+    })
+
+    it('Custom Charts button is not highlighted when Bar is active', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      const customBtn = screen.getByRole('tab', { name: /custom charts/i })
+      expect(customBtn).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('Bar tab is not highlighted when a custom chart is active', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      await user.click(screen.getByRole('option', { name: /pie chart/i }))
+
+      const barTab = screen.getByRole('tab', { name: /^bar$/i })
+      expect(barTab).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('closes the dropdown when clicking outside', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      expect(screen.getByRole('listbox', { name: /custom chart types/i })).toBeInTheDocument()
+
+      await user.click(document.body)
+
+      expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
+    })
+
+    it('closes the dropdown when Escape is pressed', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+      expect(screen.getByRole('listbox', { name: /custom chart types/i })).toBeInTheDocument()
+
+      await user.keyboard('{Escape}')
+
+      expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
+    })
+  })
 })

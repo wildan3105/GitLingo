@@ -18,6 +18,7 @@ import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
 import { SQLiteHealthAdapter } from './infrastructure/persistence/SQLiteHealthAdapter';
 import { deriveProviderBaseUrl } from './shared/utils/providerUrl';
+import { SearchPort } from './application/ports/SearchPort';
 import { SearchService } from './application/services/SearchService';
 import { CachedSearchService } from './application/services/CachedSearchService';
 import { TopSearchService } from './application/services/TopSearchService';
@@ -79,16 +80,12 @@ function createApp(): { app: Application; db: Database.Database } {
 
   // Provider + search
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
-  let searchService: SearchService = new SearchService(githubAdapter);
+  let searchService: SearchPort = new SearchService(githubAdapter);
 
   if (config.enableCache) {
     const providerBaseUrl = deriveProviderBaseUrl(config.graphqlURL);
     const cacheAdapter = new SQLiteCacheAdapter(db, config.cacheTtlHours * 3600);
-    searchService = new CachedSearchService(
-      searchService,
-      cacheAdapter,
-      providerBaseUrl
-    ) as unknown as SearchService;
+    searchService = new CachedSearchService(searchService, cacheAdapter, providerBaseUrl);
     logger.info({ cacheTtlHours: config.cacheTtlHours, providerBaseUrl }, 'Cache enabled');
   }
 

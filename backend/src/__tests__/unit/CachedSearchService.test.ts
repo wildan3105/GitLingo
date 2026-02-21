@@ -4,7 +4,7 @@
  */
 
 import { CachedSearchService } from '../../application/services/CachedSearchService';
-import { SearchService } from '../../application/services/SearchService';
+import { SearchPort } from '../../application/ports/SearchPort';
 import { CachePort } from '../../domain/ports/CachePort';
 import { CacheEntry } from '../../domain/models/CacheEntry';
 import { SearchResult } from '../../application/types/SearchResult';
@@ -65,17 +65,14 @@ function makeMockCache(entry: CacheEntry | null = null): jest.Mocked<CachePort> 
 
 function makeMockInner(
   result: SearchResult | SearchError = makeSuccessResult()
-): jest.Mocked<Pick<SearchService, 'searchLanguageStatistics'>> {
+): jest.Mocked<SearchPort> {
   return {
     searchLanguageStatistics: jest.fn().mockResolvedValue(result),
   };
 }
 
-function makeService(
-  inner: Pick<SearchService, 'searchLanguageStatistics'>,
-  cache: CachePort
-): CachedSearchService {
-  return new CachedSearchService(inner as SearchService, cache, PROVIDER_BASE_URL);
+function makeService(inner: SearchPort, cache: CachePort): CachedSearchService {
+  return new CachedSearchService(inner, cache, PROVIDER_BASE_URL);
 }
 
 // Tests --------------------------------------------------------------------

@@ -17,11 +17,11 @@
  */
 
 import { createLogger } from '../../shared/utils/logger';
-import { SearchService } from './SearchService';
 import { CachePort, CacheKey } from '../../domain/ports/CachePort';
 import { CacheEntry } from '../../domain/models/CacheEntry';
 import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
+import { SearchPort } from '../ports/SearchPort';
 
 const logger = createLogger('CachedSearchService');
 
@@ -34,11 +34,11 @@ function toISO(epochSeconds: number): string {
   return new Date(epochSeconds * 1000).toISOString();
 }
 
-export class CachedSearchService {
+export class CachedSearchService implements SearchPort {
   private readonly inflight = new Map<string, Promise<SearchResult | SearchError>>();
 
   constructor(
-    private readonly inner: SearchService,
+    private readonly inner: SearchPort,
     private readonly cache: CachePort,
     private readonly providerBaseUrl: string
   ) {}

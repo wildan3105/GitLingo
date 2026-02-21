@@ -4,16 +4,16 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { SearchService } from '../../application/services/SearchService';
+import { SearchPort } from '../../application/ports/SearchPort';
 import { TopSearchService } from '../../application/services/TopSearchService';
 import { SearchQuery } from '../validation/searchSchema';
 import { DEFAULT_PROVIDER } from '../../shared/constants/providers';
 
 export class SearchController {
-  private readonly searchService: SearchService;
+  private readonly searchService: SearchPort;
   private readonly topSearchService: TopSearchService | undefined;
 
-  constructor(searchService: SearchService, topSearchService?: TopSearchService) {
+  constructor(searchService: SearchPort, topSearchService?: TopSearchService) {
     this.searchService = searchService;
     this.topSearchService = topSearchService;
   }

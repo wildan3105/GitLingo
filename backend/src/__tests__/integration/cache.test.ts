@@ -123,7 +123,7 @@ function createCachedTestApp(db: Database.Database, ttlSeconds = TTL_SECONDS): A
   const searchService = new SearchService(githubAdapter);
   const cacheAdapter = new SQLiteCacheAdapter(db, ttlSeconds);
   const cachedService = new CachedSearchService(searchService, cacheAdapter, PROVIDER_BASE_URL);
-  const controller = new SearchController(cachedService as unknown as SearchService);
+  const controller = new SearchController(cachedService);
 
   app.use(createRoutes(controller));
   app.use(errorHandler);

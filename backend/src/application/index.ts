@@ -2,6 +2,7 @@
  * Application Layer - Barrel Export
  */
 
+export * from './ports/SearchPort';
 export * from './services/SearchService';
 export * from './services/CachedSearchService';
 export * from './services/TopSearchService';
