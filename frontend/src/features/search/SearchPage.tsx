@@ -474,7 +474,7 @@ export function SearchPage() {
 
       {/* Footer */}
       <footer className="w-full max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between text-sm text-secondary-500">
+        <div className="flex flex-col items-center gap-3 text-center text-sm text-secondary-500 md:flex-row md:justify-between md:text-left">
           <p>
             © 2026 GitLingo, created by{' '}
             <a
