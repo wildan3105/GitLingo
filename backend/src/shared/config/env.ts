@@ -13,6 +13,7 @@ interface Config {
   graphqlURL: string | undefined;
   logLevel: LogLevel;
   dbPath: string;
+  allowedOrigins: string[];
   enableCache: boolean;
   cacheTtlHours: number;
 }
@@ -63,6 +64,37 @@ function getLogLevel(): LogLevel {
   return level as LogLevel;
 }
 
+const CORS_DEFAULT_ORIGINS = ['http://localhost:5173'];
+
+/**
+ * Parse and validate ALLOWED_ORIGINS.
+ * Exported for unit testing.
+ *
+ * - Comma-separated list of allowed origins, e.g. "https://app.example.com,https://staging.example.com"
+ * - Unset / empty in production → console.warn (localhost default will block real users)
+ * - Unset / empty in development → silently falls back to localhost:5173
+ */
+export function parseAllowedOrigins(
+  rawValue: string | undefined,
+  nodeEnv: string | undefined
+): string[] {
+  if (rawValue === undefined || rawValue.trim() === '') {
+    if (nodeEnv === 'production') {
+      console.warn(
+        'ALLOWED_ORIGINS is not set in production. ' +
+          'Defaulting to localhost origins, which will block all real users. ' +
+          'Set ALLOWED_ORIGINS to your frontend domain(s).'
+      );
+    }
+    return CORS_DEFAULT_ORIGINS;
+  }
+
+  return rawValue
+    .split(',')
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
+}
+
 const CACHE_TTL_DEFAULT_HOURS = 12;
 const CACHE_TTL_MAX_HOURS = 24;
 
@@ -101,6 +133,7 @@ export const config: Config = {
   graphqlURL: process.env.GRAPHQL_URL,
   logLevel: getLogLevel(),
   dbPath: process.env.DB_PATH ?? './data/gitlingo.db',
+  allowedOrigins: parseAllowedOrigins(process.env.ALLOWED_ORIGINS, process.env.NODE_ENV),
   enableCache: process.env.ENABLE_CACHE === 'true',
   cacheTtlHours: parseCacheTtlHours(process.env.CACHE_TTL_HOURS),
 };

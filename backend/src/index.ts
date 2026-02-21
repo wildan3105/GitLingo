@@ -49,10 +49,9 @@ function createApp(): { app: Application; db: Database.Database } {
   app.use(helmet());
 
   // CORS middleware
-  // TODO: In production, restrict this to the actual frontend domain(s)
   app.use(
     cors({
-      origin: ['http://localhost:5173', 'http://192.168.32.142:5173'],
+      origin: config.allowedOrigins,
       credentials: true,
     })
   );

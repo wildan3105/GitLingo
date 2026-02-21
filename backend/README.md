@@ -62,6 +62,10 @@ LOG_LEVEL=info
 # GitHub Token (OPTIONAL - see note below)
 GITHUB_TOKEN=your_token_here
 
+# CORS — comma-separated list of allowed frontend origins
+# Default: http://localhost:5173  (must be set explicitly in production)
+ALLOWED_ORIGINS=http://localhost:5173
+
 # Result Caching (OPTIONAL)
 ENABLE_CACHE=false
 CACHE_TTL_HOURS=12
