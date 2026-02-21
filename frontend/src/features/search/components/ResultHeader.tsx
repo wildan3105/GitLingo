@@ -3,7 +3,7 @@
  * Displays profile summary information above chart
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { Profile, Metadata } from '../../../contracts/api'
 
 export type ResultHeaderProps = {
@@ -86,6 +86,10 @@ function formatTimeRemaining(isoString: string): string | null {
  */
 export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
   const [copied, setCopied] = useState(false)
+  const [showLocationTooltip, setShowLocationTooltip] = useState(false)
+  const [showWebsiteTooltip, setShowWebsiteTooltip] = useState(false)
+  const locationRef = useRef<HTMLSpanElement>(null)
+  const websiteRef = useRef<HTMLSpanElement>(null)
   const accountType = profile.type || 'User'
 
   // Construct GitHub profile URL
@@ -165,27 +169,26 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
 
             {/* Verified Badge */}
             {profile.isVerified && (
-              <span
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700 flex-shrink-0"
-                title={
-                  profile.type === 'organization'
-                    ? 'Verified by Github'
-                    : 'Public email available on GitHub profile'
-                }
-              >
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {
-                  profile.type === 'organization'
-                    ? 'Verified'
-                    : 'Email available' /* More specific for user to indicate they have public email */
-                }
-              </span>
+              <div className="relative group flex-shrink-0">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {profile.type === 'organization' ? 'Verified' : 'Email available'}
+                </span>
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 [@media(hover:hover)]:group-hover:opacity-100"
+                >
+                  {profile.type === 'organization'
+                    ? 'Verified by GitHub'
+                    : 'Public email available on GitHub profile'}
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -254,7 +257,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
         {/* Left: @username + joined since + statistics */}
         <div
           data-testid="metadata-left"
-          className="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 leading-relaxed flex-1 min-w-0 md:overflow-hidden"
+          className="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 leading-relaxed flex-1 min-w-0"
         >
           <div className="flex items-center gap-1.5">
             <svg
@@ -382,7 +385,18 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           {profile.location && (
             <>
               <span className="hidden md:inline text-secondary-400">•</span>
-              <div className="flex items-center gap-1.5" title={profile.location}>
+              <div
+                className="relative flex items-center gap-1.5"
+                onMouseEnter={() => {
+                  if (
+                    locationRef.current &&
+                    locationRef.current.scrollWidth > locationRef.current.offsetWidth
+                  ) {
+                    setShowLocationTooltip(true)
+                  }
+                }}
+                onMouseLeave={() => setShowLocationTooltip(false)}
+              >
                 <svg
                   className="w-4 h-4 text-secondary-400"
                   fill="none"
@@ -402,7 +416,19 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="inline-block max-w-[7rem] truncate">{profile.location}</span>
+                <span
+                  ref={locationRef}
+                  data-testid="location-text"
+                  className="inline-block max-w-[7rem] truncate"
+                >
+                  {profile.location}
+                </span>
+                <span
+                  role="tooltip"
+                  className={`pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white transition-opacity duration-150 ${showLocationTooltip ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  {profile.location}
+                </span>
               </div>
             </>
           )}
@@ -411,25 +437,44 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           {profile.websiteUrl && (
             <>
               <span className="hidden md:inline text-secondary-400">•</span>
-              <a
-                href={normalizeUrl(profile.websiteUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-primary-600 hover:text-primary-700 transition-colors duration-200"
-                title={profile.websiteUrl}
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (
+                    websiteRef.current &&
+                    websiteRef.current.scrollWidth > websiteRef.current.offsetWidth
+                  ) {
+                    setShowWebsiteTooltip(true)
+                  }
+                }}
+                onMouseLeave={() => setShowWebsiteTooltip(false)}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                  />
-                </svg>
-                <span className="inline-block truncate max-w-[150px]">
-                  {getDisplayUrl(profile.websiteUrl)}
+                <a
+                  data-testid="website-link"
+                  href={normalizeUrl(profile.websiteUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
+                  </svg>
+                  <span ref={websiteRef} className="inline-block truncate max-w-[150px]">
+                    {getDisplayUrl(profile.websiteUrl)}
+                  </span>
+                </a>
+                <span
+                  role="tooltip"
+                  className={`pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white transition-opacity duration-150 ${showWebsiteTooltip ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  {profile.websiteUrl}
                 </span>
-              </a>
+              </div>
             </>
           )}
         </div>

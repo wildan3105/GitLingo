@@ -422,9 +422,7 @@ describe('ResultHeader', () => {
           metadata={metadata}
         />
       )
-      // The location span may be hidden on narrow viewports but it must carry truncate
-      const locationEl = screen.getByText('San Francisco, California, USA')
-      expect(locationEl.className).toContain('truncate')
+      expect(screen.getByTestId('location-text').className).toContain('truncate')
     })
 
     it('location span has a max-width to bound the truncation', () => {
@@ -434,8 +432,7 @@ describe('ResultHeader', () => {
           metadata={metadata}
         />
       )
-      const locationEl = screen.getByText('San Francisco, California, USA')
-      expect(locationEl.className).toMatch(/max-w-/)
+      expect(screen.getByTestId('location-text').className).toMatch(/max-w-/)
     })
   })
 
@@ -454,9 +451,9 @@ describe('ResultHeader', () => {
       expect(screen.getByTestId('metadata-left').className).toContain('md:flex-row')
     })
 
-    it('metadata-left has md:overflow-hidden to clip overflow on desktop', () => {
+    it('metadata-left has min-w-0 so flex items can shrink and truncate', () => {
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
-      expect(screen.getByTestId('metadata-left').className).toContain('md:overflow-hidden')
+      expect(screen.getByTestId('metadata-left').className).toContain('min-w-0')
     })
 
     it('metadata-right does not use flex-wrap so it never wraps', () => {
@@ -693,9 +690,9 @@ describe('ResultHeader', () => {
       expect(screen.getByTestId('metadata-left').className).toContain('md:flex-row')
     })
 
-    it('metadata-left has md:overflow-hidden to clip overflow on desktop', () => {
+    it('metadata-left has min-w-0 so flex items can shrink and truncate', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      expect(screen.getByTestId('metadata-left').className).toContain('md:overflow-hidden')
+      expect(screen.getByTestId('metadata-left').className).toContain('min-w-0')
     })
 
     it('metadata-right has flex-shrink-0 (stays pinned, never collapses)', () => {
@@ -712,42 +709,37 @@ describe('ResultHeader', () => {
 
     it('location span is inline-block so max-w truncation actually applies', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const locationSpan = screen.getByTitle(MAX_LOCATION).querySelector('span')!
+      const locationSpan = screen.getByTestId('location-text')
       // inline-block (not plain inline) is required for overflow:hidden to respect max-width
       expect(locationSpan.className).toMatch(/inline-block/)
     })
 
     it('location span has truncate class', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const locationSpan = screen.getByTitle(MAX_LOCATION).querySelector('span')!
-      expect(locationSpan.className).toContain('truncate')
+      expect(screen.getByTestId('location-text').className).toContain('truncate')
     })
 
     it('location span has a max-w constraint', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const locationSpan = screen.getByTitle(MAX_LOCATION).querySelector('span')!
-      expect(locationSpan.className).toMatch(/max-w-/)
+      expect(screen.getByTestId('location-text').className).toMatch(/max-w-/)
     })
 
     it('website span is inline-block so max-w truncation actually applies', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const websiteLink = screen.getByTitle(MAX_WEBSITE_URL)
-      const websiteSpan = websiteLink.querySelector('span')!
+      const websiteSpan = screen.getByTestId('website-link').querySelector('span')!
       // Must be inline-block — plain inline ignores max-width + overflow:hidden
       expect(websiteSpan.className).toMatch(/inline-block/)
     })
 
     it('website span has truncate class', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const websiteLink = screen.getByTitle(MAX_WEBSITE_URL)
-      const websiteSpan = websiteLink.querySelector('span')!
+      const websiteSpan = screen.getByTestId('website-link').querySelector('span')!
       expect(websiteSpan.className).toContain('truncate')
     })
 
     it('website span has a max-w constraint', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      const websiteLink = screen.getByTitle(MAX_WEBSITE_URL)
-      const websiteSpan = websiteLink.querySelector('span')!
+      const websiteSpan = screen.getByTestId('website-link').querySelector('span')!
       expect(websiteSpan.className).toMatch(/max-w-/)
     })
 
