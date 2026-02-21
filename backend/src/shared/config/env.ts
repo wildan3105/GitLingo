@@ -63,6 +63,34 @@ function getLogLevel(): LogLevel {
   return level as LogLevel;
 }
 
+const CACHE_TTL_DEFAULT_HOURS = 12;
+const CACHE_TTL_MAX_HOURS = 24;
+
+/**
+ * Parse and validate CACHE_TTL_HOURS.
+ * Exported for unit testing.
+ *
+ * - Invalid / non-positive → default (12h)
+ * - Above maximum (24h)   → capped to 24h + console.warn
+ * - Otherwise             → parsed value
+ */
+export function parseCacheTtlHours(rawValue: string | undefined): number {
+  const val = Number(rawValue);
+
+  if (!Number.isFinite(val) || val <= 0) {
+    return CACHE_TTL_DEFAULT_HOURS;
+  }
+
+  if (val > CACHE_TTL_MAX_HOURS) {
+    console.warn(
+      `CACHE_TTL_HOURS=${val} exceeds the maximum of ${CACHE_TTL_MAX_HOURS}h. Capping to ${CACHE_TTL_MAX_HOURS}h.`
+    );
+    return CACHE_TTL_MAX_HOURS;
+  }
+
+  return val;
+}
+
 /**
  * Load and export configuration
  */
@@ -74,10 +102,7 @@ export const config: Config = {
   logLevel: getLogLevel(),
   dbPath: process.env.DB_PATH ?? './data/gitlingo.db',
   enableCache: process.env.ENABLE_CACHE === 'true',
-  cacheTtlHours: ((): number => {
-    const val = Number(process.env.CACHE_TTL_HOURS);
-    return Number.isFinite(val) && val > 0 ? val : 12;
-  })(),
+  cacheTtlHours: parseCacheTtlHours(process.env.CACHE_TTL_HOURS),
 };
 
 /**
