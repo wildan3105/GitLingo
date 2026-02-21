@@ -111,12 +111,12 @@ describe('useSearch', () => {
       expect(result.current.includeForks).toBe(false)
     })
 
-    it('has includeUnknownLanguage set to true by default', () => {
+    it('has includeUnknownLanguage set to false by default', () => {
       const { result } = renderHook(() => useSearch(), {
         wrapper: createWrapper(),
       })
 
-      expect(result.current.includeUnknownLanguage).toBe(true)
+      expect(result.current.includeUnknownLanguage).toBe(false)
     })
 
     it('updates includeForks when setIncludeForks is called', () => {
@@ -165,10 +165,10 @@ describe('useSearch', () => {
         result.current.handleReset()
       })
 
-      // Verify state was reset to defaults (forks: false, unknown: true)
+      // Verify state was reset to defaults (forks: false, unknown: false)
       expect(result.current.username).toBe('')
       expect(result.current.includeForks).toBe(false)
-      expect(result.current.includeUnknownLanguage).toBe(true)
+      expect(result.current.includeUnknownLanguage).toBe(false)
       expect(result.current.validationError).toBeNull()
       expect(result.current.data).toBeNull()
       expect(result.current.error).toBeNull()
