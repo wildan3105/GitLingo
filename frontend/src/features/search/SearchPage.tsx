@@ -202,10 +202,10 @@ export function SearchPage() {
               src="/gitlingo.svg"
               alt=""
               aria-hidden="true"
-              className="w-11 h-11 flex-shrink-0 drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-md"
+              className="w-11 h-11 flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
             />
             <div className="text-left">
-              <h1 className="text-2xl font-semibold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                 GitLingo
               </h1>
               <p className="text-sm text-secondary-600 mt-0.5 leading-relaxed">

@@ -81,7 +81,7 @@ export function ChartPanel({
   hasOriginalData = true,
 }: ChartPanelProps) {
   const [chartType, setChartType] = useState<ChartType>('bar')
-  const [topN, setTopN] = useState<TopNOption>('all')
+  const [topN, setTopN] = useState<TopNOption>('top10') // default to top 10
   const [isExporting, setIsExporting] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
