@@ -4,6 +4,7 @@
  * via buildOptionsHash in CachedSearchService.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SearchOptions {
-  // future fields: includeForks?: boolean, minRepos?: number, etc.
+  // intentionally empty — fields added here automatically change the cache key
 }
