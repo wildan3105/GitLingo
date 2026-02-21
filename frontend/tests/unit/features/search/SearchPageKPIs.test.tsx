@@ -95,6 +95,68 @@ async function renderAndSearch(data: LanguageData[]) {
 // Tests
 // ---------------------------------------------------------------------------
 
+describe('SearchPage — Reset button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    window.history.pushState({}, '', '/')
+    vi.spyOn(gitlingoApi, 'getTopSearch').mockResolvedValue({
+      ok: true,
+      data: [],
+      pagination: { total: 0, count: 0, offset: 0, limit: 9 },
+    })
+  })
+
+  function renderPage() {
+    render(<SearchPage />, { wrapper: createWrapper() })
+  }
+
+  it('renders a Reset button alongside the Search button', () => {
+    renderPage()
+    expect(screen.getByRole('button', { name: /^reset$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^search$/i })).toBeInTheDocument()
+  })
+
+  it('Reset and Search buttons are siblings inside the same container', () => {
+    renderPage()
+    const search = screen.getByRole('button', { name: /^search$/i })
+    const reset = screen.getByRole('button', { name: /^reset$/i })
+    expect(search.parentElement).toBe(reset.parentElement)
+  })
+
+  it('clears the username field when Reset is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    const input = screen.getByLabelText('Username') as HTMLInputElement
+    await user.type(input, 'octocat')
+    expect(input.value).toBe('octocat')
+
+    await user.click(screen.getByRole('button', { name: /^reset$/i }))
+    expect(input.value).toBe('')
+  })
+
+  it('clears search results when Reset is clicked after a successful search', async () => {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(
+      buildResponse([{ key: 'TypeScript', label: 'TypeScript', value: 10, color: '#3178c6' }])
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+    await waitFor(() => expect(screen.getByText('Language Coverage')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: /^reset$/i }))
+    await waitFor(() => expect(screen.queryByText('Language Coverage')).not.toBeInTheDocument())
+  })
+
+  it('Reset button is not disabled on initial render', () => {
+    renderPage()
+    const reset = screen.getByRole('button', { name: /^reset$/i })
+    expect(reset).not.toBeDisabled()
+  })
+})
+
 describe('SearchPage — Language Coverage KPI', () => {
   beforeEach(() => {
     vi.clearAllMocks()

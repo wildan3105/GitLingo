@@ -223,7 +223,7 @@ export function SearchPage() {
                 />
               </div>
 
-              {/* Search Button */}
+              {/* Action Buttons */}
               <div className="flex flex-col gap-1.5">
                 {/* Invisible label for alignment */}
                 <label
@@ -232,28 +232,64 @@ export function SearchPage() {
                 >
                   &nbsp;
                 </label>
-                <Button
-                  onClick={handleSearch}
-                  disabled={isLoading || !!validationError}
-                  variant="primary"
-                  className="w-full md:w-auto px-8"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSearch}
+                    disabled={isLoading || !!validationError}
+                    variant="primary"
+                    className="flex-1 md:flex-none px-8"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  Search
-                </Button>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    Search
+                  </Button>
+                  <button
+                    onClick={handleReset}
+                    disabled={isLoading}
+                    className="
+                      relative inline-flex items-center justify-center gap-2
+                      font-medium tracking-wide text-base
+                      px-6 py-3 rounded-md
+                      transition-all duration-200
+                      hover:scale-[1.02] active:scale-[0.98]
+                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200
+                      bg-white hover:bg-blue-50
+                      text-blue-600 hover:text-blue-700
+                      border border-blue-200 hover:border-blue-300
+                      shadow-sm hover:shadow
+                      flex-1 md:flex-none
+                    "
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                      />
+                    </svg>
+                    Reset
+                  </button>
+                </div>
               </div>
             </div>
           </Card>
