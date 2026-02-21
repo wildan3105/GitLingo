@@ -16,14 +16,14 @@
  *   - Concurrent requests for the same cold/expired key share one fetch.
  */
 
-import pino from 'pino';
+import { createLogger } from '../../shared/utils/logger';
 import { SearchService } from './SearchService';
 import { CachePort, CacheKey } from '../../domain/ports/CachePort';
 import { CacheEntry } from '../../domain/models/CacheEntry';
 import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
 
-const logger = pino({ name: 'CachedSearchService' });
+const logger = createLogger('CachedSearchService');
 
 const SCHEMA_VERSION = 'v1';
 const OPTIONS_HASH = 'default';

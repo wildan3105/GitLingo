@@ -4,10 +4,10 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import pino from 'pino';
+import { createLogger } from '../../shared/utils/logger';
 import { isProduction } from '../../shared/config/env';
 
-const logger = pino();
+const logger = createLogger('errorHandler');
 
 /**
  * Global error handler middleware

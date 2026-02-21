@@ -3,12 +3,12 @@
  * Orchestrates recording searches and retrieving the top search leaderboard
  */
 
-import pino from 'pino';
+import { createLogger } from '../../shared/utils/logger';
 import { TopSearchPort } from '../../domain/ports/TopSearchPort';
 import { TopSearch } from '../../domain/models/TopSearch';
 import { TopSearchResult, TopSearchEntry } from '../types/TopSearchResult';
 
-const logger = pino({ name: 'TopSearchService' });
+const logger = createLogger('TopSearchService');
 
 export interface GetTopSearchesParams {
   provider: string;

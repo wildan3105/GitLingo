@@ -9,10 +9,10 @@ import express, { Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import pino from 'pino';
 import Database from 'better-sqlite3';
 
 import { config } from './shared/config/env';
+import { logger } from './shared/utils/logger';
 import { GitHubGraphQLAdapter } from './infrastructure/providers/GitHubGraphQLAdapter';
 import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
@@ -28,9 +28,6 @@ import { TopSearchController } from './interfaces/controllers/TopSearchControlle
 import { createRoutes } from './interfaces/routes';
 import { createTopSearchRoutes } from './interfaces/routes/topSearchRoutes';
 import { errorHandler } from './interfaces/middleware/errorHandler';
-
-// Initialize logger
-const logger = pino({ level: config.logLevel });
 
 /**
  * Ensure the directory for the SQLite file exists.
@@ -52,7 +49,13 @@ function createApp(): { app: Application; db: Database.Database } {
   app.use(helmet());
 
   // CORS middleware
-  app.use(cors());
+  // TODO: In production, restrict this to the actual frontend domain(s)
+  app.use(
+    cors({
+      origin: ['http://localhost:5173', 'http://192.168.32.142:5173'],
+      credentials: true,
+    })
+  );
 
   // JSON body parser
   app.use(express.json());
