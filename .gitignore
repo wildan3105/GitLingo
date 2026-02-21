@@ -35,4 +35,5 @@ coverage/
 internal-docs/
 
 # claude
+.claude/
 CLAUDE.md

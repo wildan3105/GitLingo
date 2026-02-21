@@ -3,9 +3,11 @@
  * Uses jest mocks for both SearchService and CachePort — no real DB or GitHub API.
  */
 
-import { CachedSearchService } from '../../application/services/CachedSearchService';
+import { CachedSearchService, buildOptionsHash } from '../../application/services/CachedSearchService';
 import { SearchPort } from '../../application/ports/SearchPort';
+import { SearchOptions } from '../../application/types/SearchOptions';
 import { CachePort } from '../../domain/ports/CachePort';
+import { CacheKey } from '../../domain/ports/CachePort';
 import { CacheEntry } from '../../domain/models/CacheEntry';
 import { SearchResult } from '../../application/types/SearchResult';
 import { SearchError } from '../../application/types/SearchError';
@@ -292,5 +294,93 @@ describe('CachedSearchService', () => {
       // inner called twice — single-flight map is cleared after first resolves
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(2);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildOptionsHash unit tests
+// ---------------------------------------------------------------------------
+
+describe('buildOptionsHash', () => {
+  it('returns "default" for undefined options', () => {
+    expect(buildOptionsHash(undefined)).toBe('default');
+  });
+
+  it('returns "default" for empty options object', () => {
+    expect(buildOptionsHash({} as SearchOptions)).toBe('default');
+  });
+
+  it('returns a non-default hash for a single option', () => {
+    // Cast needed: SearchOptions is currently empty; this documents future behavior
+    const opts = { includeForks: true } as SearchOptions & { includeForks: boolean };
+    expect(buildOptionsHash(opts)).toBe('includeForks=true');
+  });
+
+  it('sorts keys alphabetically for a stable hash', () => {
+    const opts = { minRepos: 5, includeForks: false } as SearchOptions & Record<string, unknown>;
+    expect(buildOptionsHash(opts)).toBe('includeForks=false&minRepos=5');
+  });
+
+  it('two different option sets produce different hashes', () => {
+    const opts1 = { includeForks: true } as SearchOptions & Record<string, unknown>;
+    const opts2 = { includeForks: false } as SearchOptions & Record<string, unknown>;
+    expect(buildOptionsHash(opts1)).not.toBe(buildOptionsHash(opts2));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cache key isolation tests (through service behavior)
+// ---------------------------------------------------------------------------
+
+describe('CachedSearchService — options cache isolation', () => {
+  it('calls cache.get with optionsHash="default" when no options are passed', async () => {
+    const cache = makeMockCache(null);
+    const inner = makeMockInner();
+    const svc = makeService(inner, cache);
+
+    await svc.searchLanguageStatistics('torvalds');
+
+    const key: CacheKey = cache.get.mock.calls[0]![0];
+    expect(key.optionsHash).toBe('default');
+  });
+
+  it('calls cache.get with optionsHash="default" when empty options are passed', async () => {
+    const cache = makeMockCache(null);
+    const inner = makeMockInner();
+    const svc = makeService(inner, cache);
+
+    await svc.searchLanguageStatistics('torvalds', {} as SearchOptions);
+
+    const key: CacheKey = cache.get.mock.calls[0]![0];
+    expect(key.optionsHash).toBe('default');
+  });
+
+  it('produces different cache keys for different options (no shared cache entry)', async () => {
+    // Two separate service instances with isolated caches simulate two option variants
+    const cache1 = makeMockCache(null);
+    const cache2 = makeMockCache(null);
+    const svc1 = makeService(makeMockInner(), cache1);
+    const svc2 = makeService(makeMockInner(), cache2);
+
+    const opts1 = { includeForks: true } as SearchOptions & Record<string, unknown>;
+    const opts2 = { includeForks: false } as SearchOptions & Record<string, unknown>;
+
+    await svc1.searchLanguageStatistics('torvalds', opts1);
+    await svc2.searchLanguageStatistics('torvalds', opts2);
+
+    const key1: CacheKey = cache1.get.mock.calls[0]![0];
+    const key2: CacheKey = cache2.get.mock.calls[0]![0];
+    expect(key1.optionsHash).not.toBe(key2.optionsHash);
+  });
+
+  it('passes options through to inner service on a cache miss', async () => {
+    const cache = makeMockCache(null);
+    const inner = makeMockInner();
+    const svc = makeService(inner, cache);
+
+    const opts = { includeForks: true } as SearchOptions & Record<string, unknown>;
+    await svc.searchLanguageStatistics('torvalds', opts);
+
+    expect(inner.searchLanguageStatistics).toHaveBeenCalledWith('torvalds', opts);
   });
 });

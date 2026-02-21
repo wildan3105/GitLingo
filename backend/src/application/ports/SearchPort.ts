@@ -12,7 +12,11 @@
 
 import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
+import { SearchOptions } from '../types/SearchOptions';
 
 export interface SearchPort {
-  searchLanguageStatistics(username: string): Promise<SearchResult | SearchError>;
+  searchLanguageStatistics(
+    username: string,
+    options?: SearchOptions
+  ): Promise<SearchResult | SearchError>;
 }
