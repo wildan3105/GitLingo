@@ -21,13 +21,28 @@ import { CachePort, CacheKey } from '../../domain/ports/CachePort';
 import { CacheEntry } from '../../domain/models/CacheEntry';
 import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
+import { SearchOptions } from '../types/SearchOptions';
 import { SearchPort } from '../ports/SearchPort';
 
 const logger = createLogger('CachedSearchService');
 
 const SCHEMA_VERSION = 'v1';
-const OPTIONS_HASH = 'default';
 const PROVIDER = 'github';
+
+/**
+ * Compute a deterministic, stable hash string from search options.
+ * - undefined or empty options → 'default' (preserves existing cache entries)
+ * - Non-empty options → sorted 'key=value' pairs joined by '&'
+ */
+export function buildOptionsHash(options: SearchOptions | undefined): string {
+  if (options === undefined) return 'default';
+  const entries = Object.entries(options).filter(([, v]) => v !== undefined);
+  if (entries.length === 0) return 'default';
+  return entries
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${String(v)}`)
+    .join('&');
+}
 
 /** Convert Unix epoch seconds to ISO-8601 string */
 function toISO(epochSeconds: number): string {
@@ -43,8 +58,11 @@ export class CachedSearchService implements SearchPort {
     private readonly providerBaseUrl: string
   ) {}
 
-  public searchLanguageStatistics(username: string): Promise<SearchResult | SearchError> {
-    const key = this.buildKey(username);
+  public searchLanguageStatistics(
+    username: string,
+    options?: SearchOptions
+  ): Promise<SearchResult | SearchError> {
+    const key = this.buildKey(username, options);
     const keyStr = this.keyToString(key);
 
     // Return in-flight promise if one already exists for this key (stampede protection)
@@ -63,7 +81,7 @@ export class CachedSearchService implements SearchPort {
     const fallback = entry; // null on miss, CacheEntry on expired
 
     const promise = this.inner
-      .searchLanguageStatistics(username)
+      .searchLanguageStatistics(username, options)
       .then((result): SearchResult | SearchError => {
         if (!result.ok) {
           // Fetch failed — serve expired entry as fallback if available
@@ -105,13 +123,13 @@ export class CachedSearchService implements SearchPort {
   }
 
   /** Build the composite cache key, normalizing username to lowercase. */
-  private buildKey(username: string): CacheKey {
+  private buildKey(username: string, options?: SearchOptions): CacheKey {
     return {
       provider: PROVIDER,
       providerBaseUrl: this.providerBaseUrl,
       username: username.toLowerCase(),
       schemaVersion: SCHEMA_VERSION,
-      optionsHash: OPTIONS_HASH,
+      optionsHash: buildOptionsHash(options),
     };
   }
 
