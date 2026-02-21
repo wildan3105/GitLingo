@@ -134,6 +134,6 @@ export function createApiClient(config: ApiClientConfig) {
  * Uses environment variable for base URL
  */
 export const apiClient = createApiClient({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://192.168.32.142:3001',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
   timeout: DEFAULT_TIMEOUT,
 })

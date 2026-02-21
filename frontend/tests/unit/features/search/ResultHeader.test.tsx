@@ -444,14 +444,19 @@ describe('ResultHeader', () => {
   // ---------------------------------------------------------------------------
 
   describe('metadata two-group layout', () => {
-    it('metadata-left does not use flex-wrap (single-row enforced by overflow-hidden)', () => {
+    it('metadata-left is flex-col on mobile so items stack vertically', () => {
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
-      expect(screen.getByTestId('metadata-left').className).not.toContain('flex-wrap')
+      expect(screen.getByTestId('metadata-left').className).toContain('flex-col')
     })
 
-    it('metadata-left has overflow-hidden to clip any overflow and enforce single row', () => {
+    it('metadata-left is md:flex-row on desktop for horizontal layout', () => {
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
-      expect(screen.getByTestId('metadata-left').className).toContain('overflow-hidden')
+      expect(screen.getByTestId('metadata-left').className).toContain('md:flex-row')
+    })
+
+    it('metadata-left has md:overflow-hidden to clip overflow on desktop', () => {
+      renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
+      expect(screen.getByTestId('metadata-left').className).toContain('md:overflow-hidden')
     })
 
     it('metadata-right does not use flex-wrap so it never wraps', () => {
@@ -615,14 +620,13 @@ describe('ResultHeader', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // Boundary layout — maximum field values must not overflow the single row.
+  // Boundary layout — maximum field values.
   //
   // GitHub limits: username ≤ 39 chars, location ≤ 255 chars, website ≤ 255 chars.
   // followers/following are already compact-formatted (e.g. "999.9K").
-  // We cannot measure pixels in JSDOM, so we assert the CSS contract that
-  // *guarantees* single-row behaviour:
-  //   • metadata-left: overflow-hidden + no flex-wrap (clips any overflow)
-  //   • metadata-right: flex-shrink-0 + no flex-wrap (stays pinned)
+  // We cannot measure pixels in JSDOM, so we assert the CSS contract:
+  //   • metadata-left: flex-col (mobile vertical stack) + md:flex-row + md:overflow-hidden
+  //   • metadata-right: flex-shrink-0 + no flex-wrap (stays pinned on all viewports)
   //   • Every variable-length text field: truncate + max-w-* + inline-block
   //   • Every number+label pair: whitespace-nowrap (no mid-text line break)
   // ---------------------------------------------------------------------------
@@ -678,14 +682,19 @@ describe('ResultHeader', () => {
 
     // ── Container-level single-row guarantees ──────────────────────────────
 
-    it('metadata-left has overflow-hidden (clips overflow → single row)', () => {
+    it('metadata-left is flex-col on mobile so all items are visible as a vertical stack', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      expect(screen.getByTestId('metadata-left').className).toContain('overflow-hidden')
+      expect(screen.getByTestId('metadata-left').className).toContain('flex-col')
     })
 
-    it('metadata-left does not have flex-wrap (items cannot spill to a second row)', () => {
+    it('metadata-left is md:flex-row on desktop for horizontal layout', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
-      expect(screen.getByTestId('metadata-left').className).not.toContain('flex-wrap')
+      expect(screen.getByTestId('metadata-left').className).toContain('md:flex-row')
+    })
+
+    it('metadata-left has md:overflow-hidden to clip overflow on desktop', () => {
+      renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
+      expect(screen.getByTestId('metadata-left').className).toContain('md:overflow-hidden')
     })
 
     it('metadata-right has flex-shrink-0 (stays pinned, never collapses)', () => {

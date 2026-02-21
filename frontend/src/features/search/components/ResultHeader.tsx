@@ -123,10 +123,28 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
     return url.replace(/^https?:\/\//i, '').replace(/^www\./i, '')
   }
 
-  // Copy profile URL to clipboard
+  // Copy profile URL to clipboard.
+  // Uses the modern Clipboard API where available (HTTPS + supported browser).
+  // Falls back to execCommand for iOS Safari and HTTP contexts where navigator.clipboard
+  // is undefined or restricted.
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(profileUrl)
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(profileUrl)
+      } else {
+        // Fallback: create an off-screen textarea, select its content, and execCommand
+        const textarea = document.createElement('textarea')
+        textarea.value = profileUrl
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        textarea.style.top = '0'
+        textarea.style.left = '0'
+        document.body.appendChild(textarea)
+        textarea.focus()
+        textarea.setSelectionRange(0, textarea.value.length)
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -248,11 +266,11 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
       </div>
 
       {/* Row 2: Metadata */}
-      <div className="flex items-start justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
+      <div className="flex flex-col md:flex-row items-start md:justify-between gap-2 md:gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
         {/* Left: @username + joined since + statistics */}
         <div
           data-testid="metadata-left"
-          className="flex items-center gap-2 leading-relaxed flex-1 min-w-0 overflow-hidden"
+          className="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 leading-relaxed flex-1 min-w-0 md:overflow-hidden"
         >
           <div className="flex items-center gap-1.5">
             <svg
@@ -272,7 +290,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           </div>
           {profile.createdAt && (
             <>
-              <span className="text-secondary-400">•</span>
+              <span className="hidden md:inline text-secondary-400">•</span>
               <div className="flex items-center gap-1.5">
                 <svg
                   className="w-4 h-4 text-secondary-400"
@@ -302,7 +320,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                 <>
                   {profile.statistics.followers !== undefined && (
                     <>
-                      <span className="text-secondary-400">•</span>
+                      <span className="hidden md:inline text-secondary-400">•</span>
                       <div className="flex items-center gap-1.5">
                         <svg
                           className="w-4 h-4 text-secondary-400"
@@ -325,7 +343,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                   )}
                   {profile.statistics.following !== undefined && (
                     <>
-                      <span className="text-secondary-400">•</span>
+                      <span className="hidden md:inline text-secondary-400">•</span>
                       <div className="flex items-center gap-1.5">
                         <svg
                           className="w-4 h-4 text-secondary-400"
@@ -352,7 +370,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
               {/* Organization statistics */}
               {profile.type === 'organization' && profile.statistics.members !== undefined && (
                 <>
-                  <span className="text-secondary-400">•</span>
+                  <span className="hidden md:inline text-secondary-400">•</span>
                   <div className="flex items-center gap-1.5">
                     <svg
                       className="w-4 h-4 text-secondary-400"
@@ -379,7 +397,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           {/* Location */}
           {profile.location && (
             <>
-              <span className="text-secondary-400">•</span>
+              <span className="hidden md:inline text-secondary-400">•</span>
               <div className="flex items-center gap-1.5" title={profile.location}>
                 <svg
                   className="w-4 h-4 text-secondary-400"
@@ -400,9 +418,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="hidden md:inline-block max-w-[7rem] truncate">
-                  {profile.location}
-                </span>
+                <span className="inline-block max-w-[7rem] truncate">{profile.location}</span>
               </div>
             </>
           )}
@@ -410,7 +426,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
           {/* Website */}
           {profile.websiteUrl && (
             <>
-              <span className="text-secondary-400">•</span>
+              <span className="hidden md:inline text-secondary-400">•</span>
               <a
                 href={normalizeUrl(profile.websiteUrl)}
                 target="_blank"
@@ -426,7 +442,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                   />
                 </svg>
-                <span className="hidden md:inline-block truncate max-w-[150px]">
+                <span className="inline-block truncate max-w-[150px]">
                   {getDisplayUrl(profile.websiteUrl)}
                 </span>
               </a>
