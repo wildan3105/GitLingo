@@ -74,7 +74,7 @@ export const config: Config = {
   logLevel: getLogLevel(),
   dbPath: process.env.DB_PATH ?? './data/gitlingo.db',
   enableCache: process.env.ENABLE_CACHE === 'true',
-  cacheTtlHours: (() => {
+  cacheTtlHours: ((): number => {
     const val = Number(process.env.CACHE_TTL_HOURS);
     return Number.isFinite(val) && val > 0 ? val : 12;
   })(),

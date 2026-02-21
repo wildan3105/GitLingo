@@ -36,7 +36,7 @@
 export function deriveProviderBaseUrl(endpointUrl: string | undefined): string {
   const DEFAULT_BASE_URL = 'https://github.com';
 
-  if (!endpointUrl || endpointUrl.trim() === '') {
+  if (endpointUrl === undefined || endpointUrl.trim() === '') {
     return DEFAULT_BASE_URL;
   }
 
