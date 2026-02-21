@@ -77,9 +77,9 @@ export function useSearch(): UseSearchReturn {
   const [username, setUsernameState] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
 
-  // Filter state - forks defaults to false, unknown defaults to true
+  // Filter state - set forks and unknown to be false
   const [includeForks, setIncludeForks] = useState(false)
-  const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(true)
+  const [includeUnknownLanguage, setIncludeUnknownLanguage] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -156,7 +156,7 @@ export function useSearch(): UseSearchReturn {
   /**
    * Resets all state to defaults
    * - Clears username
-   * - Resets includeForks to false, includeUnknownLanguage to true
+   * - Resets includeForks to false, includeUnknownLanguage to false
    * - Clears API data and errors
    * - Clears validation errors
    * - Resets URL to root
@@ -164,7 +164,7 @@ export function useSearch(): UseSearchReturn {
   const handleReset = () => {
     setUsernameState('')
     setIncludeForks(false)
-    setIncludeUnknownLanguage(true)
+    setIncludeUnknownLanguage(false)
     setValidationError(null)
     mutation.reset()
     // Reset URL to root
