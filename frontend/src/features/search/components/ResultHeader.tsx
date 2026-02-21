@@ -69,22 +69,6 @@ function formatTimeRemaining(isoString: string): string | null {
 }
 
 /**
- * Format ISO timestamp to human-readable local time
- */
-function formatLocalDateTime(isoString: string): string {
-  const date = new Date(isoString)
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZoneName: 'short',
-  })
-}
-
-/**
  * Result header showing profile summary
  *
  * Displays:
@@ -451,26 +435,34 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
         </div>
 
         {/* Right: Last Updated + Cache — never wraps, always pinned right */}
-        <div data-testid="metadata-right" className="flex items-center gap-3 flex-shrink-0">
-          {/* Last Updated */}
-          <div
-            className="flex items-center gap-1.5"
-            title={formatLocalDateTime(metadata.generatedAt)}
-          >
-            <svg
-              className="w-4 h-4 text-secondary-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        <div data-testid="metadata-right" className="flex items-center gap-2 flex-shrink-0">
+          {/* Last Updated chip */}
+          <div className="relative group">
+            <div
+              data-testid="updated-chip"
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-default"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Updated {formatRelativeTime(metadata.generatedAt)}</span>
+              <svg
+                className="w-3.5 h-3.5 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {formatRelativeTime(metadata.generatedAt)}
+            </div>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute -top-8 right-0 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 [@media(hover:hover)]:group-hover:opacity-100"
+            >
+              Last updated {formatRelativeTime(metadata.generatedAt)}
+            </span>
           </div>
 
           {/* Cache freshness chip — only when cachedUntil is present */}
@@ -478,46 +470,60 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
             (() => {
               const remaining = formatTimeRemaining(metadata.cachedUntil)
               return remaining ? (
-                <div
-                  data-testid="cache-freshness-chip"
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-600 border border-sky-200"
-                  title={`Refreshes in ${remaining}`}
-                >
-                  <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="relative group">
+                  <div
+                    data-testid="cache-freshness-chip"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-600 border border-sky-200 cursor-default"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  in {remaining}
+                    <svg
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    in {remaining}
+                  </div>
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute -top-8 right-0 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 [@media(hover:hover)]:group-hover:opacity-100"
+                  >
+                    Refreshes in {remaining}
+                  </span>
                 </div>
               ) : (
-                <div
-                  data-testid="cache-freshness-chip"
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200"
-                  title="Cached data has expired — will refresh on next search"
-                >
-                  <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="relative group">
+                  <div
+                    data-testid="cache-freshness-chip"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200 cursor-default"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                  Stale
+                    <svg
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    Stale
+                  </div>
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute -top-8 right-0 z-10 whitespace-nowrap rounded bg-secondary-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-150 [@media(hover:hover)]:group-hover:opacity-100"
+                  >
+                    Cached data expired — refreshes on next search
+                  </span>
                 </div>
               )
             })()}

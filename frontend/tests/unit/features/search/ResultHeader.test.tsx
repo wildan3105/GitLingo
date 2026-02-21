@@ -494,20 +494,23 @@ describe('ResultHeader', () => {
       ).toBeNull()
     })
 
-    it('"Updated X ago" is rendered inside metadata-right', () => {
+    it('updated chip is rendered inside metadata-right', () => {
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
-      expect(screen.getByTestId('metadata-right')).toHaveTextContent(/Updated/)
+      expect(screen.getByTestId('metadata-right')).toContainElement(
+        screen.getByTestId('updated-chip')
+      )
     })
 
-    it('cache chip is a direct child of metadata-right (not in a nested wrapping container)', () => {
+    it('cache chip is rendered inside metadata-right', () => {
       const NOW = new Date('2026-02-21T10:00:00.000Z')
       vi.useFakeTimers()
       vi.setSystemTime(NOW)
       const cachedUntil = new Date(NOW.getTime() + 60 * 60_000).toISOString()
       const m: Metadata = { ...metadata, cachedUntil }
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={m} />)
-      const chip = screen.getByTestId('cache-freshness-chip')
-      expect(chip.parentElement).toBe(screen.getByTestId('metadata-right'))
+      expect(screen.getByTestId('metadata-right')).toContainElement(
+        screen.getByTestId('cache-freshness-chip')
+      )
       vi.useRealTimers()
     })
   })
@@ -549,14 +552,11 @@ describe('ResultHeader', () => {
       expect(screen.getByText('in 11h 46m')).toBeInTheDocument()
     })
 
-    it('chip title tooltip reads "Refreshes in Xh Ym"', () => {
+    it('cache chip tooltip reads "Refreshes in Xh Ym"', () => {
       const cachedUntil = new Date(NOW.getTime() + 11 * 60 * 60_000 + 46 * 60_000).toISOString()
       const m: Metadata = { ...metadata, cachedUntil }
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={m} />)
-      expect(screen.getByTestId('cache-freshness-chip')).toHaveAttribute(
-        'title',
-        'Refreshes in 11h 46m'
-      )
+      expect(screen.getByRole('tooltip', { name: 'Refreshes in 11h 46m' })).toBeInTheDocument()
     })
 
     it('shows "in Xh" chip text when cachedUntil is an exact number of hours away', () => {
@@ -609,12 +609,13 @@ describe('ResultHeader', () => {
       expect(screen.queryByText('Stale')).not.toBeInTheDocument()
     })
 
-    it('"Updated X ago" still renders alongside the chip', () => {
+    it('updated chip and cache chip both render alongside each other', () => {
       const cachedUntil = new Date(NOW.getTime() + 60 * 60_000).toISOString()
       const generatedAt = new Date(NOW.getTime() - 14 * 60_000).toISOString()
       const m: Metadata = { ...metadata, generatedAt, cachedUntil }
       renderWithProviders(<ResultHeader profile={baseProfile} metadata={m} />)
-      expect(screen.getByText('Updated 14m ago')).toBeInTheDocument()
+      expect(screen.getByTestId('updated-chip')).toBeInTheDocument()
+      expect(screen.getByText('14m ago')).toBeInTheDocument()
       expect(screen.getByTestId('cache-freshness-chip')).toBeInTheDocument()
     })
   })
@@ -769,10 +770,10 @@ describe('ResultHeader', () => {
 
     // ── Right-group content is present ─────────────────────────────────────
 
-    it('"Updated X ago" and cache chip both appear in metadata-right', () => {
+    it('updated chip and cache chip both appear in metadata-right', () => {
       renderWithProviders(<ResultHeader profile={maxProfile} metadata={maxMetadata} />)
       const right = screen.getByTestId('metadata-right')
-      expect(right).toHaveTextContent(/Updated/)
+      expect(right).toContainElement(screen.getByTestId('updated-chip'))
       expect(right).toContainElement(screen.getByTestId('cache-freshness-chip'))
     })
   })
