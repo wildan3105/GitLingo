@@ -195,15 +195,23 @@ export function SearchPage() {
           <button
             onClick={handleReset}
             onMouseDown={(e) => e.preventDefault()}
-            className="text-left transition-all duration-200 hover:opacity-80 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg p-1 -m-1"
+            className="group flex items-center gap-3 transition-all duration-200 hover:opacity-90 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg p-1 -m-1"
             aria-label="Reset to home"
           >
-            <h1 className="text-2xl font-semibold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-              GitLingo
-            </h1>
-            <p className="text-sm text-secondary-600 mt-1 leading-relaxed">
-              Visualize your GitHub language statistics
-            </p>
+            <img
+              src="/gitlingo.svg"
+              alt=""
+              aria-hidden="true"
+              className="w-11 h-11 flex-shrink-0 drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-md"
+            />
+            <div className="text-left">
+              <h1 className="text-2xl font-semibold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+                GitLingo
+              </h1>
+              <p className="text-sm text-secondary-600 mt-0.5 leading-relaxed">
+                Visualize your GitHub language statistics
+              </p>
+            </div>
           </button>
         </div>
       </header>
