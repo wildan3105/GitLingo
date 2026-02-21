@@ -1,65 +1,262 @@
-# Github Language Checker
+# GitLingo
 
-[![Deploy to VPS](https://github.com/wildan3105/github-langs/actions/workflows/deploy.yml/badge.svg)](https://github.com/wildan3105/github-langs/actions/workflows/deploy.yml)
-[![Node.js test pipeline](https://github.com/wildan3105/github-langs/actions/workflows/test.yml/badge.svg)](https://github.com/wildan3105/github-langs/actions/workflows/test.yml)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/wildan3105/github-langs/issues)
+> Visualize your GitHub programming language statistics with beautiful interactive charts
 
-## What ?
+GitLingo is a full-stack web application that analyzes GitHub user repositories and visualizes their programming language distribution through interactive charts. Built with modern web technologies and following domain-driven design principles.
 
-> A website to show the stats of programming language in the repos that a certain github account has.
+![GitLingo Screenshot](./images/homepage.png)
 
-[Go to the web!](https://gitstats.wildans.site)
+## Features
 
-![Screenshot](screenshot.png)
+- **GitHub User Search** - Search any GitHub username or organization
+- **Multiple Chart Types** - Visualize data with Bar, Pie, and Polar Area charts
+- **Interactive Visualizations** - Built with Chart.js for smooth, responsive charts
+- **Share Results** - Share your language stats on X (Twitter) and Facebook
+- **Download Charts** - Export your charts as PNG images
+- **Error Handling** - Comprehensive error handling with user-friendly messages
+- **Rate Limit Handling** - Automatic retry with countdown for GitHub API rate limits
+- **Responsive Design** - Works seamlessly on desktop and mobile devices
+- **Accessibility** - WCAG 2.1 Level AA compliant
 
-## Why does this project exist?
+## Tech Stack
 
-So people and/or organization can see the stats of programming language being used in their repositories easily.
+### Backend
+- **Runtime**: Node.js 22+ (Bun supported)
+- **Framework**: Express.js with TypeScript
+- **Architecture**: Domain-Driven Design (DDD)
+- **API**: GitHub GraphQL API v4
+- **Validation**: Zod for runtime type checking
+- **Testing**: Jest with 100% coverage
 
-## Key features
-- Show statistics of repo's programming language (overall) from a given github account
-- Display the total of each programming language based on github [programming language color](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml)
-- Browse the repo with specific programming language directly from the chart bar
-- Ability to switch between multicolor or single color (white)
-- Ability to download the chart in a JPG file
-- Ability to share the result via facebook or X (formerly Twitter)
+### Frontend
+- **Framework**: React 19 with TypeScript
+- **Build Tool**: Vite
+- **State Management**: TanStack Query v5 (React Query)
+- **Charts**: Chart.js with react-chartjs-2
+- **Styling**: Tailwind CSS v3
+- **Testing**: Vitest + React Testing Library
+- **Accessibility**: WCAG 2.1 Level AA
 
-## Running locally
+## Project Structure
 
-### Supported environment:
-* Prerequisite: 
+```
+github-langs/                # Root (monorepo)
+├── backend/                 # Express.js API server
+│   ├── src/
+│   │   ├── application/    # Use cases and orchestration
+│   │   ├── domain/         # Business logic and entities
+│   │   ├── infrastructure/ # External services (GitHub API)
+│   │   └── interfaces/     # HTTP controllers and routes
+│   └── README.md           # Backend documentation
+├── frontend/                # React application
+│   ├── src/
+│   │   ├── features/       # Feature modules (search, charts, share)
+│   │   ├── shared/         # Shared components and utilities
+│   │   └── contracts/      # API contracts and types
+│   └── README.md           # Frontend documentation
+└── docs/                    # Project documentation
+    ├── product-spec.md     # Product requirements
+    ├── backend-spec.md     # Backend technical spec
+    └── frontend-spec.md    # Frontend technical spec
+```
+
+## Quick Start
+
+### Prerequisites
+
+- **Node.js**: v22 or higher (or Bun)
+- **GitHub Token**: Personal access token with `read:user` and `repo` scopes
+- **Git**: For cloning the repository
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/wildan3105/github-langs.git
+   cd github-langs
+   ```
+
+2. **Install backend dependencies**
+   ```bash
+   cd backend
+   npm install
+   # or
+   bun install
+   ```
+
+3. **Install frontend dependencies**
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+4. **Configure environment variables**
+
+   **Backend** (`backend/.env`):
+   ```env
+   PORT=3001
+   NODE_ENV=development
+   GITHUB_TOKEN=your_github_personal_access_token
+   GITHUB_API_URL=https://api.github.com/graphql
+   ALLOWED_ORIGINS=http://localhost:5173
+   ```
+
+   **Frontend** (`frontend/.env`):
+   ```env
+   VITE_API_BASE_URL=http://localhost:3001
+   ```
+
+### Running Locally
+
+You need to run both servers simultaneously:
+
+**Terminal 1 - Backend**:
 ```bash
-Node >= 20.6.0+ (to enable .env support)
-NPM >= 9.8.1
+cd backend
+npm run dev        # Development with nodemon
+# or
+bun run dev        # Development with Bun
 ```
+Backend runs on http://localhost:3001
 
-* [Generate access token (classic)](https://github.com/settings/tokens/new) with `repo` scope to ensure you don't get rate limited API call.
-
-* Copy `.env.example` to `.env` and fill in the required environment variables:
-```
-ENV=local
-TOKEN=your_github_access_token_here
-PORT=3000
-```
-
-* Install dependency: `npm install`
-* Start the app `npm run start:local` and go to `http://localhost:3000`
-
-## Running with hot-reload
+**Terminal 2 - Frontend**:
 ```bash
-npm run dev # it will reload the application whenever there's scss file changes
+cd frontend
+npm run dev        # Development with Vite HMR
+```
+Frontend runs on http://localhost:5173
+
+### Testing
+
+**Backend Tests**:
+```bash
+cd backend
+npm test              # Run all tests
+npm run test:watch   # Watch mode
+npm run test:coverage # Coverage report
 ```
 
-## Feature tracker / bug report:
-You can see the feature progress / bug report and pick up some issues in the [issues](https://github.com/wildan3105/github-langs/issues)
+**Frontend Tests**:
+```bash
+cd frontend
+npm test              # Run all tests
+npm run test:watch   # Watch mode
+npm run test:coverage # Coverage report
+```
+
+## Deployment
+
+### Backend Deployment
+
+**Docker**:
+```bash
+cd backend
+docker build -t gitlingo-backend .
+docker run -p 3001:3001 --env-file .env gitlingo-backend
+```
+
+**Environment Variables**: Ensure all variables from `.env.example` are set in your deployment platform.
+
+### Frontend Deployment
+
+**Build for Production**:
+```bash
+cd frontend
+npm run build       # Creates dist/ folder
+npm run preview     # Preview production build locally
+```
+
+**Environment Variables**: Set `VITE_API_BASE_URL` to your deployed backend URL.
+
+## Development Workflow
+
+1. **Read the specs first**:
+   - [docs/product-spec.md](./docs/product-spec.md) - Product requirements
+   - [docs/backend-spec.md](./docs/backend-spec.md) - Backend technical spec
+   - [docs/frontend-spec.md](./docs/frontend-spec.md) - Frontend technical spec
+
+2. **Follow coding guidelines**:
+   - DRY principle - flag repetition aggressively
+   - Well-tested code is non-negotiable
+   - Handle edge cases thoughtfully
+   - Explicit over clever
+
+3. **Make incremental changes**:
+   - Small, proven changes
+   - Test one-by-one before committing
+   - Confirm before making changes
+
+4. **Run tests before pushing**:
+   ```bash
+   # Backend
+   cd backend && npm test
+
+   # Frontend
+   cd frontend && npm test
+   ```
+
+## Documentation
+
+- **[Product Specification](./docs/product-spec.md)** - Features, goals, and improvements
+- **[Backend Specification](./docs/backend-spec.md)** - Architecture, API contracts, testing
+- **[Frontend Specification](./docs/frontend-spec.md)** - Component architecture, state management
+- **[Backend README](./backend/README.md)** - Backend setup and API details
+- **[Frontend README](./frontend/README.md)** - Frontend setup and development
+
+## Architecture Highlights
+
+### Backend (DDD Architecture)
+- **Domain Layer**: Business logic, validation rules, entities
+- **Application Layer**: Use cases, service orchestration
+- **Infrastructure Layer**: GitHub API client, external services
+- **Interface Layer**: HTTP controllers, routes, middleware
+
+### Frontend (Feature-Based Architecture)
+- **Feature Modules**: search, charts, share, download
+- **Shared Components**: reusable UI components
+- **Contracts**: API types and response schemas
+- **State Management**: React Query for server state
+
+## Performance Optimizations
+
+- **Frontend**:
+  - React.memo for chart components
+  - useMemo for expensive calculations
+  - React Query caching (5 min stale, 10 min cache)
+  - Vite code splitting and lazy loading
+
+- **Backend**:
+  - GraphQL query optimization
+  - Error handling without retry storms
+  - CORS configuration for security
+  - Structured logging
 
 ## Contributing
 
-Check out this [page](CONTRIBUTING.md)
-## Other similar projects:
-- [Githut](https://github.com/madnight/githut)
-- [Hacktoberfest Checker](https://github.com/jenkoian/hacktoberfest-checker) (it's now archived)
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes following the coding guidelines
+4. Run tests (`npm test` in both backend and frontend)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-## License :
+## Similar Projects
+- [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) - A popular project that generates GitHub stats as images for README files.
+- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown
+) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
+- [github-profile-languages](https://github.com/IonicaBizau/github-profile-languages) - A project that visualizes the programming languages used in a GitHub profile.
+## License
 
-MIT (c) Wildan S. Nahar 2017 - 2025
+MIT License - see [LICENSE](./LICENSE) file for details
+
+## Support
+
+For issues, questions, or contributions:
+- Open an issue on GitHub
+- Check existing documentation in `docs/`
+- Review backend and frontend READMEs for specific details
+
+---
+
+Made with ♥ using Chart.js and React

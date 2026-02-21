@@ -30,3 +30,9 @@ coverage/
 
 # script
 *.sh
+
+# internal docs
+internal-docs/
+
+# claude
+CLAUDE.md

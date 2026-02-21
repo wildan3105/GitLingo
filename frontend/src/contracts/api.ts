@@ -1,0 +1,158 @@
+/**
+ * API Contracts for GitLingo Frontend
+ * These types mirror the backend API response/request shapes exactly
+ */
+
+/**
+ * Search query parameters
+ */
+export type SearchQuery = {
+  username: string
+  provider?: string
+}
+
+/**
+ * Profile statistics for users and organizations
+ */
+export type ProfileStatistics = {
+  /** Number of followers (users only) */
+  followers?: number
+  /** Number of following (users only) */
+  following?: number
+  /** Number of members (organizations only) */
+  members?: number
+}
+
+/**
+ * Profile information returned from the API
+ */
+export type Profile = {
+  username: string
+  name: string | null
+  avatarUrl: string
+  type: 'user' | 'organization'
+  providerUserId: string
+  location?: string | null
+  websiteUrl?: string | null
+  isVerified?: boolean
+  createdAt?: string
+  providerBaseUrl?: string
+  statistics?: ProfileStatistics
+}
+
+/**
+ * Language data point for charts
+ */
+export type LanguageData = {
+  key: string
+  label: string
+  value: number
+  color: string
+}
+
+/**
+ * Metadata about the response
+ */
+export type Metadata = {
+  generatedAt: string
+  unit: 'repos'
+  limit: number
+  /** ISO 8601 — when the result was written to cache. Present only on cache hits. */
+  cachedAt?: string
+  /** ISO 8601 — when the cache entry expires. Present only on cache hits. */
+  cachedUntil?: string
+}
+
+/**
+ * Error detail information
+ */
+export type ErrorDetail = {
+  code:
+    | 'user_not_found'
+    | 'rate_limited'
+    | 'network_error'
+    | 'server_error'
+    | 'validation_error'
+    | 'timeout'
+    | 'invalid_token'
+    | 'insufficient_scopes'
+    | 'generic'
+  message: string
+  details?: Record<string, unknown>
+  retryAfterSeconds?: number
+}
+
+/**
+ * Metadata for error responses
+ */
+export type Meta = {
+  generatedAt: string
+}
+
+/**
+ * Successful API response
+ */
+export type SuccessResponse = {
+  ok: true
+  provider: string
+  profile: Profile
+  data: LanguageData[]
+  metadata: Metadata
+}
+
+/**
+ * Error API response
+ */
+export type ErrorResponse = {
+  ok: false
+  provider: string
+  error: ErrorDetail
+  meta: Meta
+}
+
+/**
+ * Discriminated union of all possible API responses
+ * Use the 'ok' field to narrow the type
+ */
+export type ApiResponse = SuccessResponse | ErrorResponse
+
+/**
+ * Type guard to check if response is successful
+ */
+export function isSuccessResponse(response: ApiResponse): response is SuccessResponse {
+  return response.ok === true
+}
+
+/**
+ * Type guard to check if response is an error
+ */
+export function isErrorResponse(response: ApiResponse): response is ErrorResponse {
+  return response.ok === false
+}
+
+/**
+ * Individual entry from the top search leaderboard
+ */
+export type TopSearchItem = {
+  username: string
+  provider: string
+  hit: number
+  avatarUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+/**
+ * Response from GET /api/v1/topsearch
+ * Always returns ok: true (empty data on error/empty DB)
+ */
+export type TopSearchResponse = {
+  ok: true
+  data: TopSearchItem[]
+  pagination: {
+    total: number
+    count: number
+    offset: number
+    limit: number
+  }
+}

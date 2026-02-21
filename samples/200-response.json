@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "provider": "github",
+  "profile": {
+    "username": "octocat",
+    "type": "user",
+    "providerUserId": "1"
+  },
+  "series": [
+    { "key": "JavaScript", "label": "JavaScript", "value": 100, "color": "#f1e05a" },
+    { "key": "Python", "label": "Python", "value": 10, "color": "#3572A5" },
+    { "key": "__forks__", "label": "Forked repos", "value": 200, "color": "#ededed" }
+  ],
+  "metadata": {
+    "generatedAt": "2026-02-14T02:10:00.000Z",
+    "unit": "repos",
+    "limit": 20
+  }
+}
