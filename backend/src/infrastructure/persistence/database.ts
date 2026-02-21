@@ -26,6 +26,21 @@ const SCHEMA_SQL = `
 
   CREATE INDEX IF NOT EXISTS idx_topsearch_provider_updated
     ON topsearch(provider, updated_at DESC);
+
+  CREATE TABLE IF NOT EXISTS cache (
+    provider          TEXT    NOT NULL,
+    provider_base_url TEXT    NOT NULL,
+    username          TEXT    NOT NULL,
+    schema_version    TEXT    NOT NULL,
+    options_hash      TEXT    NOT NULL,
+    payload_json      TEXT    NOT NULL,
+
+    cached_at         INTEGER NOT NULL DEFAULT (unixepoch()),
+    cached_until      INTEGER NOT NULL,
+    updated_at        INTEGER NOT NULL DEFAULT (unixepoch()),
+
+    PRIMARY KEY (provider, provider_base_url, username, schema_version, options_hash)
+  );
 `;
 
 /**
