@@ -121,6 +121,48 @@ npm run dev
 curl "http://localhost:3001/api/v1/search?username=your-ghe-username"
 ```
 
+## Caching
+
+Result caching is **opt-in** and disabled by default.
+
+### Enabling the cache
+
+Set `ENABLE_CACHE=true` in your `.env`:
+
+```env
+ENABLE_CACHE=true
+CACHE_TTL_HOURS=12   # optional — default is 12 hours
+```
+
+When enabled, results are stored in the local SQLite database. Subsequent requests for the same username skip the GitHub API call entirely and are served from the cache until the TTL expires.
+
+### Behavior
+
+| Situation | Response |
+|---|---|
+| Cache hit (TTL valid) | Returns cached result immediately — GitHub is not called |
+| Cache miss or TTL expired | Fetches from GitHub, stores the result, returns it |
+| GitHub error + expired cache | Serves the expired cached result as a fallback with a warning log |
+| GitHub error + no cache | Returns the error response unchanged |
+
+### Response fields
+
+When a result comes from cache, the `metadata` object includes two additional fields:
+
+```json
+"metadata": {
+  "generatedAt": "2026-02-19T01:16:28.000Z",
+  "unit": "repos",
+  "cachedAt":    "2026-02-19T01:16:28.000Z",
+  "cachedUntil": "2026-02-19T13:16:28.000Z"
+}
+```
+
+- `generatedAt` equals `cachedAt` on a cache hit; on a miss it reflects the time of the live GitHub fetch.
+- `cachedAt` and `cachedUntil` are absent when the cache is disabled or the result is a live fetch error.
+
+---
+
 ## Available Scripts
 
 ```bash
@@ -257,6 +299,15 @@ Fetch language statistics for a GitHub user or organization.
 | `color` | `string` | Hex color for charts (e.g. `"#f1e05a"`) |
 
 > **Ordering:** sorted by `value` descending. The `__forks__` entry is always last.
+
+**Metadata fields:**
+
+| Field | Type | Always present | Description |
+|---|---|---|---|
+| `generatedAt` | `string` | ✅ | ISO 8601 timestamp. On a cache hit: equals `cachedAt`. On a miss: time of the live GitHub fetch. |
+| `unit` | `string` | ✅ | Unit for `data[].value` — always `"repos"` |
+| `cachedAt` | `string` | ❌ | ISO 8601 timestamp of when the result was cached. Present only when `ENABLE_CACHE=true` and the result was stored/retrieved from cache. |
+| `cachedUntil` | `string` | ❌ | ISO 8601 timestamp of when the cache entry expires. Present only when `ENABLE_CACHE=true` and the result was stored/retrieved from cache. |
 
 **Error Response:**
 ```json
@@ -441,7 +492,7 @@ backend/
 - **TypeScript** - Type safety
 - **Zod** - Schema validation
 - **@octokit/graphql** - GitHub API client
-- **better-sqlite3** - Persistent storage (topsearch leaderboard)
+- **better-sqlite3** - Persistent storage (topsearch leaderboard + result cache)
 - **Pino** - Logging
 - **Jest** - Testing
 
