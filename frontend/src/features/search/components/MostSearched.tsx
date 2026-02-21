@@ -4,7 +4,7 @@
  * Only rendered on the homepage empty state; returns null when data is unavailable.
  */
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getTopSearch } from '../../../services/gitlingoApi'
 import { computePyramidRows } from '../utils/pyramidRows'
@@ -23,27 +23,6 @@ type UserChipProps = {
   total: number
   onSearch: (username: string) => void
   onNavigate: (username: string, direction: 'prev' | 'next') => void
-}
-
-/**
- * Returns true when the viewport is narrower than the md breakpoint (768 px).
- * Defaults to false (desktop) when matchMedia is unavailable (SSR, JSDOM).
- */
-function useMobileLayout(): boolean {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false
-    return window.matchMedia('(max-width: 767px)').matches
-  })
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
-    const mq = window.matchMedia('(max-width: 767px)')
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  return isMobile
 }
 
 /** Number of top-searched chips to request from the API and to mirror in the skeleton. */
@@ -82,14 +61,11 @@ function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
   }
 
   return (
-    // max-w constrains each chip on mobile so long usernames can't dominate the row;
-    // reset to none on desktop where the pyramid layout handles sizing naturally.
-    <div className="relative group max-w-[160px] md:max-w-none" style={{ opacity }}>
+    <div className="relative group" style={{ opacity }}>
       <button
         onClick={() => onSearch(item.username)}
         onKeyDown={handleKeyDown}
-        // min-h ensures a comfortable 44px tap target on mobile; desktop height is
-        // already adequate from padding so we reset it there.
+        // min-h ensures a comfortable 44px tap target on mobile
         className="w-full flex items-center gap-3 px-5 py-2.5 min-h-[44px] md:min-h-0 bg-white border border-secondary-200 rounded-xl text-sm font-medium text-secondary-700 hover:border-primary-400 hover:text-primary-700 hover:shadow-md hover:scale-105 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 active:scale-95 cursor-pointer"
         aria-label={`Search for ${item.username}`}
         aria-describedby={tooltipId}
@@ -125,7 +101,6 @@ function UserChip({ item, rank, total, onSearch, onNavigate }: UserChipProps) {
 
 export function MostSearched({ onSearch }: MostSearchedProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isMobile = useMobileLayout()
 
   const { data, isLoading } = useQuery({
     queryKey: ['topSearch'],
@@ -135,22 +110,6 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
 
   if (isLoading) {
     const skeletonIndices = Array.from({ length: CHIP_LIMIT }, (_, i) => i)
-
-    if (isMobile) {
-      return (
-        <div className="border-t border-secondary-100 pt-2 space-y-2">
-          <div className="h-3.5 w-52 bg-secondary-200 rounded animate-pulse mx-auto" />
-          <div className="overflow-x-auto">
-            <div className="grid grid-flow-col grid-rows-2 auto-cols-max gap-x-2.5 gap-y-2">
-              {skeletonIndices.map((_, i) => (
-                <ChipSkeleton key={i} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
     const [skeletonTop, skeletonBottom] = computePyramidRows(skeletonIndices)
     return (
       <div className="border-t border-secondary-100 pt-3 space-y-3">
@@ -204,43 +163,21 @@ export function MostSearched({ onSearch }: MostSearchedProps) {
         Most searched GitHub users on GitLingo:
       </p>
 
-      {isMobile ? (
-        // Mobile: 2-row horizontal scroll grid — chips never wrap or get squished.
-        // The relative wrapper hosts a right-edge fade that signals more chips exist.
-        <div className="relative">
-          <div
-            className="overflow-x-auto"
-            style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-          >
-            <div className="grid grid-flow-col grid-rows-2 auto-cols-max gap-x-2.5 gap-y-2 pb-1">
-              {allItems.map((item, i) => (
-                <UserChip key={item.username} item={item} rank={i} {...chipProps} />
-              ))}
-            </div>
-          </div>
-          {/* Right-edge gradient fade — visual hint that more chips exist off-screen */}
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent"
-            aria-hidden="true"
-          />
+      {/* Same centered pyramid layout on all screen sizes */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
+          {topRow.map((item, i) => (
+            <UserChip key={item.username} item={item} rank={i} {...chipProps} />
+          ))}
         </div>
-      ) : (
-        // Desktop: inverted pyramid (unchanged)
-        <div className="flex flex-col items-center gap-3">
+        {bottomRow.length > 0 && (
           <div className="flex flex-wrap justify-center gap-3">
-            {topRow.map((item, i) => (
-              <UserChip key={item.username} item={item} rank={i} {...chipProps} />
+            {bottomRow.map((item, i) => (
+              <UserChip key={item.username} item={item} rank={topRow.length + i} {...chipProps} />
             ))}
           </div>
-          {bottomRow.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-3">
-              {bottomRow.map((item, i) => (
-                <UserChip key={item.username} item={item} rank={topRow.length + i} {...chipProps} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

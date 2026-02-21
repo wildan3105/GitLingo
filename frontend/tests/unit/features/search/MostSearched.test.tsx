@@ -49,67 +49,40 @@ function makeResponse(
   }
 }
 
-/** Stubs window.matchMedia to simulate a mobile viewport (< 768px). */
-function mockMobileViewport() {
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn((query: string) => ({
-      matches: query === '(max-width: 767px)',
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }))
-  )
-}
-
 describe('MostSearched', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  describe('mobile layout (< md breakpoint)', () => {
-    beforeEach(mockMobileViewport)
-    afterEach(() => vi.unstubAllGlobals())
-
-    it('renders all chips in a flat horizontal scroll container (not pyramid rows)', async () => {
+  describe('centered layout — all screen sizes', () => {
+    it('chips container uses flex-wrap and justify-center on all viewports', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
-      renderMostSearched()
+      const { container } = renderMostSearched()
       await waitFor(() => screen.getByText('@alice'))
 
-      // All 3 chips accessible, no pyramid split into separate rows
-      expect(screen.getAllByRole('button')).toHaveLength(3)
+      // At least one row uses the centered flex-wrap pattern
+      expect(container.querySelector('.flex.flex-wrap.justify-center')).toBeInTheDocument()
     })
 
-    it('scroll container has overflow-x-auto', async () => {
+    it('1 chip renders as a single centered row with no bottom row', async () => {
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['solo']))
+      const { container } = renderMostSearched()
+      await waitFor(() => screen.getByText('@solo'))
+
+      const rows = container.querySelectorAll('.flex.flex-wrap.justify-center')
+      expect(rows).toHaveLength(1)
+      expect(screen.getAllByRole('button')).toHaveLength(1)
+    })
+
+    it('2 chips both appear in the same single row (no bottom row)', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob']))
       const { container } = renderMostSearched()
       await waitFor(() => screen.getByText('@alice'))
 
-      expect(container.querySelector('.overflow-x-auto')).toBeInTheDocument()
-    })
-
-    it('chip grid uses grid-rows-2 and grid-flow-col for the 2-row layout', async () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
-      const { container } = renderMostSearched()
-      await waitFor(() => screen.getByText('@alice'))
-
-      expect(container.querySelector('.grid-rows-2.grid-flow-col')).toBeInTheDocument()
-    })
-
-    it('mobile skeleton also uses the horizontal scroll grid', () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockReturnValue(new Promise(() => {}))
-      const { container } = renderMostSearched()
-
-      expect(container.querySelector('.overflow-x-auto')).toBeInTheDocument()
-      expect(container.querySelector('.grid-rows-2.grid-flow-col')).toBeInTheDocument()
-    })
-
-    it('chip wrapper has max-w-[160px] on mobile to prevent long names dominating layout', async () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
-      renderMostSearched()
-      await waitFor(() => screen.getByText('@alice'))
-
-      const chipWrapper = screen.getByRole('button').parentElement as HTMLElement
-      expect(chipWrapper.className).toContain('max-w-[160px]')
+      // pyramid rule: n≤2 → everything in top row, bottom row omitted
+      const rows = container.querySelectorAll('.flex.flex-wrap.justify-center')
+      expect(rows).toHaveLength(1)
+      expect(rows[0].querySelectorAll('button')).toHaveLength(2)
     })
 
     it('chip button has min-h-[44px] for comfortable tap target on mobile', async () => {
@@ -117,23 +90,10 @@ describe('MostSearched', () => {
       renderMostSearched()
       await waitFor(() => screen.getByText('@alice'))
 
-      const button = screen.getByRole('button')
-      expect(button.className).toContain('min-h-[44px]')
+      expect(screen.getByRole('button').className).toContain('min-h-[44px]')
     })
 
-    it('right-edge gradient fade is rendered to hint at horizontal scroll', async () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice', 'bob', 'carol']))
-      const { container } = renderMostSearched()
-      await waitFor(() => screen.getByText('@alice'))
-
-      // The fade overlay is an aria-hidden div with a gradient-to-l and pointer-events-none
-      const fade = container.querySelector(
-        '[aria-hidden="true"].pointer-events-none.bg-gradient-to-l'
-      )
-      expect(fade).toBeInTheDocument()
-    })
-
-    it('chip click still calls onSearch on mobile', async () => {
+    it('chip click calls onSearch', async () => {
       const onSearch = vi.fn()
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
       renderMostSearched(onSearch)
@@ -147,8 +107,7 @@ describe('MostSearched', () => {
   })
 
   describe('section spacing', () => {
-    it('mobile container uses tighter top padding and gap (pt-2 space-y-2)', async () => {
-      mockMobileViewport()
+    it('container uses tighter base padding (pt-2 space-y-2)', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
       const { container } = renderMostSearched()
       await waitFor(() => screen.getByText('@alice'))
@@ -156,11 +115,9 @@ describe('MostSearched', () => {
       const section = container.firstChild as HTMLElement
       expect(section.className).toContain('pt-2')
       expect(section.className).toContain('space-y-2')
-      vi.unstubAllGlobals()
     })
 
-    it('desktop container keeps original spacing (pt-3 space-y-3 via md: prefix)', async () => {
-      // No matchMedia mock → desktop
+    it('container uses larger desktop spacing via md: prefix (pt-3 space-y-3)', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
       const { container } = renderMostSearched()
       await waitFor(() => screen.getByText('@alice'))
@@ -171,17 +128,7 @@ describe('MostSearched', () => {
     })
   })
 
-  describe('desktop chip sizing (unchanged)', () => {
-    // No matchMedia mock → JSDOM defaults to desktop layout
-    it('chip wrapper has md:max-w-none so desktop layout is unconstrained', async () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
-      renderMostSearched()
-      await waitFor(() => screen.getByText('@alice'))
-
-      const chipWrapper = screen.getByRole('button').parentElement as HTMLElement
-      expect(chipWrapper.className).toContain('md:max-w-none')
-    })
-
+  describe('chip sizing', () => {
     it('chip button has md:min-h-0 to restore natural height on desktop', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['alice']))
       renderMostSearched()
