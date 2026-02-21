@@ -61,6 +61,10 @@ LOG_LEVEL=info
 
 # GitHub Token (OPTIONAL - see note below)
 GITHUB_TOKEN=your_token_here
+
+# Result Caching (OPTIONAL)
+ENABLE_CACHE=false
+CACHE_TTL_HOURS=12
 ```
 
 ### GitHub Token
@@ -213,7 +217,9 @@ Fetch language statistics for a GitHub user or organization.
   ],
   "metadata": {
     "generatedAt": "2026-02-19T01:16:28.050Z",
-    "unit": "repos"
+    "unit": "repos",
+    "cachedAt": "2026-02-19T01:16:28.000Z",
+    "cachedUntil": "2026-02-19T13:16:28.000Z"
   }
 }
 ```
