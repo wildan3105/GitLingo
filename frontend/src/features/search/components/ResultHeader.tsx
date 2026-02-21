@@ -33,6 +33,42 @@ function formatRelativeTime(isoString: string): string {
 }
 
 /**
+ * Formats a number into a compact string: 999 → "999", 1500 → "1.5K",
+ * 1_200_000 → "1.2M", 2_500_000_000 → "2.5B".
+ * Trailing ".0" is dropped (10_000 → "10K", not "10.0K").
+ */
+function formatCompactNumber(n: number): string {
+  const compact = (value: number, suffix: string) => {
+    const rounded = Math.round(value * 10) / 10
+    return (rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1)) + suffix
+  }
+  if (n >= 1_000_000_000) return compact(n / 1_000_000_000, 'B')
+  if (n >= 1_000_000) return compact(n / 1_000_000, 'M')
+  if (n >= 1_000) return compact(n / 1_000, 'K')
+  return String(n)
+}
+
+/**
+ * Formats the time remaining until a future ISO timestamp.
+ * Returns null when the timestamp is in the past (expired).
+ *
+ * Examples: "11h 46m", "46m", "< 1m"
+ */
+function formatTimeRemaining(isoString: string): string | null {
+  const remainingMs = new Date(isoString).getTime() - Date.now()
+  if (remainingMs <= 0) return null
+
+  const totalMinutes = Math.floor(remainingMs / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`
+  if (hours > 0) return `${hours}h`
+  if (totalMinutes > 0) return `${totalMinutes}m`
+  return '< 1m'
+}
+
+/**
  * Format ISO timestamp to human-readable local time
  */
 function formatLocalDateTime(isoString: string): string {
@@ -209,9 +245,12 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
       </div>
 
       {/* Row 2: Metadata */}
-      <div className="flex items-center justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
+      <div className="flex items-start justify-between gap-4 text-sm text-secondary-600 pt-2 border-t border-secondary-100">
         {/* Left: @username + joined since + statistics */}
-        <div className="flex items-center gap-2 leading-relaxed flex-wrap">
+        <div
+          data-testid="metadata-left"
+          className="flex items-center gap-2 leading-relaxed flex-1 min-w-0 overflow-hidden"
+        >
           <div className="flex items-center gap-1.5">
             <svg
               className="w-4 h-4 text-secondary-400"
@@ -245,7 +284,9 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <span>Joined since {new Date(profile.createdAt).getFullYear()}</span>
+                <span className="whitespace-nowrap">
+                  Joined since {new Date(profile.createdAt).getFullYear()}
+                </span>
               </div>
             </>
           )}
@@ -273,7 +314,9 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                           />
                         </svg>
-                        <span>{profile.statistics.followers.toLocaleString()} Followers</span>
+                        <span className="whitespace-nowrap">
+                          {formatCompactNumber(profile.statistics.followers)} Followers
+                        </span>
                       </div>
                     </>
                   )}
@@ -294,7 +337,9 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                           />
                         </svg>
-                        <span>{profile.statistics.following.toLocaleString()} Following</span>
+                        <span className="whitespace-nowrap">
+                          {formatCompactNumber(profile.statistics.following)} Following
+                        </span>
                       </div>
                     </>
                   )}
@@ -319,19 +364,19 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                         d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                       />
                     </svg>
-                    <span>{profile.statistics.members.toLocaleString()} Members</span>
+                    <span className="whitespace-nowrap">
+                      {formatCompactNumber(profile.statistics.members)} Members
+                    </span>
                   </div>
                 </>
               )}
             </>
           )}
-        </div>
 
-        {/* Right: Location + Website + Last Updated */}
-        <div className="flex items-center gap-3 flex-wrap justify-end">
           {/* Location */}
           {profile.location && (
             <>
+              <span className="text-secondary-400">•</span>
               <div className="flex items-center gap-1.5" title={profile.location}>
                 <svg
                   className="w-4 h-4 text-secondary-400"
@@ -352,15 +397,17 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="hidden md:inline">{profile.location}</span>
+                <span className="hidden md:inline-block max-w-[7rem] truncate">
+                  {profile.location}
+                </span>
               </div>
-              <span className="text-secondary-400 hidden md:inline">•</span>
             </>
           )}
 
           {/* Website */}
           {profile.websiteUrl && (
             <>
+              <span className="text-secondary-400">•</span>
               <a
                 href={normalizeUrl(profile.websiteUrl)}
                 target="_blank"
@@ -376,14 +423,16 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
                     d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                   />
                 </svg>
-                <span className="hidden md:inline truncate max-w-[150px]">
+                <span className="hidden md:inline-block truncate max-w-[150px]">
                   {getDisplayUrl(profile.websiteUrl)}
                 </span>
               </a>
-              <span className="text-secondary-400 hidden md:inline">•</span>
             </>
           )}
+        </div>
 
+        {/* Right: Last Updated + Cache — never wraps, always pinned right */}
+        <div data-testid="metadata-right" className="flex items-center gap-3 flex-shrink-0">
           {/* Last Updated */}
           <div
             className="flex items-center gap-1.5"
@@ -404,6 +453,55 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
             </svg>
             <span>Updated {formatRelativeTime(metadata.generatedAt)}</span>
           </div>
+
+          {/* Cache freshness chip — only when cachedUntil is present */}
+          {metadata.cachedUntil &&
+            (() => {
+              const remaining = formatTimeRemaining(metadata.cachedUntil)
+              return remaining ? (
+                <div
+                  data-testid="cache-freshness-chip"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-600 border border-sky-200"
+                  title={`Refreshes in ${remaining}`}
+                >
+                  <svg
+                    className="w-3.5 h-3.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  in {remaining}
+                </div>
+              ) : (
+                <div
+                  data-testid="cache-freshness-chip"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200"
+                  title="Cached data has expired — will refresh on next search"
+                >
+                  <svg
+                    className="w-3.5 h-3.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  Stale
+                </div>
+              )
+            })()}
         </div>
       </div>
     </div>

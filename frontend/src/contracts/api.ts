@@ -57,6 +57,10 @@ export type Metadata = {
   generatedAt: string
   unit: 'repos'
   limit: number
+  /** ISO 8601 — when the result was written to cache. Present only on cache hits. */
+  cachedAt?: string
+  /** ISO 8601 — when the cache entry expires. Present only on cache hits. */
+  cachedUntil?: string
 }
 
 /**
