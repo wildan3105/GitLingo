@@ -43,13 +43,13 @@ describe('ResultHeader', () => {
     it('uses providerBaseUrl to construct profile URL when available', () => {
       const profile: Profile = {
         ...baseProfile,
-        providerBaseUrl: 'https://ghe.rakuten-it.com',
+        providerBaseUrl: 'https://ghe.your-company.com',
       }
 
       renderWithProviders(<ResultHeader profile={profile} metadata={metadata} />)
 
       const githubLink = screen.getByRole('link', { name: /open github/i })
-      expect(githubLink).toHaveAttribute('href', 'https://ghe.rakuten-it.com/testuser')
+      expect(githubLink).toHaveAttribute('href', 'https://ghe.your-company.com/testuser')
     })
 
     it('defaults to github.com when providerBaseUrl is not provided', () => {
