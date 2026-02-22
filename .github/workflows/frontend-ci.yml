@@ -49,7 +49,14 @@ jobs:
         run: npm run typecheck
 
       - name: Run tests
-        run: npm run test:coverage
+        run: npm run test:coverage -- --reporter=junit --outputFile=test-report.junit.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: ./frontend/test-report.junit.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -57,6 +64,7 @@ jobs:
           files: ./frontend/coverage/lcov.info
           flags: frontend
           name: frontend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
 
       - name: Build

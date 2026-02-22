@@ -1,10 +1,10 @@
 # GitLingo
 
+[![codecov](https://codecov.io/github/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7)](https://codecov.io/github/wildan3105/GitLingo)
+
 > Visualize your GitHub programming language statistics with beautiful interactive charts
 
 GitLingo is a full-stack web application that analyzes GitHub user repositories and visualizes their programming language distribution through interactive charts. Built with modern web technologies and following domain-driven design principles.
-
-![GitLingo Screenshot](./images/homepage.png)
 
 ## Features
 
