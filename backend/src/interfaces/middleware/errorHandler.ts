@@ -39,7 +39,7 @@ export function errorHandler(
     },
     metadata: {
       generatedAt: new Date().toISOString(),
-      reqId: req.id,
+      ...(req.id ? { reqId: req.id } : {}),
     },
   };
 
