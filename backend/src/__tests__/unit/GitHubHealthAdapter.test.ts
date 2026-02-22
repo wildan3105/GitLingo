@@ -4,6 +4,7 @@
  */
 
 import { GitHubHealthAdapter } from '../../infrastructure/providers/GitHubHealthAdapter';
+import { ProviderHealthPort } from '../../domain/ports/ProviderHealthPort';
 
 describe('GitHubHealthAdapter', () => {
   let fetchSpy: jest.SpyInstance;
@@ -14,6 +15,11 @@ describe('GitHubHealthAdapter', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('should satisfy the ProviderHealthPort interface', () => {
+    const adapter: ProviderHealthPort = new GitHubHealthAdapter();
+    expect(typeof adapter.checkProvider).toBe('function');
   });
 
   describe('checkProvider', () => {
@@ -109,12 +115,6 @@ describe('GitHubHealthAdapter', () => {
         'https://api.github.com',
         expect.objectContaining({ method: 'HEAD' })
       );
-    });
-  });
-
-  describe('ping', () => {
-    it('should always return true', () => {
-      expect(new GitHubHealthAdapter().ping()).toBe(true);
     });
   });
 });

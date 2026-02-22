@@ -4,6 +4,7 @@
  */
 
 import { HealthPort } from '../../domain/ports/HealthPort';
+import { ProviderHealthPort } from '../../domain/ports/ProviderHealthPort';
 
 export interface ServiceHealthStatus {
   database: 'ok' | 'error';
@@ -18,14 +19,13 @@ export interface HealthCheckResult {
 
 export class HealthService {
   private readonly healthPort: HealthPort;
-  private readonly providerPort: HealthPort | undefined;
+  private readonly providerPort: ProviderHealthPort | undefined;
 
   /**
    * @param healthPort   - Adapter for local infrastructure (e.g. SQLite)
-   * @param providerPort - Optional adapter for upstream provider (e.g. GitHub).
-   *                       Must implement checkProvider() to be useful here.
+   * @param providerPort - Optional adapter for upstream provider (e.g. GitHub)
    */
-  constructor(healthPort: HealthPort, providerPort?: HealthPort) {
+  constructor(healthPort: HealthPort, providerPort?: ProviderHealthPort) {
     this.healthPort = healthPort;
     this.providerPort = providerPort;
   }
@@ -35,7 +35,7 @@ export class HealthService {
       database: this.healthPort.ping() ? 'ok' : 'error',
     };
 
-    if (typeof this.providerPort?.checkProvider === 'function') {
+    if (this.providerPort !== undefined) {
       services.github = await this.providerPort.checkProvider();
     }
 

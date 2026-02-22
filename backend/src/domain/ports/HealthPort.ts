@@ -1,6 +1,7 @@
 /**
  * HealthPort
- * Domain contract for checking liveness of infrastructure dependencies.
+ * Domain contract for checking liveness of local infrastructure dependencies.
+ * Implemented by adapters that wrap synchronous, in-process checks (e.g. SQLite).
  */
 
 export interface HealthPort {
@@ -9,11 +10,4 @@ export interface HealthPort {
    * Implementations must never throw.
    */
   ping(): boolean;
-
-  /**
-   * Asynchronously checks whether an upstream provider is reachable.
-   * Optional — only adapters that support remote connectivity need implement this.
-   * Implementations must never throw; return 'error' on any failure.
-   */
-  checkProvider?(): Promise<'ok' | 'error'>;
 }

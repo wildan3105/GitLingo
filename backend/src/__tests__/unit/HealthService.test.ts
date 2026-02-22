@@ -1,10 +1,11 @@
 /**
  * HealthService Unit Tests
- * Uses mock HealthPort implementations — no database or network involved.
+ * Uses mock implementations — no database or network involved.
  */
 
 import { HealthService } from '../../application/services/HealthService';
 import { HealthPort } from '../../domain/ports/HealthPort';
+import { ProviderHealthPort } from '../../domain/ports/ProviderHealthPort';
 
 class MockDbPort implements HealthPort {
   constructor(private readonly healthy: boolean) {}
@@ -13,11 +14,8 @@ class MockDbPort implements HealthPort {
   }
 }
 
-class MockProviderPort implements HealthPort {
+class MockProviderPort implements ProviderHealthPort {
   constructor(private readonly result: 'ok' | 'error') {}
-  ping(): boolean {
-    return true;
-  }
   async checkProvider(): Promise<'ok' | 'error'> {
     return this.result;
   }
@@ -97,17 +95,6 @@ describe('HealthService', () => {
       expect(result.ok).toBe(false);
       expect(result.services.database).toBe('error');
       expect(result.services.github).toBe('error');
-    });
-
-    it('should not call checkProvider on a port that does not implement it', async () => {
-      // MockDbPort has no checkProvider — passing it as providerPort should not fail
-      const service = new HealthService(new MockDbPort(true), new MockDbPort(true));
-
-      const result = await service.check();
-
-      // No checkProvider on the port → github key absent → ok determined by database only
-      expect(result.services).not.toHaveProperty('github');
-      expect(result.ok).toBe(true);
     });
   });
 });
