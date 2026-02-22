@@ -108,7 +108,7 @@ GITHUB_TOKEN=ghp_GitHubPersonalAccessToken
 
 #### GitHub Enterprise
 ```env
-GRAPHQL_URL=https://ghe.rakuten-it.com/api
+GRAPHQL_URL=https://ghe.your-company.com/api
 GITHUB_TOKEN=ghp_EnterpriseAccessToken
 ```
 

@@ -432,13 +432,13 @@ describe('GitHubGraphQLAdapter', () => {
       expect(result.repositories).toHaveLength(1);
     });
 
-    it('should handle unverified organization (rakutentech)', async () => {
+    it('should handle unverified organization (somecompanytech)', async () => {
       const adapter = new GitHubGraphQLAdapter('test_token');
 
       mockGraphqlFn.mockResolvedValueOnce({
         user: null,
         organization: {
-          login: 'rakutentech',
+          login: 'somecompanytech',
           id: '789',
           isVerified: false,
           repositories: {
@@ -449,10 +449,10 @@ describe('GitHubGraphQLAdapter', () => {
         },
       });
 
-      const result = await adapter.fetchRepositories('rakutentech');
+      const result = await adapter.fetchRepositories('somecompanytech');
 
       expect(result.profile).toEqual({
-        username: 'rakutentech',
+        username: 'somecompanytech',
         type: 'organization',
         providerUserId: '789',
         isVerified: false,
@@ -576,7 +576,7 @@ describe('GitHubGraphQLAdapter', () => {
 
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
-          login: 'boheng-cao',
+          login: 'your-employee',
           id: '16',
           email: 'boheng.cao@company.com',
           avatarUrl: 'https://avatars.ghe.your-company.com/u/16',
@@ -589,7 +589,7 @@ describe('GitHubGraphQLAdapter', () => {
         organization: null,
       });
 
-      const result = await adapter.fetchRepositories('boheng-cao');
+      const result = await adapter.fetchRepositories('your-employee');
 
       expect(result.profile.avatarUrl).toBe('https://avatars.ghe.your-company.com/u/16');
       expect(result.profile.providerBaseUrl).toBe('https://ghe.your-company.com');
@@ -784,7 +784,7 @@ describe('GitHubGraphQLAdapter', () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: null,
         organization: {
-          login: 'rakutentech',
+          login: 'somecompanytech',
           id: '1415441',
           isVerified: false,
           membersWithRole: {
@@ -798,10 +798,10 @@ describe('GitHubGraphQLAdapter', () => {
         },
       });
 
-      const result = await adapter.fetchRepositories('rakutentech');
+      const result = await adapter.fetchRepositories('somecompanytech');
 
       expect(result.profile).toEqual({
-        username: 'rakutentech',
+        username: 'somecompanytech',
         type: 'organization',
         providerUserId: '1415441',
         isVerified: false,
@@ -1194,7 +1194,7 @@ describe('GitHubGraphQLAdapter', () => {
         error.errors = [{ type: 'UNAUTHORIZED', message: 'Bad credentials' }];
         mockGraphqlFn.mockRejectedValue(error);
 
-        await expect(adapter.fetchRepositories('boheng-cao')).rejects.toThrow(ProviderError);
+        await expect(adapter.fetchRepositories('your-employee')).rejects.toThrow(ProviderError);
       });
     });
 
@@ -1205,7 +1205,7 @@ describe('GitHubGraphQLAdapter', () => {
 
         mockGraphqlFn.mockResolvedValueOnce({
           user: {
-            login: 'boheng-cao',
+            login: 'your-employee',
             id: '789',
             repositories: {
               nodes: [{ name: 'ghe-repo', primaryLanguage: { name: 'Go' }, isFork: false }],
@@ -1216,9 +1216,9 @@ describe('GitHubGraphQLAdapter', () => {
           organization: null,
         });
 
-        const result = await adapter.fetchRepositories('boheng-cao');
+        const result = await adapter.fetchRepositories('your-employee');
 
-        expect(result.profile.username).toBe('boheng-cao');
+        expect(result.profile.username).toBe('your-employee');
         expect(mockGraphql.defaults).toHaveBeenCalledWith({
           baseUrl: gheURL,
         });
@@ -1233,7 +1233,7 @@ describe('GitHubGraphQLAdapter', () => {
 
         mockGraphqlFn.mockResolvedValueOnce({
           user: {
-            login: 'boheng-cao',
+            login: 'your-employee',
             id: '101112',
             email: 'boheng.cao@company.com',
             repositories: {
@@ -1247,9 +1247,9 @@ describe('GitHubGraphQLAdapter', () => {
           organization: null,
         });
 
-        const result = await adapter.fetchRepositories('boheng-cao');
+        const result = await adapter.fetchRepositories('your-employee');
 
-        expect(result.profile.username).toBe('boheng-cao');
+        expect(result.profile.username).toBe('your-employee');
         expect(result.profile.isVerified).toBe(true);
         expect(mockGraphql.defaults).toHaveBeenCalledTimes(2);
       });
