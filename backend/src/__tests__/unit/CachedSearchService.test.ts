@@ -69,6 +69,7 @@ function makeMockInner(
   result: SearchResult | SearchError = makeSuccessResult()
 ): jest.Mocked<SearchPort> {
   return {
+    getProviderName: jest.fn().mockReturnValue('github'),
     searchLanguageStatistics: jest.fn().mockResolvedValue(result),
   };
 }
@@ -333,6 +334,18 @@ describe('buildOptionsHash', () => {
 // ---------------------------------------------------------------------------
 
 describe('CachedSearchService — options cache isolation', () => {
+  it('uses the provider name from the inner service in the cache key', async () => {
+    const cache = makeMockCache(null);
+    const inner = makeMockInner();
+    inner.getProviderName.mockReturnValue('gitlab');
+    const svc = makeService(inner, cache);
+
+    await svc.searchLanguageStatistics('torvalds');
+
+    const key: CacheKey = cache.get.mock.calls[0]![0];
+    expect(key.provider).toBe('gitlab');
+  });
+
   it('calls cache.get with optionsHash="default" when no options are passed', async () => {
     const cache = makeMockCache(null);
     const inner = makeMockInner();

@@ -27,7 +27,6 @@ import { SearchPort } from '../ports/SearchPort';
 const logger = createLogger('CachedSearchService');
 
 const SCHEMA_VERSION = 'v1';
-const PROVIDER = 'github';
 
 /**
  * Compute a deterministic, stable hash string from search options.
@@ -57,6 +56,10 @@ export class CachedSearchService implements SearchPort {
     private readonly cache: CachePort,
     private readonly providerBaseUrl: string
   ) {}
+
+  public getProviderName(): string {
+    return this.inner.getProviderName();
+  }
 
   public searchLanguageStatistics(
     username: string,
@@ -125,7 +128,7 @@ export class CachedSearchService implements SearchPort {
   /** Build the composite cache key, normalizing username to lowercase. */
   private buildKey(username: string, options?: SearchOptions): CacheKey {
     return {
-      provider: PROVIDER,
+      provider: this.inner.getProviderName(),
       providerBaseUrl: this.providerBaseUrl,
       username: username.toLowerCase(),
       schemaVersion: SCHEMA_VERSION,

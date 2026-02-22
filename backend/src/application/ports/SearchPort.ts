@@ -15,6 +15,7 @@ import { SearchError } from '../types/SearchError';
 import { SearchOptions } from '../types/SearchOptions';
 
 export interface SearchPort {
+  getProviderName(): string;
   searchLanguageStatistics(
     username: string,
     options?: SearchOptions
