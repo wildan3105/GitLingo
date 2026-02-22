@@ -7,27 +7,12 @@ import { apiClient } from './apiClient'
 import type { ApiResponse, TopSearchResponse } from '../contracts/api'
 
 /**
- * Search for language statistics for a given username
+ * Fetch the most-searched usernames leaderboard.
  *
- * @param username - GitHub username or organization
- * @param provider - Provider name (default: 'github')
- * @returns Promise resolving to ApiResponse (success or error)
- *
- * @example
- * ```ts
- * const result = await searchLanguageStatistics('octocat')
- * if (result.ok) {
- *   console.log(result.data) // Language statistics
- * } else {
- *   console.error(result.error) // Error details
- * }
- * ```
- */
-/**
- * Fetch the most-searched usernames leaderboard
- *
- * Always resolves — returns null on network failure (component falls back to empty state).
- * The API itself always returns HTTP 200, so null only occurs on a fetch-level error.
+ * Returns `null` on any failure (network error, timeout, non-200 status).
+ * This is intentional — the top-search section is non-critical UI and degrades
+ * silently to an empty state. Contrast with `searchLanguageStatistics`, which
+ * returns a typed `ErrorResponse` because its failures must be surfaced to the user.
  *
  * @param limit - Max entries to return (default 9)
  */
@@ -44,6 +29,25 @@ export async function getTopSearch(limit = 9): Promise<TopSearchResponse | null>
   }
 }
 
+/**
+ * Search for language statistics for a given username.
+ *
+ * Returns a typed `ErrorResponse` on failure so callers can display a specific
+ * error message and retry button. For the silent-failure equivalent see `getTopSearch`.
+ *
+ * @param username - GitHub username or organization
+ * @returns Promise resolving to ApiResponse (SuccessResponse or ErrorResponse)
+ *
+ * @example
+ * ```ts
+ * const result = await searchLanguageStatistics('octocat')
+ * if (result.ok) {
+ *   console.log(result.data) // Language statistics
+ * } else {
+ *   console.error(result.error) // Error details
+ * }
+ * ```
+ */
 export async function searchLanguageStatistics(username: string): Promise<ApiResponse> {
   try {
     // Build query params

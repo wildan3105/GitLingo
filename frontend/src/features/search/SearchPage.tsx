@@ -195,7 +195,8 @@ export function SearchPage() {
           <button
             onClick={handleReset}
             onMouseDown={(e) => e.preventDefault()}
-            className="group flex items-center gap-3 transition-all duration-200 hover:opacity-90 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg p-1 -m-1"
+            disabled={isLoading}
+            className="group flex items-center gap-3 transition-all duration-200 hover:opacity-90 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg p-1 -m-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
             aria-label="Reset to home"
           >
             <img
