@@ -18,7 +18,7 @@ React + TypeScript frontend for GitLingo - Visualize your GitHub language statis
 
 We chose **Chart.js** with **react-chartjs-2** for the following reasons:
 
-- ✅ Supports all 4 required chart types (Bar, Pie, Polar Area)
+- ✅ Supports all 3 required chart types (Bar, Pie, Polar Area)
 - ✅ Highly customizable and performant
 - ✅ Excellent documentation and community support
 - ✅ Responsive by default
@@ -92,18 +92,28 @@ frontend/
 │   │   └── providers.tsx
 │   ├── features/         # Feature-based modules
 │   │   ├── search/       # Search feature
+│   │   │   ├── SearchPage.tsx
+│   │   │   ├── components/   # SearchBar, ProviderSelect, ResultHeader, MostSearched
+│   │   │   ├── hooks/        # useSearch
+│   │   │   └── utils/        # validation, pyramidRows
 │   │   ├── charts/       # Charts feature
-│   │   └── share/        # Share feature
+│   │   │   ├── components/   # ChartPanel, ChartTypeSelect, BarChartView, PieChartView, PolarAreaChartView
+│   │   │   ├── config/       # chartDefaults
+│   │   │   └── utils/        # normalizeData, aggregateTopN, downloadChart
+│   │   └── export/       # Export feature (CSV)
+│   │       └── utils/        # exportToCSV
 │   ├── services/         # API clients
 │   ├── contracts/        # API types (mirrors backend)
 │   ├── shared/           # Shared components, hooks, utils
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   └── utils/
+│   │   ├── components/   # Button, Card, Checkbox, Dropdown, EmptyState, ErrorBoundary,
+│   │   │                 # ErrorState, KPICard, LoadingState, SegmentedControl, Select, Toast
+│   │   ├── hooks/        # useToast
+│   │   ├── styles/       # animations.css
+│   │   └── utils/        # formatDuration
 │   ├── styles/           # Global styles
-│   └── test/             # Test utilities
+│   └── test/             # Test utilities and setup
 ├── tests/
-│   ├── unit/             # Unit tests
+│   ├── unit/             # Unit tests (features, services, shared)
 │   └── integration/      # Integration tests
 └── public/               # Static assets
 ```
@@ -166,8 +176,8 @@ VITE_API_BASE_URL=http://localhost:3001
 
 ## Documentation
 
-- [Frontend Specification](../docs/frontend-spec.md)
-- [Product Specification](../docs/product-spec.md)
+- [Frontend Specification](../internal-docs/spec/frontend-spec.md)
+- [Product Specification](../internal-docs/spec/product-spec.md)
 
 ## License
 

@@ -795,6 +795,107 @@ describe('useSearch', () => {
     })
   })
 
+  describe('concurrent search behavior', () => {
+    const makeResponse = (username: string): ApiResponse => ({
+      ok: true,
+      provider: 'github',
+      profile: {
+        username,
+        name: username,
+        avatarUrl: `https://example.com/${username}.png`,
+        type: 'user',
+        providerUserId: '1',
+      },
+      data: [],
+      metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+    })
+
+    it('does not overwrite a later search result with a stale earlier result', async () => {
+      let resolveFirst!: (v: ApiResponse) => void
+      const firstPromise = new Promise<ApiResponse>((resolve) => {
+        resolveFirst = resolve
+      })
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+        .mockImplementationOnce(() => firstPromise)
+        .mockResolvedValueOnce(makeResponse('user2'))
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      // Start slow first search
+      act(() => {
+        result.current.setUsername('user1')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
+
+      // user1 is in-flight; setUsername calls mutation.reset() — removes observer from user1's mutation
+      act(() => {
+        result.current.setUsername('')
+      })
+      act(() => {
+        result.current.setUsername('user2')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
+
+      // Wait for user2 to settle
+      await waitFor(() => {
+        expect(result.current.data?.profile.username).toBe('user2')
+      })
+
+      // Resolve the stale user1 promise — must NOT overwrite user2 result
+      await act(async () => {
+        resolveFirst(makeResponse('user1'))
+      })
+
+      expect(result.current.data?.profile.username).toBe('user2')
+    })
+
+    it('isLoading is false after the second search settles even though the first is still in-flight', async () => {
+      let resolveFirst!: (v: ApiResponse) => void
+      const firstPromise = new Promise<ApiResponse>((resolve) => {
+        resolveFirst = resolve
+      })
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+        .mockImplementationOnce(() => firstPromise)
+        .mockResolvedValueOnce(makeResponse('user2'))
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.setUsername('user1')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
+      await waitFor(() => expect(result.current.isLoading).toBe(true))
+
+      act(() => {
+        result.current.setUsername('')
+      })
+      act(() => {
+        result.current.setUsername('user2')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
+
+      // Second search resolved — loading must stop
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      // Resolving the stale first search must NOT flip isLoading back to true
+      await act(async () => {
+        resolveFirst(makeResponse('user1'))
+      })
+
+      expect(result.current.isLoading).toBe(false)
+    })
+  })
+
   describe('cache invalidation', () => {
     const makeSuccessResponse = (): ApiResponse => ({
       ok: true,

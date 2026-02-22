@@ -3,7 +3,6 @@
  * Loads and validates environment variables
  */
 
-import 'dotenv/config';
 import { Environment, LogLevel } from '../types/common';
 
 interface Config {

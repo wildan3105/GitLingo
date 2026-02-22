@@ -6,7 +6,7 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node --env-file=.env ./node_modules/.bin/tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",
@@ -50,13 +50,12 @@
     "typescript": "^5.7.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.3.0"
   },
   "dependencies": {
     "@octokit/graphql": "^9.0.3",
     "better-sqlite3": "^12.6.2",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "pino": "^10.3.1",
