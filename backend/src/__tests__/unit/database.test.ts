@@ -172,4 +172,76 @@ describe('applyMigrations', () => {
     expect(cacheTable).toBeDefined();
     db.close();
   });
+
+  it('handles a gap in recorded migration IDs (e.g., 1, 3) without adding missing IDs', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Simulate a gap in applied migration IDs: 1 and 3, skipping 2
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(3, '003_some_later_migration');
+
+    // applyMigrations should not throw and should not invent an ID=2 entry
+    expect(() => applyMigrations(db)).not.toThrow();
+
+    const rows = db
+      .prepare('SELECT id, name FROM migrations ORDER BY id')
+      .all() as Array<{ id: number; name: string }>;
+
+    expect(rows.map((r) => r.id)).toEqual([1, 3]);
+    db.close();
+  });
+
+  it('does not allow duplicate migration IDs in the migrations table', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Insert a migration with ID 1
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+
+    // Attempting to insert another row with the same ID should violate the PRIMARY KEY constraint
+    expect(() =>
+      db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_duplicate_id'),
+    ).toThrow();
+
+    db.close();
+  });
+
+  it('returns migrations ordered by ID even if inserted out of order', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Insert in non-sequential order: 2, then 1
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(2, '002_create_cache');
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+
+    const rows = db
+      .prepare('SELECT id FROM migrations ORDER BY id')
+      .all() as Array<{ id: number }>;
+
+    // Even though insertion order was [2, 1], querying with ORDER BY id returns [1, 2]
+    expect(rows.map((r) => r.id)).toEqual([1, 2]);
+    db.close();
+  });
 });
