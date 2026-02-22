@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ResultHeader } from '../../../../src/features/search/components/ResultHeader'
 import { ToastProvider } from '../../../../src/shared/hooks/useToast'
 import type { Profile, Metadata } from '../../../../src/contracts/api'
@@ -830,6 +831,56 @@ describe('ResultHeader', () => {
       // The link is inside the actions div; both that div and profile-identity are direct
       // children of the same row — so going up one level from each must reach the same node.
       expect(identityArea.parentElement).toBe(openGitHub.parentElement?.parentElement)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // handleCopyLink — clipboard fallback
+  // ---------------------------------------------------------------------------
+
+  describe('handleCopyLink — clipboard fallback', () => {
+    // Override the clipboard AFTER the outer beforeEach so writeText is unavailable
+    beforeEach(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: null },
+        writable: true,
+        configurable: true,
+      })
+    })
+
+    it('falls back to execCommand when navigator.clipboard.writeText is unavailable', async () => {
+      // jsdom does not implement execCommand, so we define it before asserting it was called
+      const execCommandMock = vi.fn().mockReturnValue(true)
+      Object.defineProperty(document, 'execCommand', {
+        value: execCommandMock,
+        writable: true,
+        configurable: true,
+      })
+
+      renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
+
+      // Use fireEvent (not userEvent) so userEvent does not replace navigator.clipboard
+      fireEvent.click(screen.getByRole('button', { name: /copy link/i }))
+
+      await waitFor(() => expect(execCommandMock).toHaveBeenCalledWith('copy'))
+    })
+
+    it('does not crash when clipboard write rejects', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: vi.fn().mockRejectedValue(new Error('Permission denied')),
+        },
+        writable: true,
+        configurable: true,
+      })
+      const user = userEvent.setup()
+
+      renderWithProviders(<ResultHeader profile={baseProfile} metadata={metadata} />)
+
+      // clicking should not throw — the error is caught and logged
+      await expect(
+        user.click(screen.getByRole('button', { name: /copy link/i }))
+      ).resolves.not.toThrow()
     })
   })
 })

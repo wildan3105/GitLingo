@@ -346,4 +346,85 @@ describe('ChartPanel', () => {
       expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
     })
   })
+
+  describe('Download handlers', () => {
+    it('calls downloadChart when Download PNG is clicked', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() => expect(downloadChart).toHaveBeenCalledOnce())
+    })
+
+    it('shows success toast after a successful PNG download', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() =>
+        expect(screen.getByText('Chart downloaded successfully!')).toBeInTheDocument()
+      )
+    })
+
+    it('shows error toast when downloadChart throws', async () => {
+      vi.mocked(downloadChart).mockRejectedValueOnce(new Error('Canvas not found'))
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() => expect(screen.getByText('Canvas not found')).toBeInTheDocument())
+    })
+
+    it('calls exportToCSV when Download CSV is clicked', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      expect(exportToCSV).toHaveBeenCalledOnce()
+      expect(exportToCSV).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.stringContaining('testuser')
+      )
+    })
+
+    it('shows success toast after a successful CSV export', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      await waitFor(() =>
+        expect(screen.getByText('CSV exported successfully!')).toBeInTheDocument()
+      )
+    })
+
+    it('shows error toast when exportToCSV throws', async () => {
+      vi.mocked(exportToCSV).mockImplementationOnce(() => {
+        throw new Error('CSV failed')
+      })
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      await waitFor(() => expect(screen.getByText('CSV failed')).toBeInTheDocument())
+    })
+  })
+
+  describe('filter empty state', () => {
+    it('shows "No repositories match your filters" when data is empty but hasOriginalData is true', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} data={[]} hasOriginalData={true} />)
+      expect(screen.getByText('No repositories match your filters')).toBeInTheDocument()
+    })
+  })
 })
