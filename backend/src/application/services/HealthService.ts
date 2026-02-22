@@ -39,7 +39,7 @@ export class HealthService {
       services.github = await this.providerPort.checkProvider();
     }
 
-    const allHealthy = (Object.values(services) as string[]).every((s) => s === 'ok');
+    const allHealthy = (Object.values(services) as Array<'ok' | 'error'>).every((s) => s === 'ok');
 
     return { ok: allHealthy, services };
   }
