@@ -51,6 +51,21 @@ jobs:
       - name: Run tests
         run: npm run test:coverage -- --reporter=junit --outputFile=test-report.junit.xml
 
+      - name: Write coverage summary
+        run: |
+          node -e '
+            const s = require("./coverage/coverage-summary.json").total;
+            const p = v => v.toFixed(1) + "%";
+            require("fs").appendFileSync(
+              process.env.GITHUB_STEP_SUMMARY,
+              "## Frontend Coverage\n\n| Metric | Coverage |\n|--------|----------|\n" +
+              "| Lines | " + p(s.lines.pct) + " |\n" +
+              "| Statements | " + p(s.statements.pct) + " |\n" +
+              "| Functions | " + p(s.functions.pct) + " |\n" +
+              "| Branches | " + p(s.branches.pct) + " |\n"
+            );
+          '
+
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
@@ -59,7 +74,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./frontend/coverage/lcov.info
           flags: frontend

@@ -25,6 +25,7 @@ module.exports = {
     '/dist/',
   ],
   coverageDirectory: 'coverage',
+  coverageReporters: ['json-summary', 'lcov', 'text'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   transformIgnorePatterns: ['node_modules/(?!(@octokit)/)'],
   verbose: true,

@@ -1,9 +1,12 @@
 # GitLingo
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![codecov](https://codecov.io/github/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7)](https://codecov.io/github/wildan3105/GitLingo)
-![CI](https://github.com/wildan3105/GitLingo/actions/workflows/backend-ci.yml/badge.svg)
-![CI](https://github.com/wildan3105/GitLingo/actions/workflows/frontend-ci.yml/badge.svg)
+<!-- root  -->
+[![codecov](https://codecov.io/github/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7)](https://codecov.io/github/wildan3105/GitLingo) 
+[![Backend Coverage](https://codecov.io/gh/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7&flag=backend)](https://codecov.io/gh/wildan3105/GitLingo)
+[![Frontend Coverage](https://codecov.io/gh/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7&flag=frontend)](https://codecov.io/gh/wildan3105/GitLingo)
+[![Backend CI](https://github.com/wildan3105/GitLingo/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/wildan3105/GitLingo/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/wildan3105/GitLingo/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/wildan3105/GitLingo/actions/workflows/frontend-ci.yml)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D24.3.0-brightgreen)
 
 > Visualize your GitHub programming language statistics with beautiful interactive charts
