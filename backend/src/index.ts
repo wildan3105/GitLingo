@@ -58,6 +58,7 @@ function createApp(): { app: Application; db: Database.Database } {
   app.use(
     cors({
       origin: config.allowedOrigins,
+      methods: ['GET', 'HEAD', 'OPTIONS'], // to add more methods if needed
       credentials: true,
     })
   );
