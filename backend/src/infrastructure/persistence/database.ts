@@ -92,12 +92,16 @@ export function applyMigrations(db: Database.Database): void {
 
   const record = db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)');
 
-  for (const migration of MIGRATIONS) {
-    if (!applied.has(migration.id)) {
-      db.exec(migration.sql);
-      record.run(migration.id, migration.name);
+  const runPendingMigrations = db.transaction(() => {
+    for (const migration of MIGRATIONS) {
+      if (!applied.has(migration.id)) {
+        db.exec(migration.sql);
+        record.run(migration.id, migration.name);
+      }
     }
-  }
+  });
+
+  runPendingMigrations();
 }
 
 /**
