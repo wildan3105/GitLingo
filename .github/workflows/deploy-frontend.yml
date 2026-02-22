@@ -6,6 +6,9 @@ on:
     paths: uncomment if already works
       - "frontend/**" 
 
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-frontend
   cancel-in-progress: false
