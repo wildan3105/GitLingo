@@ -35,7 +35,8 @@ export function exportToCSV(data: LanguageData[], filename: string): void {
 
   // Build CSV rows
   for (const item of languages) {
-    const percentage = totalRepos > 0 ? ((item.value / totalRepos) * 100).toFixed(PERCENTAGE_DECIMAL_PLACES) : '0.00'
+    const percentage =
+      totalRepos > 0 ? ((item.value / totalRepos) * 100).toFixed(PERCENTAGE_DECIMAL_PLACES) : '0.00'
     const row = [
       // Escape language name if it contains commas or quotes
       escapeCSVValue(item.label),
