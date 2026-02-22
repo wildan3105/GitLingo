@@ -94,7 +94,7 @@ function createApp(): { app: Application; db: Database.Database } {
 
   // Provider + search
   const githubAdapter = new GitHubGraphQLAdapter(config.githubToken, config.graphqlURL);
-  let searchService: SearchPort = new SearchService(githubAdapter);
+  let searchService: SearchPort = new SearchService(githubAdapter, config.concurrencyLimit);
 
   if (config.enableCache) {
     const providerBaseUrl = deriveProviderBaseUrl(config.graphqlURL);

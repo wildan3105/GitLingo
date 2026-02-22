@@ -2,7 +2,7 @@
  * Unit tests for env config helpers
  */
 
-import { parseCacheTtlHours, parseAllowedOrigins } from '../../shared/config/env';
+import { parseCacheTtlHours, parseAllowedOrigins, parseConcurrencyLimit } from '../../shared/config/env';
 
 describe('parseCacheTtlHours', () => {
   let warnSpy: jest.SpyInstance;
@@ -136,5 +136,39 @@ describe('parseAllowedOrigins', () => {
   it('should not warn when valid origins are set in production', () => {
     parseAllowedOrigins('https://app.example.com', 'production');
     expect(warnSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('parseConcurrencyLimit', () => {
+  it('should return the default (20) when value is undefined', () => {
+    expect(parseConcurrencyLimit(undefined)).toBe(20);
+  });
+
+  it('should return the default (20) when value is an empty string', () => {
+    expect(parseConcurrencyLimit('')).toBe(20);
+  });
+
+  it('should return the default (20) when value is non-numeric', () => {
+    expect(parseConcurrencyLimit('abc')).toBe(20);
+  });
+
+  it('should return the default (20) when value is zero', () => {
+    expect(parseConcurrencyLimit('0')).toBe(20);
+  });
+
+  it('should return the default (20) when value is negative', () => {
+    expect(parseConcurrencyLimit('-5')).toBe(20);
+  });
+
+  it('should parse a valid positive integer', () => {
+    expect(parseConcurrencyLimit('10')).toBe(10);
+  });
+
+  it('should floor a float to an integer', () => {
+    expect(parseConcurrencyLimit('7.9')).toBe(7);
+  });
+
+  it('should accept 1 as the minimum valid value', () => {
+    expect(parseConcurrencyLimit('1')).toBe(1);
   });
 });

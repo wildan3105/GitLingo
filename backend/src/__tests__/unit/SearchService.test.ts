@@ -423,17 +423,17 @@ describe('SearchService', () => {
       expect(second.error.code).not.toBe('rate_limited');
     });
 
-    it('should use a default concurrency limit of 10', async () => {
+    it('should use a default concurrency limit of 20', async () => {
       const provider = new SlowProvider();
       const service = new SearchService(provider); // default limit
 
-      // Start 10 requests — should all be accepted
-      const requests = Array.from({ length: 10 }, (_, i) =>
+      // Start 20 requests — should all be accepted
+      const requests = Array.from({ length: 20 }, (_, i) =>
         service.searchLanguageStatistics(`user${i}`)
       );
 
-      // 11th should be rejected
-      const rejected = await service.searchLanguageStatistics('user10');
+      // 21st should be rejected
+      const rejected = await service.searchLanguageStatistics('user20');
       expect(rejected.ok).toBe(false);
       if (rejected.ok) return;
       expect(rejected.error.code).toBe('rate_limited');

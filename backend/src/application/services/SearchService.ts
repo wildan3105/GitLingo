@@ -13,7 +13,7 @@ import { SearchError } from '../types/SearchError';
 import { SearchPort } from '../ports/SearchPort';
 
 const FORKS_KEY = '__forks__';
-const DEFAULT_CONCURRENCY_LIMIT = 10;
+const DEFAULT_CONCURRENCY_LIMIT = 20;
 
 export class SearchService implements SearchPort {
   private readonly provider: ProviderPort;
