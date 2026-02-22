@@ -289,8 +289,9 @@ describe('Cache Integration Tests', () => {
 
       expect(response.status).toBe(403);
       expect(response.body.ok).toBe(false);
-      // Error response uses SearchError shape (no `metadata` key)
-      expect(response.body.metadata).toBeUndefined();
+      // Error response metadata has no cachedAt/cachedUntil (only generatedAt)
+      expect(response.body.metadata).not.toHaveProperty('cachedAt');
+      expect(response.body.metadata).not.toHaveProperty('cachedUntil');
 
       db.close();
     });

@@ -52,7 +52,7 @@ export function validateTopSearchQuery(req: Request, res: Response, next: NextFu
             })),
           },
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       });

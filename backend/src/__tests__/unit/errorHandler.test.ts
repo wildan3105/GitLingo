@@ -44,14 +44,14 @@ describe('errorHandler', () => {
         error: expect.objectContaining({
           code: 'internal_server_error',
         }),
-        meta: expect.objectContaining({
+        metadata: expect.objectContaining({
           generatedAt: expect.any(String),
         }),
       })
     );
   });
 
-  it('should include reqId in meta when request has an id', () => {
+  it('should include reqId in metadata when request has an id', () => {
     mockRequest = { id: 'req-abc-123' } as Partial<Request>;
     const error = new Error('Test error');
 
@@ -59,7 +59,7 @@ describe('errorHandler', () => {
 
     expect(jsonMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        meta: expect.objectContaining({
+        metadata: expect.objectContaining({
           reqId: 'req-abc-123',
         }),
       })
