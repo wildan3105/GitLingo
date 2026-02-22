@@ -16,9 +16,7 @@ function ToastTrigger({ messages }: { messages: string[] }) {
   return (
     <button
       onClick={() => {
-        messages.forEach((message) =>
-          showToast({ type: 'success', message, duration: 999_999 })
-        )
+        messages.forEach((message) => showToast({ type: 'success', message, duration: 999_999 }))
       }}
     >
       Trigger
