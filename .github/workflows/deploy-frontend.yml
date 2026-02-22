@@ -62,24 +62,22 @@ jobs:
             TS="$(date +%Y%m%d-%H%M%S)"
             BASE="/var/www/gitlingo"
             REL="$BASE/releases/$TS"
+            PKG="/tmp/gitlingo-deploy/frontend-dist.tgz"
 
             mkdir -p "$BASE/releases"
             mkdir -p "$REL"
+            mkdir -p /tmp/gitlingo-deploy
 
-            # Extract dist into new release
-            tar -xzf /tmp/gitlingo-deploy/frontend-dist.tgz -C "$REL"
-
-            # Sanity check
+            tar -xzf "$PKG" -C "$REL"
             test -f "$REL/index.html"
 
-            # Atomic switch
             ln -sfn "$REL" "$BASE/current"
 
-            # Optional: reload nginx (safe)
             sudo systemctl reload nginx
 
-            # Prune old releases (keep latest 3)
             cd "$BASE/releases"
             ls -1dt */ | tail -n +4 | xargs -r rm -rf
+
+            rm -f "$PKG"
 
             echo "Deployed frontend release: $TS"
