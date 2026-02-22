@@ -23,9 +23,9 @@ A TypeScript backend API that:
 # Install dependencies
 npm install
 
-# Create .env file (optional)
+# Create .env file (required for npm run dev)
 cp .env.example .env
-# Add your GitHub token to .env for higher rate limits
+# Edit .env to add your GitHub token and any other settings
 ```
 
 ### Run Locally
