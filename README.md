@@ -25,7 +25,7 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
 ## Tech Stack
 
 ### Backend
-- **Runtime**: Node.js 22+ (Bun supported)
+- **Runtime**: Node.js 24+
 - **Framework**: Express.js with TypeScript
 - **Architecture**: Domain-Driven Design (DDD)
 - **API**: GitHub GraphQL API v4
@@ -41,34 +41,11 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
 - **Testing**: Vitest + React Testing Library
 - **Accessibility**: WCAG 2.1 Level AA
 
-## Project Structure
-
-```
-GitLingo/                # Root (monorepo)
-├── backend/                 # Express.js API server
-│   ├── src/
-│   │   ├── application/    # Use cases and orchestration
-│   │   ├── domain/         # Business logic and entities
-│   │   ├── infrastructure/ # External services (GitHub API)
-│   │   └── interfaces/     # HTTP controllers and routes
-│   └── README.md           # Backend documentation
-├── frontend/                # React application
-│   ├── src/
-│   │   ├── features/       # Feature modules (search, charts, share)
-│   │   ├── shared/         # Shared components and utilities
-│   │   └── contracts/      # API contracts and types
-│   └── README.md           # Frontend documentation
-└── docs/                    # Project documentation
-    ├── product-spec.md     # Product requirements
-    ├── backend-spec.md     # Backend technical spec
-    └── frontend-spec.md    # Frontend technical spec
-```
-
 ## Quick Start
 
 ### Prerequisites
 
-- **Node.js**: v22 or higher (or Bun)
+- **Node.js**: v24 or higher
 - **GitHub Token**: Personal access token with `read:user` and `repo` scopes
 - **Git**: For cloning the repository
 
