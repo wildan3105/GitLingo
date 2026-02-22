@@ -266,6 +266,36 @@ describe('CachedSearchService', () => {
     });
   });
 
+  describe('corrupt cache payload', () => {
+    it('should fall through to inner when a valid (non-expired) entry has corrupt payloadJson', async () => {
+      const entry = makeCacheEntry({ payloadJson: 'not valid json' });
+      const cache = makeMockCache(entry);
+      const inner = makeMockInner();
+      const svc = makeService(inner, cache);
+
+      const result = await svc.searchLanguageStatistics('torvalds');
+
+      // Corrupt entry bypassed — inner was called for a fresh result
+      expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(1);
+      expect(result.ok).toBe(true);
+    });
+
+    it('should return the error result when an expired fallback entry has corrupt payloadJson', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const expiredCorrupt = makeCacheEntry({ cachedUntil: now - 1, payloadJson: '{bad json' });
+      const cache = makeMockCache(expiredCorrupt);
+      const errorResult = makeErrorResult();
+      const inner = makeMockInner(errorResult);
+      const svc = makeService(inner, cache);
+
+      const result = await svc.searchLanguageStatistics('torvalds');
+
+      // Corrupt fallback discarded — error returned as-is
+      expect(result.ok).toBe(false);
+      expect(cache.upsert).not.toHaveBeenCalled();
+    });
+  });
+
   describe('single-flight', () => {
     it('should call inner exactly once for two concurrent requests for the same key', async () => {
       const cache = makeMockCache(null);
