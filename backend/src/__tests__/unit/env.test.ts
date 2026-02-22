@@ -140,35 +140,57 @@ describe('parseAllowedOrigins', () => {
 });
 
 describe('parseConcurrencyLimit', () => {
-  it('should return the default (20) when value is undefined', () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('should return the default (20) silently when value is undefined', () => {
     expect(parseConcurrencyLimit(undefined)).toBe(20);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('should return the default (20) when value is an empty string', () => {
+  it('should return the default (20) silently when value is an empty string', () => {
     expect(parseConcurrencyLimit('')).toBe(20);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('should return the default (20) when value is non-numeric', () => {
+  it('should return the default (20) silently when value is whitespace-only', () => {
+    expect(parseConcurrencyLimit('   ')).toBe(20);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+  it('should warn and return default (20) when value is non-numeric', () => {
     expect(parseConcurrencyLimit('abc')).toBe(20);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid CONCURRENCY_LIMIT'));
   });
 
-  it('should return the default (20) when value is zero', () => {
+  it('should warn and return default (20) when value is zero', () => {
     expect(parseConcurrencyLimit('0')).toBe(20);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid CONCURRENCY_LIMIT'));
   });
 
-  it('should return the default (20) when value is negative', () => {
+  it('should warn and return default (20) when value is negative', () => {
     expect(parseConcurrencyLimit('-5')).toBe(20);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid CONCURRENCY_LIMIT'));
   });
 
   it('should parse a valid positive integer', () => {
     expect(parseConcurrencyLimit('10')).toBe(10);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('should floor a float to an integer', () => {
     expect(parseConcurrencyLimit('7.9')).toBe(7);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('should accept 1 as the minimum valid value', () => {
     expect(parseConcurrencyLimit('1')).toBe(1);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 });

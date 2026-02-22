@@ -132,8 +132,14 @@ const CONCURRENCY_LIMIT_DEFAULT = 20;
  * - Unset / empty / non-positive / non-numeric → default (20)
  */
 export function parseConcurrencyLimit(rawValue: string | undefined): number {
+  if (rawValue === undefined || rawValue.trim() === '') {
+    return CONCURRENCY_LIMIT_DEFAULT;
+  }
   const val = Number(rawValue);
   if (!Number.isFinite(val) || val < 1) {
+    console.warn(
+      `Invalid CONCURRENCY_LIMIT: "${rawValue}". Must be a positive integer. Defaulting to ${CONCURRENCY_LIMIT_DEFAULT}.`
+    );
     return CONCURRENCY_LIMIT_DEFAULT;
   }
   return Math.floor(val);

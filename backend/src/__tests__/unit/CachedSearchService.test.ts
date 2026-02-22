@@ -36,7 +36,7 @@ function makeErrorResult(): SearchError {
     ok: false,
     provider: 'github',
     error: { code: 'rate_limited', message: 'Rate limited' },
-    meta: { generatedAt: new Date().toISOString() },
+    metadata: { generatedAt: new Date().toISOString() },
   };
 }
 
@@ -249,8 +249,9 @@ describe('CachedSearchService', () => {
       const result = await svc.searchLanguageStatistics('torvalds');
 
       expect(result.ok).toBe(false);
-      // SearchError has no metadata.cachedAt/cachedUntil
-      expect((result as SearchResult).metadata).toBeUndefined();
+      // SearchError metadata has no cachedAt/cachedUntil (only generatedAt)
+      expect(result.metadata).not.toHaveProperty('cachedAt');
+      expect(result.metadata).not.toHaveProperty('cachedUntil');
     });
   });
 

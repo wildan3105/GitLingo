@@ -50,7 +50,7 @@ export function validateSearchQuery(req: Request, res: Response, next: NextFunct
             })),
           },
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       });

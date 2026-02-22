@@ -74,7 +74,7 @@ describe('SearchController', () => {
           code: 'user_not_found',
           message: 'User not found',
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       };
@@ -97,7 +97,7 @@ describe('SearchController', () => {
           message: 'Rate limited',
           retryAfterSeconds: 60,
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       };
@@ -119,7 +119,7 @@ describe('SearchController', () => {
           code: 'network_error',
           message: 'Network error',
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       };
@@ -243,7 +243,7 @@ describe('SearchController', () => {
         ok: false as const,
         provider: 'github',
         error: { code: 'user_not_found', message: 'Not found' },
-        meta: { generatedAt: new Date().toISOString() },
+        metadata: { generatedAt: new Date().toISOString() },
       };
 
       mockSearchService.searchLanguageStatistics.mockResolvedValue(errorResult);

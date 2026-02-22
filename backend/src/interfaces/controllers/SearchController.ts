@@ -44,7 +44,7 @@ export class SearchController {
             message: `Provider '${provider}' is not yet implemented. Only 'github' is currently supported.`,
             details: { provider, supportedProviders: [DEFAULT_PROVIDER] },
           },
-          meta: {
+          metadata: {
             generatedAt: new Date().toISOString(),
           },
         });

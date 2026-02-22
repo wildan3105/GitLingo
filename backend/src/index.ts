@@ -127,6 +127,7 @@ function startServer(): void {
         nodeEnv: config.nodeEnv,
         logLevel: config.logLevel,
         dbPath: config.dbPath,
+        concurrencyLimit: config.concurrencyLimit,
       },
       '🚀 GitLingo Backend started'
     );
@@ -141,6 +142,10 @@ function startServer(): void {
       logger.info('Server closed');
       process.exit(0);
     });
+
+    // Release idle keep-alive connections immediately so server.close()
+    // doesn't wait for their timeout before calling the callback above.
+    server.closeIdleConnections();
 
     // Force shutdown after 10 seconds
     setTimeout(() => {

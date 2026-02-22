@@ -42,7 +42,7 @@ export interface SearchError {
   /**
    * Response metadata
    */
-  meta: {
+  metadata: {
     /**
      * ISO timestamp when the error occurred
      */

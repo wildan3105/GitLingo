@@ -42,7 +42,7 @@ export class SearchService implements SearchPort {
           message: 'Too many concurrent requests. Please try again shortly.',
           details: { username },
         },
-        meta: {
+        metadata: {
           generatedAt: new Date().toISOString(),
         },
       };
@@ -157,7 +157,7 @@ export class SearchService implements SearchPort {
           },
           ...(error.retryAfter !== undefined && { retryAfterSeconds: error.retryAfter }),
         },
-        meta: {
+        metadata: {
           generatedAt,
         },
       };
@@ -173,7 +173,7 @@ export class SearchService implements SearchPort {
         message: err.message ?? 'An unexpected error occurred',
         details: { username },
       },
-      meta: {
+      metadata: {
         generatedAt,
       },
     };

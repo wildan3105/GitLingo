@@ -15,7 +15,7 @@ const logger = createLogger('errorHandler');
  */
 export function errorHandler(
   error: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void {
@@ -37,8 +37,9 @@ export function errorHandler(
       message: isProduction() ? 'An unexpected error occurred' : error.message,
       ...(isProduction() ? {} : { stack: error.stack }),
     },
-    meta: {
+    metadata: {
       generatedAt: new Date().toISOString(),
+      ...(req.id ? { reqId: req.id } : {}),
     },
   };
 
