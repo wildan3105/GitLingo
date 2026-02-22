@@ -13,6 +13,7 @@ import Database from 'better-sqlite3';
 
 import { config } from './shared/config/env';
 import { logger } from './shared/utils/logger';
+import { requestContext } from './shared/utils/requestContext';
 import { GitHubGraphQLAdapter } from './infrastructure/providers/GitHubGraphQLAdapter';
 import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
@@ -67,6 +68,12 @@ function createApp(): { app: Application; db: Database.Database } {
       autoLogging: true,
     })
   );
+
+  // Bind req.log into AsyncLocalStorage so service-level loggers
+  // automatically inherit the request's reqId (must be after pinoHttp)
+  app.use((req, _res, next) => {
+    requestContext.run(req.log, next);
+  });
 
   // Persistence
   ensureDbDirectory(config.dbPath);

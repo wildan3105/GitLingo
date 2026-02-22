@@ -13,6 +13,7 @@
 
 import pino from 'pino';
 import { config } from '../config/env';
+import { getRequestLogger } from './requestContext';
 
 /**
  * Root logger.
@@ -26,11 +27,24 @@ export const logger = pino({
 });
 
 /**
- * Create a child logger bound to a named component.
- * Inherits the root level and timestamp format; adds a `name` field to every line.
+ * Create a named component logger.
+ *
+ * Returns a Proxy that resolves the active logger lazily at each log call:
+ * - Inside a request context: delegates to req.log.child({ name }),
+ *   so every log line automatically carries the request's reqId.
+ * - Outside a request context (startup, shutdown): delegates to the
+ *   root logger child, which has no reqId.
  *
  * @param name - Component or service identifier (e.g. 'CachedSearchService')
  */
 export function createLogger(name: string): pino.Logger {
-  return logger.child({ name });
+  const base = logger.child({ name });
+  return new Proxy(base, {
+    get(_target: pino.Logger, prop: string | symbol): unknown {
+      const source = getRequestLogger()?.child({ name }) ?? base;
+      const val = (source as unknown as Record<string | symbol, unknown>)[prop];
+      if (typeof val !== 'function') return val;
+      return (val as { bind(thisArg: pino.Logger): unknown }).bind(source);
+    },
+  });
 }
