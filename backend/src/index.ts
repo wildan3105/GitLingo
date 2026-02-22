@@ -18,6 +18,7 @@ import { GitHubGraphQLAdapter } from './infrastructure/providers/GitHubGraphQLAd
 import { createDatabase } from './infrastructure/persistence/database';
 import { SQLiteTopSearchAdapter } from './infrastructure/persistence/SQLiteTopSearchAdapter';
 import { SQLiteHealthAdapter } from './infrastructure/persistence/SQLiteHealthAdapter';
+import { GitHubHealthAdapter } from './infrastructure/providers/GitHubHealthAdapter';
 import { deriveProviderBaseUrl } from './shared/utils/providerUrl';
 import { SearchPort } from './application/ports/SearchPort';
 import { SearchService } from './application/services/SearchService';
@@ -83,7 +84,8 @@ function createApp(): { app: Application; db: Database.Database } {
   const topSearchController = new TopSearchController(topSearchService);
 
   const healthAdapter = new SQLiteHealthAdapter(db);
-  const healthService = new HealthService(healthAdapter);
+  const githubHealthAdapter = new GitHubHealthAdapter(config.graphqlURL);
+  const healthService = new HealthService(healthAdapter, githubHealthAdapter);
   const healthController = new HealthController(healthService);
 
   // Provider + search
