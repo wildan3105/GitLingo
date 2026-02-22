@@ -334,4 +334,112 @@ describe('SearchService', () => {
       ).toBeUndefined();
     });
   });
+
+  describe('concurrency cap', () => {
+    class SlowProvider implements ProviderPort {
+      private resolve!: () => void;
+      readonly promise: Promise<void> = new Promise((r) => {
+        this.resolve = r;
+      });
+
+      async fetchRepositories(username: string): Promise<AccountData> {
+        await this.promise;
+        return {
+          profile: { username, type: 'user', providerUserId: 'id', isVerified: false },
+          repositories: [],
+        };
+      }
+
+      getProviderName(): string {
+        return 'slow-provider';
+      }
+
+      unblock(): void {
+        this.resolve();
+      }
+    }
+
+    it('should reject when active requests reach the concurrency limit', async () => {
+      const provider = new SlowProvider();
+      const service = new SearchService(provider, 2);
+
+      // Start 2 requests — fills the cap
+      const p1 = service.searchLanguageStatistics('user1');
+      const p2 = service.searchLanguageStatistics('user2');
+
+      // 3rd request should be rejected immediately
+      const result = await service.searchLanguageStatistics('user3');
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error.code).toBe('rate_limited');
+      expect(result.error.message).toMatch(/too many concurrent/i);
+
+      provider.unblock();
+      await Promise.all([p1, p2]);
+    });
+
+    it('should allow new requests after in-flight ones complete', async () => {
+      const provider = new SlowProvider();
+      const service = new SearchService(provider, 1);
+
+      // Fill the cap
+      const p1 = service.searchLanguageStatistics('user1');
+
+      // Rejected while cap is full
+      const rejected = await service.searchLanguageStatistics('user2');
+      expect(rejected.ok).toBe(false);
+
+      // Drain the cap
+      provider.unblock();
+      await p1;
+
+      // Now a new request should succeed
+      const next = await service.searchLanguageStatistics('user3');
+      expect(next.ok).toBe(true);
+    });
+
+    it('should release the slot even when the provider throws', async () => {
+      class ThrowingProvider implements ProviderPort {
+        async fetchRepositories(): Promise<AccountData> {
+          throw new Error('Provider exploded');
+        }
+        getProviderName(): string {
+          return 'throwing-provider';
+        }
+      }
+
+      const service = new SearchService(new ThrowingProvider(), 1);
+
+      // First call fails but slot must be released
+      const first = await service.searchLanguageStatistics('user1');
+      expect(first.ok).toBe(false);
+
+      // Second call should not be rejected by the concurrency cap
+      const second = await service.searchLanguageStatistics('user2');
+      expect(second.ok).toBe(false);
+      if (second.ok) return;
+      // Should be an unknown_error, not rate_limited
+      expect(second.error.code).not.toBe('rate_limited');
+    });
+
+    it('should use a default concurrency limit of 10', async () => {
+      const provider = new SlowProvider();
+      const service = new SearchService(provider); // default limit
+
+      // Start 10 requests — should all be accepted
+      const requests = Array.from({ length: 10 }, (_, i) =>
+        service.searchLanguageStatistics(`user${i}`)
+      );
+
+      // 11th should be rejected
+      const rejected = await service.searchLanguageStatistics('user10');
+      expect(rejected.ok).toBe(false);
+      if (rejected.ok) return;
+      expect(rejected.error.code).toBe('rate_limited');
+
+      provider.unblock();
+      await Promise.all(requests);
+    });
+  });
 });
