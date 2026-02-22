@@ -19,6 +19,10 @@ export class SearchService implements SearchPort {
     this.provider = provider;
   }
 
+  public getProviderName(): string {
+    return this.provider.getProviderName();
+  }
+
   /**
    * Search language statistics for a given username
    */
