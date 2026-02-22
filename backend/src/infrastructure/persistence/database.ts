@@ -86,15 +86,19 @@ export function applyMigrations(db: Database.Database): void {
     )
   `);
 
-  const applied = new Set(
-    (db.prepare('SELECT id FROM migrations').all() as Array<{ id: number }>).map((r) => r.id)
-  );
+  // High-watermark: only apply migrations with an ID strictly greater than the
+  // highest ID already recorded. This prevents back-filling gaps that could appear
+  // after a rollback or manual DB intervention, which might silently corrupt state.
+  const { max_id } = db
+    .prepare('SELECT MAX(id) AS max_id FROM migrations')
+    .get() as { max_id: number | null };
+  const maxApplied = max_id ?? 0;
 
   const record = db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)');
 
   const runPendingMigrations = db.transaction(() => {
     for (const migration of MIGRATIONS) {
-      if (!applied.has(migration.id)) {
+      if (migration.id > maxApplied) {
         db.exec(migration.sql);
         record.run(migration.id, migration.name);
       }
