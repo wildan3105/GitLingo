@@ -12,6 +12,8 @@ import { GitHubUserQueryResponse, GitHubRepository } from './types/GitHubTypes';
 import { Providers } from '../../shared/constants/providers';
 import { extractProviderBaseUrl } from '../../shared/utils/providerUrl';
 
+const RETRY_AFTER_FALLBACK_SECONDS = 60;
+
 export class GitHubGraphQLAdapter implements ProviderPort {
   private readonly graphqlClient: typeof graphql;
 
@@ -278,7 +280,7 @@ export class GitHubGraphQLAdapter implements ProviderPort {
         return Math.max(0, Math.ceil(resetTimestamp - Date.now() / 1000));
       }
     }
-    return 60;
+    return RETRY_AFTER_FALLBACK_SECONDS;
   }
 
   /**

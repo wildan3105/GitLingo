@@ -32,6 +32,9 @@ import { HealthController } from './interfaces/controllers/HealthController';
 import { createRoutes } from './interfaces/routes';
 import { errorHandler } from './interfaces/middleware/errorHandler';
 
+const SECONDS_PER_HOUR = 3600;
+const FORCE_SHUTDOWN_TIMEOUT_MS = 10_000;
+
 /**
  * Ensure the directory for the SQLite file exists.
  * Skipped for ':memory:' (in-memory databases have no filesystem path).
@@ -94,7 +97,7 @@ function createApp(): { app: Application; db: Database.Database } {
 
   if (config.enableCache) {
     const providerBaseUrl = deriveProviderBaseUrl(config.graphqlURL);
-    const cacheAdapter = new SQLiteCacheAdapter(db, config.cacheTtlHours * 3600);
+    const cacheAdapter = new SQLiteCacheAdapter(db, config.cacheTtlHours * SECONDS_PER_HOUR);
     searchService = new CachedSearchService(searchService, cacheAdapter, providerBaseUrl);
     logger.info({ cacheTtlHours: config.cacheTtlHours, providerBaseUrl }, 'Cache enabled');
   }
@@ -142,7 +145,7 @@ function startServer(): void {
     setTimeout(() => {
       logger.error('Forcing shutdown after timeout');
       process.exit(1);
-    }, 10000);
+    }, FORCE_SHUTDOWN_TIMEOUT_MS);
   };
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));

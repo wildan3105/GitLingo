@@ -77,7 +77,8 @@ export class CachedSearchService implements SearchPort {
     const entry = this.cache.get(key);
 
     if (entry !== null && now < entry.cachedUntil) {
-      return Promise.resolve(this.buildFromCacheEntry(entry));
+      const cached = this.buildFromCacheEntry(entry);
+      if (cached !== null) return Promise.resolve(cached);
     }
 
     // Cache miss or expired — fetch, (maybe) cache, return
@@ -89,11 +90,14 @@ export class CachedSearchService implements SearchPort {
         if (!result.ok) {
           // Fetch failed — serve expired entry as fallback if available
           if (fallback !== null) {
-            logger.warn(
-              { username, expiredAt: toISO(fallback.cachedUntil) },
-              'GitHub fetch failed; serving expired cache entry as fallback'
-            );
-            return this.buildFromCacheEntry(fallback);
+            const cached = this.buildFromCacheEntry(fallback);
+            if (cached !== null) {
+              logger.warn(
+                { username, expiredAt: toISO(fallback.cachedUntil) },
+                'GitHub fetch failed; serving expired cache entry as fallback'
+              );
+              return cached;
+            }
           }
           // No fallback — return error as-is
           return result;
@@ -144,9 +148,16 @@ export class CachedSearchService implements SearchPort {
   /**
    * Reconstruct a SearchResult from a CacheEntry.
    * generatedAt is set to cachedAt (per the decision matrix in the spec).
+   * Returns null if payloadJson is corrupt — callers fall through to a fresh fetch.
    */
-  private buildFromCacheEntry(entry: CacheEntry): SearchResult {
-    const payload = JSON.parse(entry.payloadJson) as Omit<SearchResult, 'metadata'>;
+  private buildFromCacheEntry(entry: CacheEntry): SearchResult | null {
+    let payload: Omit<SearchResult, 'metadata'>;
+    try {
+      payload = JSON.parse(entry.payloadJson) as Omit<SearchResult, 'metadata'>;
+    } catch {
+      logger.warn({ username: entry.username }, 'Corrupt cache payload; discarding entry');
+      return null;
+    }
     return {
       ...payload,
       metadata: {

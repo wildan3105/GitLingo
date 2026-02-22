@@ -12,6 +12,8 @@ import { SearchResult } from '../types/SearchResult';
 import { SearchError } from '../types/SearchError';
 import { SearchPort } from '../ports/SearchPort';
 
+const FORKS_KEY = '__forks__';
+
 export class SearchService implements SearchPort {
   private readonly provider: ProviderPort;
 
@@ -88,7 +90,7 @@ export class SearchService implements SearchPort {
     // Add forks as a special category if there are any
     if (forkCount > 0) {
       data.push({
-        key: '__forks__',
+        key: FORKS_KEY,
         label: 'Forked repos',
         value: forkCount,
         color: FORK_COLOR,
