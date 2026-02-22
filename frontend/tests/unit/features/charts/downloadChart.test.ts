@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { downloadChart, generateFilename } from '../../../../src/features/charts/utils/downloadChart'
+import {
+  downloadChart,
+  generateFilename,
+} from '../../../../src/features/charts/utils/downloadChart'
 
 const MOCK_URL = 'blob:mock-url'
 
@@ -35,7 +38,7 @@ describe('generateFilename', () => {
     expect(filename).toMatch(/^gitlingo-octocat-pie-\d{8}\.jpg$/)
   })
 
-  it('timestamp in filename matches today\'s date', () => {
+  it("timestamp in filename matches today's date", () => {
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
     const filename = generateFilename({ username: 'user', chartType: 'bar' })
     expect(filename).toContain(today)
@@ -97,9 +100,9 @@ describe('downloadChart', () => {
 
   it('throws when no canvas element is found in the container', async () => {
     const emptyContainer = document.createElement('div')
-    await expect(downloadChart(emptyContainer, { username: 'u', chartType: 'bar' })).rejects.toThrow(
-      'Download failed: Chart canvas not found'
-    )
+    await expect(
+      downloadChart(emptyContainer, { username: 'u', chartType: 'bar' })
+    ).rejects.toThrow('Download failed: Chart canvas not found')
   })
 
   it('throws when toBlob returns null', async () => {

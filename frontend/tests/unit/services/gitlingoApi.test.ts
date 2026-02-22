@@ -4,10 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { searchLanguageStatistics, getTopSearch } from '../../../src/services/gitlingoApi'
-import {
-  isErrorResponse,
-  isSuccessResponse,
-} from '../../../src/contracts/api'
+import { isErrorResponse, isSuccessResponse } from '../../../src/contracts/api'
 import type { SuccessResponse, ErrorResponse, TopSearchResponse } from '../../../src/contracts/api'
 
 // Mock fetch globally

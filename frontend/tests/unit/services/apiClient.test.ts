@@ -129,7 +129,9 @@ describe('createApiClient — error handling', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: async () => { throw new SyntaxError('bad json') },
+      json: async () => {
+        throw new SyntaxError('bad json')
+      },
       text: async () => 'not json',
     })
 

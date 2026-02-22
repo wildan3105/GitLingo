@@ -18,9 +18,7 @@ function makeItems(n = 2): DropdownItem[] {
 
 function renderDropdown(props?: Partial<React.ComponentProps<typeof Dropdown>>) {
   const items = props?.items ?? makeItems()
-  return render(
-    <Dropdown trigger={<span>Open</span>} items={items} {...props} />
-  )
+  return render(<Dropdown trigger={<span>Open</span>} items={items} {...props} />)
 }
 
 beforeEach(() => {
@@ -165,7 +163,7 @@ describe('Dropdown', () => {
       await user.click(screen.getByRole('button'))
       fireEvent.keyDown(document, { key: 'ArrowDown' }) // go to index 0
       fireEvent.keyDown(document, { key: 'ArrowDown' }) // go to index 1
-      fireEvent.keyDown(document, { key: 'Home' })      // back to first
+      fireEvent.keyDown(document, { key: 'Home' }) // back to first
       const menuItems = screen.getAllByRole('menuitem')
       expect(menuItems[0]).toHaveAttribute('tabindex', '0')
     })

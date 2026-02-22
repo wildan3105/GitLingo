@@ -8,11 +8,6 @@ import type { LanguageData } from '../../../../src/contracts/api'
 
 const MOCK_URL = 'blob:mock-csv'
 
-function captureCSVContent(): string {
-  const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob
-  return blobArg ? '' : '' // actual content read below via FileReader — use sync approach
-}
-
 beforeEach(() => {
   vi.stubGlobal('URL', {
     createObjectURL: vi.fn().mockReturnValue(MOCK_URL),
@@ -25,15 +20,6 @@ afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
-
-// Helper to capture the CSV string written to the Blob
-function getCapturedCSV(): string {
-  const call = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0]
-  const blob = call[0] as Blob
-  // Blobs are synchronously readable in the test environment via a workaround:
-  // We intercept the Blob constructor to capture text instead.
-  return (blob as unknown as { _text: string })._text ?? ''
-}
 
 // Better approach: intercept Blob at the module level
 const blobTexts: string[] = []
@@ -89,17 +75,13 @@ describe('exportToCSV', () => {
   })
 
   it('shows 0.00% for all rows when totalRepos is zero', () => {
-    const zeroData: LanguageData[] = [
-      { key: 'Go', label: 'Go', value: 0, color: '#00ADD8' },
-    ]
+    const zeroData: LanguageData[] = [{ key: 'Go', label: 'Go', value: 0, color: '#00ADD8' }]
     exportToCSV(zeroData, 'test')
     expect(blobTexts[0]).toContain('0.00%')
   })
 
   it('escapes a language name containing a comma', () => {
-    const dataWithComma: LanguageData[] = [
-      { key: 'C,D', label: 'C, D', value: 5, color: '#aaa' },
-    ]
+    const dataWithComma: LanguageData[] = [{ key: 'C,D', label: 'C, D', value: 5, color: '#aaa' }]
     exportToCSV(dataWithComma, 'test')
     expect(blobTexts[0]).toContain('"C, D"')
   })
