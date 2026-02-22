@@ -9,29 +9,21 @@
  */
 
 import { HealthPort } from '../../domain/ports/HealthPort';
+import { deriveProviderBaseUrl } from '../../shared/utils/providerUrl';
 
+// deriveProviderBaseUrl defaults to https://github.com (the git host) when no URL is given.
+// For health checks we want to ping the API endpoint directly.
 const GITHUB_API_BASE = 'https://api.github.com';
+const GITHUB_COM_BASE = 'https://github.com';
 const TIMEOUT_MS = 3000;
-
-/**
- * Derive the API base URL from an optional GraphQL endpoint URL.
- * Falls back to standard GitHub API if the URL is absent or unparseable.
- */
-function resolveBaseUrl(graphqlURL: string | undefined): string {
-  if (graphqlURL === undefined || graphqlURL.trim() === '') return GITHUB_API_BASE;
-  try {
-    const { protocol, hostname, port } = new URL(graphqlURL);
-    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
-  } catch {
-    return GITHUB_API_BASE;
-  }
-}
 
 export class GitHubHealthAdapter implements HealthPort {
   private readonly baseUrl: string;
 
   constructor(graphqlURL?: string) {
-    this.baseUrl = resolveBaseUrl(graphqlURL);
+    const derived = deriveProviderBaseUrl(graphqlURL);
+    // Map the github.com default → api.github.com; GHE URLs pass through unchanged.
+    this.baseUrl = derived === GITHUB_COM_BASE ? GITHUB_API_BASE : derived;
   }
 
   /**
