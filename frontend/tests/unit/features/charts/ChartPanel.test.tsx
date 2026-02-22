@@ -9,6 +9,8 @@ import userEvent from '@testing-library/user-event'
 import { ChartPanel } from '../../../../src/features/charts/components/ChartPanel'
 import { ToastProvider } from '../../../../src/shared/hooks/useToast'
 import type { LanguageData } from '../../../../src/contracts/api'
+import { downloadChart } from '../../../../src/features/charts/utils/downloadChart'
+import { exportToCSV } from '../../../../src/features/export/utils/exportToCSV'
 
 // Mock the chart components to avoid canvas rendering in tests
 vi.mock('../../../../src/features/charts/components/charts/BarChartView', () => ({
@@ -21,6 +23,15 @@ vi.mock('../../../../src/features/charts/components/charts/PieChartView', () => 
 
 vi.mock('../../../../src/features/charts/components/charts/PolarAreaChartView', () => ({
   PolarAreaChartView: () => <div data-testid="polar-chart">Polar Chart</div>,
+}))
+
+// Mock download/export utilities
+vi.mock('../../../../src/features/charts/utils/downloadChart', () => ({
+  downloadChart: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock('../../../../src/features/export/utils/exportToCSV', () => ({
+  exportToCSV: vi.fn(),
 }))
 
 describe('ChartPanel', () => {
