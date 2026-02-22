@@ -24,6 +24,10 @@ import { getRequestLogger } from './requestContext';
 export const logger = pino({
   level: config.logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
+  redact: {
+    paths: ['req.headers.authorization', 'req.headers.cookie'],
+    censor: '[redacted]',
+  },
 });
 
 /**

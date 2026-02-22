@@ -15,6 +15,7 @@ interface Config {
   allowedOrigins: string[];
   enableCache: boolean;
   cacheTtlHours: number;
+  concurrencyLimit: number;
 }
 
 /**
@@ -122,6 +123,22 @@ export function parseCacheTtlHours(rawValue: string | undefined): number {
   return val;
 }
 
+const CONCURRENCY_LIMIT_DEFAULT = 20;
+
+/**
+ * Parse and validate CONCURRENCY_LIMIT.
+ * Exported for unit testing.
+ *
+ * - Unset / empty / non-positive / non-numeric → default (20)
+ */
+export function parseConcurrencyLimit(rawValue: string | undefined): number {
+  const val = Number(rawValue);
+  if (!Number.isFinite(val) || val < 1) {
+    return CONCURRENCY_LIMIT_DEFAULT;
+  }
+  return Math.floor(val);
+}
+
 /**
  * Load and export configuration
  */
@@ -135,6 +152,7 @@ export const config: Config = {
   allowedOrigins: parseAllowedOrigins(process.env.ALLOWED_ORIGINS, process.env.NODE_ENV),
   enableCache: process.env.ENABLE_CACHE === 'true',
   cacheTtlHours: parseCacheTtlHours(process.env.CACHE_TTL_HOURS),
+  concurrencyLimit: parseConcurrencyLimit(process.env.CONCURRENCY_LIMIT),
 };
 
 /**

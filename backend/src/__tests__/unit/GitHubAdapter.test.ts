@@ -1150,7 +1150,9 @@ describe('GitHubGraphQLAdapter', () => {
         const result = await adapter.fetchRepositories('abc');
 
         expect(result.profile.username).toBe('abc');
-        expect(mockGraphql.defaults).not.toHaveBeenCalled();
+        expect(mockGraphql.defaults).toHaveBeenCalledWith({
+          request: { timeout: 10_000 },
+        });
       });
     });
 
@@ -1180,6 +1182,7 @@ describe('GitHubGraphQLAdapter', () => {
           headers: {
             authorization: `token ${githubToken}`,
           },
+          request: { timeout: 10_000 },
         });
       });
     });

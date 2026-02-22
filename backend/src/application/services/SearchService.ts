@@ -13,12 +13,16 @@ import { SearchError } from '../types/SearchError';
 import { SearchPort } from '../ports/SearchPort';
 
 const FORKS_KEY = '__forks__';
+const DEFAULT_CONCURRENCY_LIMIT = 20;
 
 export class SearchService implements SearchPort {
   private readonly provider: ProviderPort;
+  private readonly concurrencyLimit: number;
+  private activeCount = 0;
 
-  constructor(provider: ProviderPort) {
+  constructor(provider: ProviderPort, concurrencyLimit = DEFAULT_CONCURRENCY_LIMIT) {
     this.provider = provider;
+    this.concurrencyLimit = concurrencyLimit;
   }
 
   public getProviderName(): string {
@@ -29,6 +33,22 @@ export class SearchService implements SearchPort {
    * Search language statistics for a given username
    */
   public async searchLanguageStatistics(username: string): Promise<SearchResult | SearchError> {
+    if (this.activeCount >= this.concurrencyLimit) {
+      return {
+        ok: false,
+        provider: this.provider.getProviderName(),
+        error: {
+          code: 'rate_limited',
+          message: 'Too many concurrent requests. Please try again shortly.',
+          details: { username },
+        },
+        meta: {
+          generatedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    this.activeCount++;
     try {
       // 1. Fetch repositories and profile from provider
       const { profile, repositories } = await this.provider.fetchRepositories(username);
@@ -50,6 +70,8 @@ export class SearchService implements SearchPort {
     } catch (error) {
       // Transform provider errors to search errors
       return this.handleError(error, username);
+    } finally {
+      this.activeCount--;
     }
   }
 

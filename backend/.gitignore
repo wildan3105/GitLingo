@@ -39,3 +39,6 @@ debug/
 
 # SQLite database files
 data/
+
+# scripts
+scripts/

@@ -24,8 +24,15 @@ export class GitHubGraphQLAdapter implements ProviderPort {
             headers: {
               authorization: `token ${token}`,
             },
+            request: {
+              timeout: 10_000,
+            },
           })
-        : graphql;
+        : graphql.defaults({
+            request: {
+              timeout: 10_000,
+            },
+          });
 
     if (typeof graphqlURL === 'string' && graphqlURL.length > 0) {
       this.graphqlClient = this.graphqlClient.defaults({
