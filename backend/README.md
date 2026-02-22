@@ -14,7 +14,7 @@ A TypeScript backend API that:
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - GitHub Personal Access Token (optional but recommended)
 
 ### Installation

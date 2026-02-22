@@ -17,6 +17,9 @@
     "test:coverage": "vitest run --coverage",
     "prepare": "cd .. && husky frontend/.husky"
   },
+  "engines": {
+    "node": ">=24.3.0"
+  },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
