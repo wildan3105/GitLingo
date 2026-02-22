@@ -17,7 +17,7 @@ Access the demo [here](https://gitlingo.app)
 | | Feature | Description |
 |---|---|---|
 | 🔍 | **Username Search** | Search any public GitHub user or organization by username and instantly visualize their programming language distribution. |
-| 🏢 | **Private GitHub Enterprise (GHE)** | Works with any self-hosted GHE instance — GitLingo auto-derives the correct profile URLs directly from the API response. (See [here](./backend/README.md) for the details setup) |
+| 🏢 | **Private GitHub Enterprise (GHE)** | Works with any self-hosted GHE instance — GitLingo auto-derives the correct profile URLs directly from the API response. (See [here](./backend/README.md) for details on setup) |
 | 📊 | **Three Interactive Chart Types** | Switch between Bar, Pie, and Polar Area charts in one click without re-triggering the API or losing your filter state. |
 | 🎯 | **Top-N Language Aggregation** | Slice results to Top 10, Top 25, or all detected languages, with overflow automatically folded into a unified "Others" slice. |
 | 🔧 | **Fork & Unknown Language Filtering** | Toggle forked repos and repositories with no detected language independently, isolating only the signal that matters. |
