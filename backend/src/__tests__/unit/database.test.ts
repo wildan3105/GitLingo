@@ -2,7 +2,8 @@
  * database.ts Unit Tests
  */
 
-import { createDatabase } from '../../infrastructure/persistence/database';
+import { createDatabase, applyMigrations } from '../../infrastructure/persistence/database';
+import Database from 'better-sqlite3';
 
 describe('createDatabase', () => {
   it('should return an open database connection', () => {
@@ -101,6 +102,146 @@ describe('createDatabase', () => {
     expect(colNames).toContain('avatar_url');
     expect(colNames).toContain('created_at');
     expect(colNames).toContain('updated_at');
+    db.close();
+  });
+});
+
+describe('applyMigrations', () => {
+  it('creates the migrations tracking table', () => {
+    const db = createDatabase(':memory:');
+
+    const row = db
+      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'`)
+      .get() as { name: string } | undefined;
+
+    expect(row?.name).toBe('migrations');
+    db.close();
+  });
+
+  it('records all migrations on a fresh database', () => {
+    const db = createDatabase(':memory:');
+
+    const rows = db
+      .prepare('SELECT id, name FROM migrations ORDER BY id')
+      .all() as Array<{ id: number; name: string }>;
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({ id: 1, name: '001_create_topsearch' });
+    expect(rows[1]).toMatchObject({ id: 2, name: '002_create_cache' });
+    db.close();
+  });
+
+  it('does not re-apply migrations on a second run', () => {
+    const db = new Database(':memory:');
+
+    applyMigrations(db); // first run — applies both migrations
+    applyMigrations(db); // second run — should skip both
+
+    const rows = db.prepare('SELECT id FROM migrations').all();
+    expect(rows).toHaveLength(2); // still exactly 2 rows, not 4
+    db.close();
+  });
+
+  it('applies only the pending migration when one is already recorded', () => {
+    const db = new Database(':memory:');
+
+    // Manually create the migrations table and record migration 1 as done
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+
+    // applyMigrations should skip id=1 and apply id=2
+    applyMigrations(db);
+
+    const rows = db
+      .prepare('SELECT id FROM migrations ORDER BY id')
+      .all() as Array<{ id: number }>;
+
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toMatchObject({ id: 2 });
+
+    // Cache table should now exist (created by migration 2)
+    const cacheTable = db
+      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='cache'`)
+      .get();
+    expect(cacheTable).toBeDefined();
+    db.close();
+  });
+
+  it('handles a gap in recorded migration IDs (e.g., 1, 3) without adding missing IDs', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Simulate a gap in applied migration IDs: 1 and 3, skipping 2
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(3, '003_some_later_migration');
+
+    // applyMigrations should not throw and should not invent an ID=2 entry
+    expect(() => applyMigrations(db)).not.toThrow();
+
+    const rows = db
+      .prepare('SELECT id, name FROM migrations ORDER BY id')
+      .all() as Array<{ id: number; name: string }>;
+
+    expect(rows.map((r) => r.id)).toEqual([1, 3]);
+    db.close();
+  });
+
+  it('does not allow duplicate migration IDs in the migrations table', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Insert a migration with ID 1
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+
+    // Attempting to insert another row with the same ID should violate the PRIMARY KEY constraint
+    expect(() =>
+      db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_duplicate_id'),
+    ).toThrow();
+
+    db.close();
+  });
+
+  it('returns migrations ordered by ID even if inserted out of order', () => {
+    const db = new Database(':memory:');
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `);
+
+    // Insert in non-sequential order: 2, then 1
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(2, '002_create_cache');
+    db.prepare('INSERT INTO migrations (id, name) VALUES (?, ?)').run(1, '001_create_topsearch');
+
+    const rows = db
+      .prepare('SELECT id FROM migrations ORDER BY id')
+      .all() as Array<{ id: number }>;
+
+    // Even though insertion order was [2, 1], querying with ORDER BY id returns [1, 2]
+    expect(rows.map((r) => r.id)).toEqual([1, 2]);
     db.close();
   });
 });
