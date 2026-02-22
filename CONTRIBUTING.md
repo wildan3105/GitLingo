@@ -1,11 +1,11 @@
-## Contributing to github-langs
+## Contributing to GitLingo
 
 First of all, thank you for taking the time to contribute! :+1::tada:
 
 Here are the steps to contribute to this project :
 - Check the open issues
 - Check the projects or milestones
-- Have your own issue? Found a bug? Want add a feature? Just [submit!](https://github.com/wildan3105/github-langs/issues/new)
+- Have your own issue? Found a bug? Want add a feature? Just [submit!](https://github.com/wildan3105/GitLingo/issues/new)
 
 ## Contribute :
 - **IMPORTANT** : Please claim the issue you want to solve first
@@ -17,4 +17,4 @@ Here are the steps to contribute to this project :
 - Make sure the unit tests are passed
 
 ## Contributor(s)
-A full list of contributors can be found [here](https://github.com/wildan3105/github-langs/graphs/contributors)
+A full list of contributors can be found [here](https://github.com/wildan3105/GitLingo/graphs/contributors)

@@ -44,7 +44,7 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
 ## Project Structure
 
 ```
-github-langs/                # Root (monorepo)
+GitLingo/                # Root (monorepo)
 ├── backend/                 # Express.js API server
 │   ├── src/
 │   │   ├── application/    # Use cases and orchestration
@@ -76,8 +76,8 @@ github-langs/                # Root (monorepo)
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/wildan3105/github-langs.git
-   cd github-langs
+   git clone https://github.com/wildan3105/GitLingo.git
+   cd GitLingo
    ```
 
 2. **Install backend dependencies**
