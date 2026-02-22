@@ -160,6 +160,10 @@ describe('parseConcurrencyLimit', () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it('should return the default (20) silently when value is whitespace-only', () => {
+    expect(parseConcurrencyLimit('   ')).toBe(20);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
   it('should warn and return default (20) when value is non-numeric', () => {
     expect(parseConcurrencyLimit('abc')).toBe(20);
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid CONCURRENCY_LIMIT'));
