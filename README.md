@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/github/wildan3105/GitLingo/graph/badge.svg?token=f9E5pnHAm7)](https://codecov.io/github/wildan3105/GitLingo)
 ![CI](https://github.com/wildan3105/GitLingo/actions/workflows/backend-ci.yml/badge.svg)
+![CI](https://github.com/wildan3105/GitLingo/actions/workflows/frontend-ci.yml/badge.svg)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D24.3.0-brightgreen)
 
 > Visualize your GitHub programming language statistics with beautiful interactive charts
