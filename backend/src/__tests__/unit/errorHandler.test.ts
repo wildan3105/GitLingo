@@ -51,6 +51,21 @@ describe('errorHandler', () => {
     );
   });
 
+  it('should include reqId in meta when request has an id', () => {
+    mockRequest = { id: 'req-abc-123' } as Partial<Request>;
+    const error = new Error('Test error');
+
+    errorHandler(error, mockRequest as Request, mockResponse as Response, mockNext);
+
+    expect(jsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meta: expect.objectContaining({
+          reqId: 'req-abc-123',
+        }),
+      })
+    );
+  });
+
   it('should include error message and stack in non-production mode', () => {
     // In test mode (non-production), error details should be included
     const error = new Error('Detailed error message');

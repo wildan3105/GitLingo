@@ -15,7 +15,7 @@ const logger = createLogger('errorHandler');
  */
 export function errorHandler(
   error: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void {
@@ -39,6 +39,7 @@ export function errorHandler(
     },
     meta: {
       generatedAt: new Date().toISOString(),
+      reqId: req.id,
     },
   };
 
