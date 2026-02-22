@@ -20,15 +20,19 @@ export class HealthController {
     return this.router;
   }
 
-  private health(_req: Request, res: Response): void {
-    const { ok, services } = this.healthService.check();
-    res.status(200).json({
-      ok,
-      data: {
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString(),
-        services,
-      },
-    });
+  private async health(_req: Request, res: Response): Promise<void> {
+    try {
+      const { ok, services } = await this.healthService.check();
+      res.status(200).json({
+        ok,
+        data: {
+          uptime: process.uptime(),
+          timestamp: new Date().toISOString(),
+          services,
+        },
+      });
+    } catch {
+      res.status(500).json({ ok: false, error: 'Health check failed' });
+    }
   }
 }
