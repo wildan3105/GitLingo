@@ -36,6 +36,9 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined)
 /** Maximum number of toasts visible at once. Oldest is evicted when exceeded. */
 const MAX_TOASTS = 3
 
+/** Default time (ms) a toast stays visible before auto-dismissing. */
+export const TOAST_DEFAULT_DURATION_MS = 3_000
+
 // Reducer
 function toastReducer(state: ToastState, action: ToastAction): ToastState {
   switch (action.type) {
@@ -83,7 +86,7 @@ export type ToastProviderProps = {
 export function ToastProvider({
   children,
   position = 'top-right',
-  defaultDuration = 3000,
+  defaultDuration = TOAST_DEFAULT_DURATION_MS,
 }: ToastProviderProps) {
   const [state, dispatch] = useReducer(toastReducer, initialState)
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ToastProvider } from '../shared/hooks/useToast'
+import { ToastProvider, TOAST_DEFAULT_DURATION_MS } from '../shared/hooks/useToast'
 
 /**
  * React Query client configuration
@@ -35,7 +35,7 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider position="top-right" defaultDuration={3000}>
+      <ToastProvider position="top-right" defaultDuration={TOAST_DEFAULT_DURATION_MS}>
         {children}
         {import.meta.env.MODE === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </ToastProvider>

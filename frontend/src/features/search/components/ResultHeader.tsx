@@ -6,6 +6,9 @@
 import { useRef, useState } from 'react'
 import type { Profile, Metadata } from '../../../contracts/api'
 
+/** How long (ms) to show the "Copied!" confirmation before resetting the copy button. */
+const COPY_RESET_DELAY_MS = 2_000
+
 export type ResultHeaderProps = {
   /** User/organization profile information */
   profile: Profile
@@ -134,7 +137,7 @@ export function ResultHeader({ profile, metadata }: ResultHeaderProps) {
         document.body.removeChild(textarea)
       }
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setTimeout(() => setCopied(false), COPY_RESET_DELAY_MS)
     } catch (err) {
       console.error('Failed to copy:', err)
     }

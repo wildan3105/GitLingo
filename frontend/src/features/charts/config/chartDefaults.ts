@@ -18,6 +18,9 @@ import {
   type ChartOptions,
 } from 'chart.js'
 
+/** Duration of the Chart.js enter/exit animation in milliseconds. */
+const CHART_ANIMATION_DURATION_MS = 750
+
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -65,7 +68,7 @@ const baseOptions = {
     },
   },
   animation: {
-    duration: 750,
+    duration: CHART_ANIMATION_DURATION_MS,
     easing: 'easeInOutQuart' as const,
   },
 }

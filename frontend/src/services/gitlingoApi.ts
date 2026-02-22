@@ -6,6 +6,9 @@
 import { apiClient } from './apiClient'
 import type { ApiResponse, TopSearchResponse } from '../contracts/api'
 
+const TOP_SEARCH_ENDPOINT = '/api/v1/topsearch'
+const SEARCH_ENDPOINT = '/api/v1/search'
+
 /**
  * Fetch the most-searched usernames leaderboard.
  *
@@ -25,7 +28,7 @@ export async function getTopSearch(limit = 9): Promise<TopSearchResponse | null>
       limit: String(limit),
       offset: '0',
     })
-    return await apiClient.get<TopSearchResponse>(`/api/v1/topsearch?${params.toString()}`)
+    return await apiClient.get<TopSearchResponse>(`${TOP_SEARCH_ENDPOINT}?${params.toString()}`)
   } catch {
     return null
   }
@@ -58,7 +61,7 @@ export async function searchLanguageStatistics(username: string): Promise<ApiRes
     // Provider defaults to 'github' on backend
 
     // Make API request
-    const response = await apiClient.get<ApiResponse>(`/api/v1/search?${params.toString()}`)
+    const response = await apiClient.get<ApiResponse>(`${SEARCH_ENDPOINT}?${params.toString()}`)
 
     return response
   } catch (error) {

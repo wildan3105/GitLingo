@@ -5,6 +5,9 @@
 
 import type { LanguageData } from '../../../contracts/api'
 
+/** Number of decimal places used when formatting percentage values in the CSV. */
+const PERCENTAGE_DECIMAL_PLACES = 2
+
 /**
  * Converts language data to CSV format and triggers download
  *
@@ -32,7 +35,7 @@ export function exportToCSV(data: LanguageData[], filename: string): void {
 
   // Build CSV rows
   for (const item of languages) {
-    const percentage = totalRepos > 0 ? ((item.value / totalRepos) * 100).toFixed(2) : '0.00'
+    const percentage = totalRepos > 0 ? ((item.value / totalRepos) * 100).toFixed(PERCENTAGE_DECIMAL_PLACES) : '0.00'
     const row = [
       // Escape language name if it contains commas or quotes
       escapeCSVValue(item.label),
