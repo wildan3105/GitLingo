@@ -14,7 +14,7 @@ A TypeScript backend API that:
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js 20+
 - GitHub Personal Access Token (optional but recommended)
 
 ### Installation
@@ -65,6 +65,9 @@ GITHUB_TOKEN=your_token_here
 # CORS — comma-separated list of allowed frontend origins
 # Default: http://localhost:5173  (must be set explicitly in production)
 ALLOWED_ORIGINS=http://localhost:5173
+
+# SQLite database path (relative to project root)
+DB_PATH=./data/gitlingo.db
 
 # Result Caching (OPTIONAL)
 ENABLE_CACHE=false
@@ -195,7 +198,8 @@ Application health check. Always returns HTTP 200 — inspect `ok` and `data.ser
     "uptime": 2008.08,
     "timestamp": "2026-02-19T01:16:28.050Z",
     "services": {
-      "database": "ok"
+      "database": "ok",
+      "github": "ok"
     }
   }
 }
@@ -209,7 +213,8 @@ Application health check. Always returns HTTP 200 — inspect `ok` and `data.ser
     "uptime": 2008.08,
     "timestamp": "2026-02-19T01:16:28.050Z",
     "services": {
-      "database": "error"
+      "database": "error",
+      "github": "ok"
     }
   }
 }
@@ -221,6 +226,7 @@ Application health check. Always returns HTTP 200 — inspect `ok` and `data.ser
 | `data.uptime` | `number` | Process uptime in seconds |
 | `data.timestamp` | `string` | ISO 8601 timestamp of the check |
 | `data.services.database` | `"ok" \| "error"` | SQLite connection status |
+| `data.services.github` | `"ok" \| "error"` | GitHub API reachability (optional — only present when a provider health check is configured) |
 
 ---
 
@@ -485,7 +491,9 @@ backend/
 │   ├── application/      # Use cases
 │   ├── infrastructure/   # GitHub API integration
 │   ├── interfaces/       # HTTP controllers & routes
-│   └── shared/          # Utilities & config
+│   ├── shared/           # Utilities & config
+│   └── __tests__/        # Unit and integration tests
+├── data/                 # SQLite database (auto-created at runtime)
 ├── Dockerfile
 └── package.json
 ```
