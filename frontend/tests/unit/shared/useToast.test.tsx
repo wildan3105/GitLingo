@@ -32,6 +32,71 @@ function setup(messages: string[]) {
   )
 }
 
+describe('useToast — manual dismiss and edge cases', () => {
+  it('dismissToast removes the specific toast from the DOM', () => {
+    function App() {
+      const { showToast } = useToast()
+      return (
+        <button onClick={() => showToast({ type: 'success', message: 'Hello', duration: 999_999 })}>
+          Show
+        </button>
+      )
+    }
+
+    render(
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    )
+
+    fireEvent.click(screen.getByText('Show'))
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /dismiss notification/i }))
+    expect(screen.queryByText('Hello')).not.toBeInTheDocument()
+  })
+
+  it('a toast with duration=0 is never auto-dismissed', () => {
+    vi.useFakeTimers()
+
+    function App() {
+      const { showToast } = useToast()
+      return (
+        <button onClick={() => showToast({ type: 'info', message: 'Sticky', duration: 0 })}>
+          Show
+        </button>
+      )
+    }
+
+    render(
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    )
+
+    fireEvent.click(screen.getByText('Show'))
+    expect(screen.getByText('Sticky')).toBeInTheDocument()
+
+    act(() => vi.advanceTimersByTime(60_000))
+    expect(screen.getByText('Sticky')).toBeInTheDocument()
+
+    vi.useRealTimers()
+  })
+
+  it('useToast throws when used outside ToastProvider', () => {
+    function BrokenComponent() {
+      useToast()
+      return null
+    }
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => render(<BrokenComponent />)).toThrow(
+      'useToast must be used within a ToastProvider'
+    )
+    consoleSpy.mockRestore()
+  })
+})
+
 describe('useToast — queue cap', () => {
   afterEach(() => vi.useRealTimers())
 

@@ -9,6 +9,8 @@ import userEvent from '@testing-library/user-event'
 import { ChartPanel } from '../../../../src/features/charts/components/ChartPanel'
 import { ToastProvider } from '../../../../src/shared/hooks/useToast'
 import type { LanguageData } from '../../../../src/contracts/api'
+import { downloadChart } from '../../../../src/features/charts/utils/downloadChart'
+import { exportToCSV } from '../../../../src/features/export/utils/exportToCSV'
 
 // Mock the chart components to avoid canvas rendering in tests
 vi.mock('../../../../src/features/charts/components/charts/BarChartView', () => ({
@@ -21,6 +23,15 @@ vi.mock('../../../../src/features/charts/components/charts/PieChartView', () => 
 
 vi.mock('../../../../src/features/charts/components/charts/PolarAreaChartView', () => ({
   PolarAreaChartView: () => <div data-testid="polar-chart">Polar Chart</div>,
+}))
+
+// Mock download/export utilities
+vi.mock('../../../../src/features/charts/utils/downloadChart', () => ({
+  downloadChart: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock('../../../../src/features/export/utils/exportToCSV', () => ({
+  exportToCSV: vi.fn(),
 }))
 
 describe('ChartPanel', () => {
@@ -333,6 +344,87 @@ describe('ChartPanel', () => {
       await user.keyboard('{Escape}')
 
       expect(screen.queryByRole('listbox', { name: /custom chart types/i })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Download handlers', () => {
+    it('calls downloadChart when Download PNG is clicked', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() => expect(downloadChart).toHaveBeenCalledOnce())
+    })
+
+    it('shows success toast after a successful PNG download', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() =>
+        expect(screen.getByText('Chart downloaded successfully!')).toBeInTheDocument()
+      )
+    })
+
+    it('shows error toast when downloadChart throws', async () => {
+      vi.mocked(downloadChart).mockRejectedValueOnce(new Error('Canvas not found'))
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download PNG'))
+
+      await waitFor(() => expect(screen.getByText('Canvas not found')).toBeInTheDocument())
+    })
+
+    it('calls exportToCSV when Download CSV is clicked', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      expect(exportToCSV).toHaveBeenCalledOnce()
+      expect(exportToCSV).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.stringContaining('testuser')
+      )
+    })
+
+    it('shows success toast after a successful CSV export', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      await waitFor(() =>
+        expect(screen.getByText('CSV exported successfully!')).toBeInTheDocument()
+      )
+    })
+
+    it('shows error toast when exportToCSV throws', async () => {
+      vi.mocked(exportToCSV).mockImplementationOnce(() => {
+        throw new Error('CSV failed')
+      })
+      const user = userEvent.setup()
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+
+      await user.click(screen.getByText('Share'))
+      await user.click(screen.getByText('Download CSV'))
+
+      await waitFor(() => expect(screen.getByText('CSV failed')).toBeInTheDocument())
+    })
+  })
+
+  describe('filter empty state', () => {
+    it('shows "No repositories match your filters" when data is empty but hasOriginalData is true', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} data={[]} hasOriginalData={true} />)
+      expect(screen.getByText('No repositories match your filters')).toBeInTheDocument()
     })
   })
 })

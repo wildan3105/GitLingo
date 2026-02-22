@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { searchLanguageStatistics, getTopSearch } from '../../../src/services/gitlingoApi'
+import { isErrorResponse, isSuccessResponse } from '../../../src/contracts/api'
 import type { SuccessResponse, ErrorResponse, TopSearchResponse } from '../../../src/contracts/api'
 
 // Mock fetch globally
@@ -411,5 +412,38 @@ describe('gitlingoApi', () => {
       expect(result).not.toBeNull()
       expect(result?.data).toEqual([])
     })
+  })
+})
+
+describe('type guards', () => {
+  const errorResponse: ErrorResponse = {
+    ok: false,
+    provider: 'github',
+    error: { code: 'user_not_found', message: 'not found' },
+    meta: { generatedAt: '2026-01-01T00:00:00Z' },
+  }
+
+  const successResponse: SuccessResponse = {
+    ok: true,
+    provider: 'github',
+    profile: {
+      username: 'u',
+      name: null,
+      avatarUrl: 'https://example.com/avatar.png',
+      type: 'user',
+      providerUserId: '1',
+    },
+    data: [],
+    metadata: { generatedAt: '2026-01-01T00:00:00Z', unit: 'repos', limit: 0 },
+  }
+
+  it('isErrorResponse returns true for error responses and false for success', () => {
+    expect(isErrorResponse(errorResponse)).toBe(true)
+    expect(isErrorResponse(successResponse)).toBe(false)
+  })
+
+  it('isSuccessResponse returns true for success and false for error responses', () => {
+    expect(isSuccessResponse(successResponse)).toBe(true)
+    expect(isSuccessResponse(errorResponse)).toBe(false)
   })
 })

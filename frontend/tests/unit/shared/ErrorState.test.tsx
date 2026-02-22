@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen } from '../../../src/test/test-utils'
+import { render, screen, act } from '../../../src/test/test-utils'
 import { ErrorState } from '../../../src/shared/components/ErrorState'
 import { formatDuration } from '../../../src/shared/utils/formatDuration'
 
@@ -128,6 +128,51 @@ describe('ErrorState', () => {
 
     const alert = screen.getByRole('alert')
     expect(alert).toHaveAttribute('aria-live', 'assertive')
+  })
+
+  describe('countdown timer', () => {
+    it('decrements each second', () => {
+      render(
+        <ErrorState code="rate_limited" message="Rate limited" retryAfter={3} onRetry={vi.fn()} />
+      )
+      expect(screen.getByText(/please wait 3s before retrying/i)).toBeInTheDocument()
+
+      act(() => {
+        vi.advanceTimersByTime(1000)
+      })
+      expect(screen.getByText(/please wait 2s before retrying/i)).toBeInTheDocument()
+    })
+
+    it('enables the retry button when countdown reaches 0', () => {
+      render(
+        <ErrorState code="rate_limited" message="Rate limited" retryAfter={3} onRetry={vi.fn()} />
+      )
+
+      expect(screen.getByRole('button')).toBeDisabled()
+
+      act(() => {
+        vi.advanceTimersByTime(3000)
+      })
+
+      expect(screen.queryByText(/please wait/i)).not.toBeInTheDocument()
+      expect(screen.getByRole('button')).not.toBeDisabled()
+      expect(screen.getByRole('button')).toHaveTextContent('Try Again')
+    })
+
+    it('resets countdown when retryAfter prop changes', () => {
+      const onRetry = vi.fn()
+      const { rerender } = render(
+        <ErrorState code="rate_limited" message="Rate limited" retryAfter={5} onRetry={onRetry} />
+      )
+
+      expect(screen.getByText(/please wait 5s before retrying/i)).toBeInTheDocument()
+
+      rerender(
+        <ErrorState code="rate_limited" message="Rate limited" retryAfter={3} onRetry={onRetry} />
+      )
+
+      expect(screen.getByText(/please wait 3s before retrying/i)).toBeInTheDocument()
+    })
   })
 })
 

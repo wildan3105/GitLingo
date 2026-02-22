@@ -495,6 +495,69 @@ describe('chart type switching', () => {
   })
 })
 
+describe('error flow — timeout', () => {
+  it('shows the timeout message', async () => {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(
+      buildErrorResponse('timeout')
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'The request took too long to complete. This can happen with large accounts. Please try again.'
+        )
+      ).toBeInTheDocument()
+    )
+  })
+})
+
+describe('error flow — invalid_token', () => {
+  it('shows the invalid token message', async () => {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(
+      buildErrorResponse('invalid_token')
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'The configured token is invalid or has expired. Please check your token and try again.'
+        )
+      ).toBeInTheDocument()
+    )
+  })
+})
+
+describe('error flow — insufficient_scopes', () => {
+  it('shows the insufficient scopes message', async () => {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(
+      buildErrorResponse('insufficient_scopes')
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'The configured token does not have sufficient permissions to fetch this profile. Please update your token scopes and try again.'
+        )
+      ).toBeInTheDocument()
+    )
+  })
+})
+
 describe('error flow — retry', () => {
   it('re-triggers the search when Retry Now is clicked', async () => {
     const spy = vi
