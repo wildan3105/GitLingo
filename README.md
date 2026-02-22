@@ -8,45 +8,47 @@
 
 > Visualize your GitHub programming language statistics with beautiful interactive charts
 
-GitLingo is a full-stack web application that analyzes GitHub user repositories and visualizes their programming language distribution through interactive charts. Built with modern web technologies and following domain-driven design principles.
+## Demo
+
+Access the demo [here](https://gitlingo.app)
 
 ## Features
 
-- **GitHub User Search** - Search any GitHub username or organization
-- **Multiple Chart Types** - Visualize data with Bar, Pie, and Polar Area charts
-- **Interactive Visualizations** - Built with Chart.js for smooth, responsive charts
-- **Share Results** - Share your language stats on X (Twitter) and Facebook
-- **Download Charts** - Export your charts as PNG images
-- **Error Handling** - Comprehensive error handling with user-friendly messages
-- **Rate Limit Handling** - Automatic retry with countdown for GitHub API rate limits
-- **Responsive Design** - Works seamlessly on desktop and mobile devices
-- **Accessibility** - WCAG 2.1 Level AA compliant
+| | Feature | Description |
+|---|---|---|
+| 🔍 | **Username Search** | Search any public GitHub user or organization by username and instantly visualize their programming language distribution. |
+| 🏢 | **Private GitHub Enterprise (GHE)** | Works with any self-hosted GHE instance — GitLingo auto-derives the correct profile URLs directly from the API response. (See [here](./backend/README.md) for the details setup) |
+| 📊 | **Three Interactive Chart Types** | Switch between Bar, Pie, and Polar Area charts in one click without re-triggering the API or losing your filter state. |
+| 🎯 | **Top-N Language Aggregation** | Slice results to Top 10, Top 25, or all detected languages, with overflow automatically folded into a unified "Others" slice. |
+| 🔧 | **Fork & Unknown Language Filtering** | Toggle forked repos and repositories with no detected language independently, isolating only the signal that matters. |
+| 📈 | **KPI Dashboard** | Four at-a-glance cards — total repositories, top language, unique language count, and language coverage percentage. |
+| 🏆 | **Most Searched Leaderboard** | A live community top-9 of the most-searched developers, displayed as clickable one-tap chips on the home screen. |
+| 📥 | **PNG & CSV Export** | Download the active chart as a timestamped PNG or export the raw language breakdown as a standards-compliant CSV file. |
+| 🔗 | **Shareable Deep Links** | Every search produces a bookmarkable URL (e.g. `/github/torvalds`) that auto-executes the search on load. |
+| ⚡ | **Server-Side Caching with Freshness Indicator** | Responses are cached server-side and the UI shows a live chip counting down exactly when the data will next refresh. |
 
 ## Tech Stack
 
 ### Backend
-- **Runtime**: Node.js 24+
-- **Framework**: Express.js with TypeScript
-- **Architecture**: Domain-Driven Design (DDD)
-- **API**: GitHub GraphQL API v4
-- **Validation**: Zod for runtime type checking
-- **Testing**: Jest with 100% coverage
+- **Runtime**: Node.js 24+ with TypeScript 5
+- **Framework**: Express.js v5
+- **Database**: SQLite via better-sqlite3
+- **API Client**: @octokit/graphql (GitHub GraphQL API v4)
+- **Validation**: Zod v4
 
 ### Frontend
-- **Framework**: React 19 with TypeScript
-- **Build Tool**: Vite
-- **State Management**: TanStack Query v5 (React Query)
-- **Charts**: Chart.js with react-chartjs-2
+- **Framework**: React 19 with TypeScript 5
+- **Build Tool**: Vite 7
+- **State Management**: TanStack Query v5
+- **Charts**: Chart.js v4 with react-chartjs-2
 - **Styling**: Tailwind CSS v3
-- **Testing**: Vitest + React Testing Library
-- **Accessibility**: WCAG 2.1 Level AA
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Node.js**: v24 or higher
-- **GitHub Token**: Personal access token with `read:user` and `repo` scopes
+- **Node.js**: v24 or higher — or **Bun**: v1.3.9 or higher
+- **GitHub Token**: Personal access token with `read:org, read:user, user:email` scopes
 - **Git**: For cloning the repository
 
 ### Installation
@@ -60,15 +62,13 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
 2. **Install backend dependencies**
    ```bash
    cd backend
-   npm install
-   # or
-   bun install
+   npm install   # or: bun install
    ```
 
 3. **Install frontend dependencies**
    ```bash
    cd ../frontend
-   npm install
+   npm install   # or: bun install
    ```
 
 4. **Configure environment variables**
@@ -78,8 +78,9 @@ GitLingo is a full-stack web application that analyzes GitHub user repositories 
    PORT=3001
    NODE_ENV=development
    GITHUB_TOKEN=your_github_personal_access_token
-   GITHUB_API_URL=https://api.github.com/graphql
    ALLOWED_ORIGINS=http://localhost:5173
+   ENABLE_CACHE=true
+   CACHE_TTL_HOURS=12
    ```
 
    **Frontend** (`frontend/.env`):
@@ -94,16 +95,14 @@ You need to run both servers simultaneously:
 **Terminal 1 - Backend**:
 ```bash
 cd backend
-npm run dev        # Development with nodemon
-# or
-bun run dev        # Development with Bun
+npm run dev   # or: bun run dev
 ```
 Backend runs on http://localhost:3001
 
 **Terminal 2 - Frontend**:
 ```bash
 cd frontend
-npm run dev        # Development with Vite HMR
+npm run dev   # or: bun run dev
 ```
 Frontend runs on http://localhost:5173
 
@@ -149,95 +148,32 @@ npm run preview     # Preview production build locally
 
 **Environment Variables**: Set `VITE_API_BASE_URL` to your deployed backend URL.
 
-## Development Workflow
-
-1. **Read the specs first**:
-   - [docs/product-spec.md](./docs/product-spec.md) - Product requirements
-   - [docs/backend-spec.md](./docs/backend-spec.md) - Backend technical spec
-   - [docs/frontend-spec.md](./docs/frontend-spec.md) - Frontend technical spec
-
-2. **Follow coding guidelines**:
-   - DRY principle - flag repetition aggressively
-   - Well-tested code is non-negotiable
-   - Handle edge cases thoughtfully
-   - Explicit over clever
-
-3. **Make incremental changes**:
-   - Small, proven changes
-   - Test one-by-one before committing
-   - Confirm before making changes
-
-4. **Run tests before pushing**:
-   ```bash
-   # Backend
-   cd backend && npm test
-
-   # Frontend
-   cd frontend && npm test
-   ```
-
-## Documentation
-
-- **[Product Specification](./docs/product-spec.md)** - Features, goals, and improvements
-- **[Backend Specification](./docs/backend-spec.md)** - Architecture, API contracts, testing
-- **[Frontend Specification](./docs/frontend-spec.md)** - Component architecture, state management
-- **[Backend README](./backend/README.md)** - Backend setup and API details
-- **[Frontend README](./frontend/README.md)** - Frontend setup and development
-
 ## Architecture Highlights
 
 ### Backend (DDD Architecture)
-- **Domain Layer**: Business logic, validation rules, entities
-- **Application Layer**: Use cases, service orchestration
-- **Infrastructure Layer**: GitHub API client, external services
-- **Interface Layer**: HTTP controllers, routes, middleware
+- **Domain Layer** (`domain/`): Core entities and outbound port interfaces
+- **Application Layer** (`application/`): Use cases, service orchestration, inbound ports
+- **Infrastructure Layer** (`infrastructure/`): GitHub API provider, SQLite persistence, error handling
+- **Interface Layer** (`interfaces/`): HTTP controllers, routes, middleware, request validation
+- **Shared Layer** (`shared/`): Config, constants, shared types and utilities
 
 ### Frontend (Feature-Based Architecture)
-- **Feature Modules**: search, charts, share, download
-- **Shared Components**: reusable UI components
-- **Contracts**: API types and response schemas
-- **State Management**: React Query for server state
-
-## Performance Optimizations
-
-- **Frontend**:
-  - React.memo for chart components
-  - useMemo for expensive calculations
-  - React Query caching (5 min stale, 10 min cache)
-  - Vite code splitting and lazy loading
-
-- **Backend**:
-  - GraphQL query optimization
-  - Error handling without retry storms
-  - CORS configuration for security
-  - Structured logging
+- **App** (`app/`): Root providers and application entry point
+- **Feature Modules** (`features/`): Self-contained features — `search`, `charts`, `export`
+- **Services** (`services/`): API client and data-fetching layer
+- **Contracts** (`contracts/`): API response types and type guards
+- **Shared** (`shared/`): Reusable components, hooks, styles, and utilities
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes following the coding guidelines
-4. Run tests (`npm test` in both backend and frontend)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 ## Similar Projects
 - [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) - A popular project that generates GitHub stats as images for README files.
 - [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown
 ) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
 - [github-profile-languages](https://github.com/IonicaBizau/github-profile-languages) - A project that visualizes the programming languages used in a GitHub profile.
+
 ## License
 
 MIT License - see [LICENSE](./LICENSE) file for details
-
-## Support
-
-For issues, questions, or contributions:
-- Open an issue on GitHub
-- Check existing documentation in `docs/`
-- Review backend and frontend READMEs for specific details
-
----
-
-Made with ♥ using Chart.js and React
