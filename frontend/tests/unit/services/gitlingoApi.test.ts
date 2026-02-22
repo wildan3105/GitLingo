@@ -217,6 +217,44 @@ describe('gitlingoApi', () => {
       )
     })
 
+    it('returns ErrorResponse with network_error when server returns non-JSON body', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON')
+        },
+        text: async () => '<html><body>502 Bad Gateway</body></html>',
+      })
+
+      const result = await searchLanguageStatistics('testuser')
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.error.code).toBe('network_error')
+        expect(result.error.message).toBe('Failed to parse response as JSON')
+      }
+    })
+
+    it('returns ErrorResponse with network_error when response body is empty', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => {
+          throw new SyntaxError('Unexpected end of JSON input')
+        },
+        text: async () => '',
+      })
+
+      const result = await searchLanguageStatistics('testuser')
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.error.code).toBe('network_error')
+        expect(result.error.message).toBe('Failed to parse response as JSON')
+      }
+    })
+
     it('should not send provider parameter in request', async () => {
       const mockSuccessResponse: SuccessResponse = {
         ok: true,
@@ -335,6 +373,21 @@ describe('gitlingoApi', () => {
       const abortError = new Error('The operation was aborted')
       abortError.name = 'AbortError'
       mockFetch.mockRejectedValueOnce(abortError)
+
+      const result = await getTopSearch(9)
+
+      expect(result).toBeNull()
+    })
+
+    it('returns null when response body is not valid JSON', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON')
+        },
+        text: async () => '<html>Gateway error</html>',
+      })
 
       const result = await getTopSearch(9)
 

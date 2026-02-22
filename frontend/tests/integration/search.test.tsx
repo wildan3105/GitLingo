@@ -416,6 +416,85 @@ describe('cache freshness chip', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Chart type switching
+// ---------------------------------------------------------------------------
+
+describe('chart type switching', () => {
+  async function searchAndWait() {
+    vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(SUCCESS_RESPONSE)
+    const user = userEvent.setup()
+    renderPage()
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+    await waitFor(() => expect(screen.getByTestId('bar-chart')).toBeInTheDocument())
+    return user
+  }
+
+  it('renders the bar chart by default after a successful search', async () => {
+    await searchAndWait()
+
+    expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+    expect(screen.queryByTestId('pie-chart')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('polar-chart')).not.toBeInTheDocument()
+  })
+
+  it('switches to pie chart when Pie Chart is selected from Custom Charts', async () => {
+    const user = await searchAndWait()
+
+    await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+    await user.click(screen.getByRole('option', { name: /pie chart/i }))
+
+    await waitFor(() => expect(screen.getByTestId('pie-chart')).toBeInTheDocument())
+    expect(screen.queryByTestId('bar-chart')).not.toBeInTheDocument()
+  })
+
+  it('switches to polar area chart when Polar Area is selected from Custom Charts', async () => {
+    const user = await searchAndWait()
+
+    await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+    await user.click(screen.getByRole('option', { name: /polar area/i }))
+
+    await waitFor(() => expect(screen.getByTestId('polar-chart')).toBeInTheDocument())
+    expect(screen.queryByTestId('bar-chart')).not.toBeInTheDocument()
+  })
+
+  it('switches back to bar chart from a custom chart type', async () => {
+    const user = await searchAndWait()
+
+    await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+    await user.click(screen.getByRole('option', { name: /pie chart/i }))
+    await waitFor(() => expect(screen.getByTestId('pie-chart')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('tab', { name: /bar/i }))
+
+    await waitFor(() => expect(screen.getByTestId('bar-chart')).toBeInTheDocument())
+    expect(screen.queryByTestId('pie-chart')).not.toBeInTheDocument()
+  })
+
+  it('does not trigger an API refetch when switching chart types', async () => {
+    const spy = vi
+      .spyOn(gitlingoApi, 'searchLanguageStatistics')
+      .mockResolvedValue(SUCCESS_RESPONSE)
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText('Username'), 'octocat')
+    await user.click(screen.getByRole('button', { name: /^search$/i }))
+    await waitFor(() => expect(screen.getByTestId('bar-chart')).toBeInTheDocument())
+    const callsAfterSearch = spy.mock.calls.length
+
+    await user.click(screen.getByRole('tab', { name: /custom charts/i }))
+    await user.click(screen.getByRole('option', { name: /pie chart/i }))
+    await waitFor(() => expect(screen.getByTestId('pie-chart')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('tab', { name: /bar/i }))
+    await waitFor(() => expect(screen.getByTestId('bar-chart')).toBeInTheDocument())
+
+    expect(spy.mock.calls.length).toBe(callsAfterSearch)
+  })
+})
+
 describe('error flow — retry', () => {
   it('re-triggers the search when Retry Now is clicked', async () => {
     const spy = vi
