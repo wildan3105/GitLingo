@@ -28,3 +28,5 @@ export type { CheckboxProps } from './Checkbox'
 
 export { SegmentedControl } from './SegmentedControl'
 export type { SegmentedControlProps, SegmentedOption } from './SegmentedControl'
+
+export { ErrorBoundary } from './ErrorBoundary'

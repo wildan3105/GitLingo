@@ -33,13 +33,16 @@ type ToastContextType = {
 // Create context
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
+/** Maximum number of toasts visible at once. Oldest is evicted when exceeded. */
+const MAX_TOASTS = 3
+
 // Reducer
 function toastReducer(state: ToastState, action: ToastAction): ToastState {
   switch (action.type) {
     case 'ADD_TOAST':
       return {
         ...state,
-        toasts: [...state.toasts, action.payload],
+        toasts: [...state.toasts, action.payload].slice(-MAX_TOASTS),
       }
     case 'REMOVE_TOAST':
       return {
