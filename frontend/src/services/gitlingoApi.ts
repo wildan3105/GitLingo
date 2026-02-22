@@ -6,12 +6,42 @@
 import { apiClient } from './apiClient'
 import type { ApiResponse, TopSearchResponse } from '../contracts/api'
 
+const TOP_SEARCH_ENDPOINT = '/api/v1/topsearch'
+const SEARCH_ENDPOINT = '/api/v1/search'
+
 /**
- * Search for language statistics for a given username
+ * Fetch the most-searched usernames leaderboard.
+ *
+ * Returns `null` only when the underlying request fails (e.g. network error,
+ * timeout, or invalid/unparseable response). Non-2xx HTTP responses still
+ * resolve to a parsed `TopSearchResponse` value if the body is valid.
+ * This is intentional — the top-search section is non-critical UI and degrades
+ * silently to an empty state. Contrast with `searchLanguageStatistics`, which
+ * returns a typed `ErrorResponse` because its failures must be surfaced to the user.
+ *
+ * @param limit - Max entries to return (default 9)
+ */
+export async function getTopSearch(limit = 9): Promise<TopSearchResponse | null> {
+  try {
+    const params = new URLSearchParams({
+      provider: 'github',
+      limit: String(limit),
+      offset: '0',
+    })
+    return await apiClient.get<TopSearchResponse>(`${TOP_SEARCH_ENDPOINT}?${params.toString()}`)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Search for language statistics for a given username.
+ *
+ * Returns a typed `ErrorResponse` on failure so callers can display a specific
+ * error message and retry button. For the silent-failure equivalent see `getTopSearch`.
  *
  * @param username - GitHub username or organization
- * @param provider - Provider name (default: 'github')
- * @returns Promise resolving to ApiResponse (success or error)
+ * @returns Promise resolving to ApiResponse (SuccessResponse or ErrorResponse)
  *
  * @example
  * ```ts
@@ -23,27 +53,6 @@ import type { ApiResponse, TopSearchResponse } from '../contracts/api'
  * }
  * ```
  */
-/**
- * Fetch the most-searched usernames leaderboard
- *
- * Always resolves — returns null on network failure (component falls back to empty state).
- * The API itself always returns HTTP 200, so null only occurs on a fetch-level error.
- *
- * @param limit - Max entries to return (default 9)
- */
-export async function getTopSearch(limit = 9): Promise<TopSearchResponse | null> {
-  try {
-    const params = new URLSearchParams({
-      provider: 'github',
-      limit: String(limit),
-      offset: '0',
-    })
-    return await apiClient.get<TopSearchResponse>(`/api/v1/topsearch?${params.toString()}`)
-  } catch {
-    return null
-  }
-}
-
 export async function searchLanguageStatistics(username: string): Promise<ApiResponse> {
   try {
     // Build query params
@@ -52,7 +61,7 @@ export async function searchLanguageStatistics(username: string): Promise<ApiRes
     // Provider defaults to 'github' on backend
 
     // Make API request
-    const response = await apiClient.get<ApiResponse>(`/api/v1/search?${params.toString()}`)
+    const response = await apiClient.get<ApiResponse>(`${SEARCH_ENDPOINT}?${params.toString()}`)
 
     return response
   } catch (error) {

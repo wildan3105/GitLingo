@@ -12,6 +12,9 @@ export type ValidationResult = {
   error?: string
 }
 
+/** GitHub's enforced maximum username length. */
+const GITHUB_USERNAME_MAX_LENGTH = 39
+
 /**
  * GitHub username validation regex
  * Rules:
@@ -51,7 +54,7 @@ export function validateUsername(username: string): ValidationResult {
   }
 
   // Check maximum length (GitHub's limit is 39 characters)
-  if (username.length > 39) {
+  if (username.length > GITHUB_USERNAME_MAX_LENGTH) {
     return { isValid: false, error: 'Username must be 39 characters or less' }
   }
 
