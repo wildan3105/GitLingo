@@ -258,11 +258,11 @@ describe('API Integration Tests', () => {
       });
     });
 
-    it('should return language statistics for unverified organization (rakutentech)', async () => {
+    it('should return language statistics for unverified organization (somecompanytech)', async () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: null,
         organization: {
-          login: 'rakutentech',
+          login: 'somecompanytech',
           id: '101112',
           isVerified: false,
           repositories: {
@@ -276,14 +276,14 @@ describe('API Integration Tests', () => {
         },
       });
 
-      const response = await request(app).get('/api/v1/search?username=rakutentech');
+      const response = await request(app).get('/api/v1/search?username=somecompanytech');
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         ok: true,
         provider: 'github',
         profile: {
-          username: 'rakutentech',
+          username: 'somecompanytech',
           type: 'organization',
           providerUserId: '101112',
           isVerified: false,
@@ -659,7 +659,7 @@ describe('API Integration Tests', () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: null,
         organization: {
-          login: 'rakutentech',
+          login: 'somecompanytech',
           id: '1415441',
           isVerified: false,
           createdAt: '2012-02-07T09:30:38Z',
@@ -677,14 +677,14 @@ describe('API Integration Tests', () => {
         },
       });
 
-      const response = await request(app).get('/api/v1/search?username=rakutentech');
+      const response = await request(app).get('/api/v1/search?username=somecompanytech');
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         ok: true,
         provider: 'github',
         profile: {
-          username: 'rakutentech',
+          username: 'somecompanytech',
           type: 'organization',
           providerUserId: '1415441',
           isVerified: false,

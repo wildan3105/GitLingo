@@ -110,7 +110,7 @@ describe('extractProviderBaseUrl', () => {
       expect(extractProviderBaseUrl(avatarUrl)).toBe('https://github.com');
     });
 
-    it('should handle Rakuten GHE avatar URL', () => {
+    it('should handle Your Company GHE avatar URL', () => {
       const avatarUrl = 'https://avatars.ghe.your-company.com/u/16';
       expect(extractProviderBaseUrl(avatarUrl)).toBe('https://ghe.your-company.com');
     });
