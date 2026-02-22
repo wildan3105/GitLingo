@@ -25,7 +25,7 @@ export const logger = pino({
   level: config.logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
   redact: {
-    paths: ['GITHUB_TOKEN', 'req.headers.authorization', 'req.headers.cookie'],
+    paths: ['req.headers.authorization', 'req.headers.cookie'],
     censor: '[redacted]',
   },
 });
