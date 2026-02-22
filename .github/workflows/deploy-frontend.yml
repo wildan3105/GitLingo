@@ -73,8 +73,6 @@ jobs:
 
             ln -sfn "$REL" "$BASE/current"
 
-            sudo systemctl reload nginx
-
             cd "$BASE/releases"
             ls -1dt */ | tail -n +4 | xargs -r rm -rf
 
