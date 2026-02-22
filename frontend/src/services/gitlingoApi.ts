@@ -9,7 +9,9 @@ import type { ApiResponse, TopSearchResponse } from '../contracts/api'
 /**
  * Fetch the most-searched usernames leaderboard.
  *
- * Returns `null` on any failure (network error, timeout, non-200 status).
+ * Returns `null` only when the underlying request fails (e.g. network error,
+ * timeout, or invalid/unparseable response). Non-2xx HTTP responses still
+ * resolve to a parsed `TopSearchResponse` value if the body is valid.
  * This is intentional — the top-search section is non-critical UI and degrades
  * silently to an empty state. Contrast with `searchLanguageStatistics`, which
  * returns a typed `ErrorResponse` because its failures must be surfaced to the user.
