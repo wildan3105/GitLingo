@@ -2,9 +2,9 @@ name: Deploy Frontend (gitlingo.app)
 
 on:
   push:
-    branches: [ "ci/frontend-deployment" ]
-    # paths: uncomment if already works
-    #   - "frontend/**" 
+    branches: [ "master" ]
+    paths: uncomment if already works
+      - "frontend/**" 
 
 concurrency:
   group: deploy-frontend
