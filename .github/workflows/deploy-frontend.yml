@@ -3,12 +3,17 @@ name: Deploy Frontend (gitlingo.app)
 on:
   push:
     branches: [ "master" ]
-    paths: uncomment if already works
+    paths:
       - "frontend/**" 
+      - ".github/workflows/deploy-frontend.yml"
 
 concurrency:
   group: deploy-frontend
   cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: frontend
 
 jobs:
   deploy:
@@ -26,11 +31,9 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install deps
-        working-directory: frontend
         run: npm ci
 
       - name: Build (Vite)
-        working-directory: frontend
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         run: npm run build
