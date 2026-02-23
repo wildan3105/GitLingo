@@ -1,0 +1,87 @@
+name: Deploy Frontend (gitlingo.app)
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "frontend/**" 
+      - ".github/workflows/deploy-frontend.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (Vite)
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: npm run build
+
+      - name: Package dist
+        run: |
+          tar -czf frontend-dist.tgz -C frontend/dist .
+
+      - name: Upload dist tarball to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VULTR_SSH_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          port: ${{ secrets.VULTR_SSH_PORT }}
+          source: "frontend-dist.tgz"
+          target: "/tmp/gitlingo-deploy/"
+
+      - name: Deploy on server (atomic switch + prune)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VULTR_SSH_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          port: ${{ secrets.VULTR_SSH_PORT }}
+          script: |
+            set -euo pipefail
+
+            TS="$(date +%Y%m%d-%H%M%S)"
+            BASE="/var/www/gitlingo"
+            REL="$BASE/releases/$TS"
+            PKG="/tmp/gitlingo-deploy/frontend-dist.tgz"
+
+            mkdir -p "$BASE/releases"
+            mkdir -p "$REL"
+            mkdir -p /tmp/gitlingo-deploy
+
+            tar -xzf "$PKG" -C "$REL"
+            test -f "$REL/index.html"
+
+            ln -sfn "$REL" "$BASE/current"
+
+            cd "$BASE/releases"
+            ls -1dt */ | tail -n +4 | xargs -r rm -rf
+
+            rm -f "$PKG"
+
+            echo "Deployed frontend release: $TS"
