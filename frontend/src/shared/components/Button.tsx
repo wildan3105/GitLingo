@@ -7,7 +7,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 export type ButtonProps = {
   /** Button visual style */
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
   /** Button size */
   size?: 'sm' | 'md' | 'lg'
   /** Disabled state */
@@ -102,6 +102,13 @@ export function Button({
       bg-transparent hover:bg-secondary-100
       text-secondary-700 hover:text-secondary-900
       focus:ring-secondary-500
+    `,
+    danger: `
+      bg-gradient-to-r from-red-600 to-red-500
+      hover:from-red-700 hover:to-red-600
+      text-white shadow-md hover:shadow-lg
+      focus:ring-red-500
+      border border-red-400/20
     `,
   }
 

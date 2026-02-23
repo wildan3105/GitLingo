@@ -26,7 +26,7 @@ Access the demo [here](https://gitlingo.app)
 | 🎯 | **Top-N Language Aggregation** | Slice results to Top 10, Top 25, or all detected languages, with overflow automatically folded into a unified "Others" slice. |
 | 🔧 | **Fork & Unknown Language Filtering** | Toggle forked repos and repositories with no detected language independently, isolating only the signal that matters. |
 | 📈 | **KPI Dashboard** | Four at-a-glance cards — total repositories, top language, unique language count, and language coverage percentage. |
-| 🏆 | **Most Searched Leaderboard** | A live community top-9 of the most-searched user or organization, displayed as clickable one-tap chips on the home screen. |
+| 🏆 | **Most Searched Leaderboard** | A live community top-9 of the most-searched users or organizations, displayed as clickable one-tap chips on the home screen. |
 | 📥 | **PNG & CSV Export** | Download the active chart as a timestamped PNG or export the raw language breakdown as a standards-compliant CSV file. |
 | 🔗 | **Shareable Deep Links** | Every search produces a bookmarkable URL (e.g. `/github/octocat`) that auto-executes the search on load. |
 | ⚡ | **Server-Side Caching with Freshness Indicator** | Responses are cached server-side and the UI shows a live chip counting down exactly when the data will next refresh. |
