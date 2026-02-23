@@ -219,6 +219,12 @@ describe('ChartPanel', () => {
       expect(screen.getByRole('tab', { name: /^bar$/i })).toBeInTheDocument()
     })
 
+    it('Bar tab contains a stats icon', () => {
+      renderWithProviders(<ChartPanel {...defaultProps} />)
+      const barTab = screen.getByRole('tab', { name: /^bar$/i })
+      expect(barTab.querySelector('svg')).not.toBeNull()
+    })
+
     it('does not render Pie or Polar Area as top-level tabs', () => {
       renderWithProviders(<ChartPanel {...defaultProps} />)
       const tabs = screen.getAllByRole('tab')

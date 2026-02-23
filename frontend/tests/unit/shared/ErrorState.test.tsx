@@ -78,6 +78,20 @@ describe('ErrorState', () => {
     expect(screen.getByText('Try Again')).toBeInTheDocument()
   })
 
+  it('Try Again button has primary (blue) styling', () => {
+    render(<ErrorState code="generic" message="Error" onRetry={vi.fn()} />)
+
+    const button = screen.getByRole('button', { name: /retry now/i })
+    expect(button.className).toMatch(/blue/)
+  })
+
+  it('Try Again button contains a refresh icon', () => {
+    render(<ErrorState code="generic" message="Error" onRetry={vi.fn()} />)
+
+    const button = screen.getByRole('button', { name: /retry now/i })
+    expect(button.querySelector('svg')).not.toBeNull()
+  })
+
   it('calls onRetry when retry button clicked', () => {
     vi.useRealTimers() // Use real timers for this test
     const handleRetry = vi.fn()

@@ -163,7 +163,7 @@ export function ErrorState({
       {onRetry && (
         <div className="mt-6">
           <Button
-            variant="danger"
+            variant="primary"
             size="md"
             onClick={onRetry}
             disabled={!canRetry}
