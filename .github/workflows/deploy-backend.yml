@@ -137,8 +137,7 @@ jobs:
                 export COMPOSE_PROJECT_NAME="gitlingo-backend"
                 export GITLINGO_IMAGE_TAG="$TS"
 
-                # Make sure router is up
-                docker compose up -d router
+                docker compose up -d --no-deps router
 
                 # Build + start NEXT service
                 docker compose build "api_${NEXT}"
