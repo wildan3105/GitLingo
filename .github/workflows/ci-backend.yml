@@ -1,19 +1,14 @@
-name: Backend CI
+name: CI Backend
 
 permissions:
   contents: read
 
 on:
-  push:
-    branches: [master, main, develop]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches: [master, main, develop]
+    branches: [master]
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
+      - '.github/workflows/ci-backend.yml'
 
 defaults:
   run:
