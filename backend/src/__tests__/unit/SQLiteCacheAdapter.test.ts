@@ -19,7 +19,7 @@ function makeAdapter(): { adapter: SQLiteCacheAdapter; db: Database.Database } {
 const BASE_KEY: CacheKey = {
   provider: 'github',
   providerBaseUrl: 'https://github.com',
-  username: 'torvalds',
+  username: 'octocat',
   schemaVersion: 'v1',
   optionsHash: 'default',
 };
@@ -63,16 +63,16 @@ describe('SQLiteCacheAdapter', () => {
       db.close();
     });
 
-    it('should be case-insensitive for username — "Torvalds" and "torvalds" resolve to the same entry', () => {
+    it('should be case-insensitive for username — "Torvalds" and "octocat" resolve to the same entry', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert(BASE_KEY, PAYLOAD); // stored as "torvalds"
+      adapter.upsert(BASE_KEY, PAYLOAD); // stored as "octocat"
 
       const upperKey: CacheKey = { ...BASE_KEY, username: 'Torvalds' };
       const entry = adapter.get(upperKey);
 
       expect(entry).not.toBeNull();
-      expect(entry!.username).toBe('torvalds');
+      expect(entry!.username).toBe('octocat');
 
       db.close();
     });
@@ -114,14 +114,14 @@ describe('SQLiteCacheAdapter', () => {
       const upperKey: CacheKey = { ...BASE_KEY, username: 'Torvalds' };
       const stored = adapter.upsert(upperKey, PAYLOAD);
 
-      expect(stored.username).toBe('torvalds');
+      expect(stored.username).toBe('octocat');
 
       // Confirm it's stored lowercase in the DB
-      const row = db.prepare('SELECT username FROM cache WHERE username = ?').get('torvalds') as
+      const row = db.prepare('SELECT username FROM cache WHERE username = ?').get('octocat') as
         | { username: string }
         | undefined;
       expect(row).toBeDefined();
-      expect(row!.username).toBe('torvalds');
+      expect(row!.username).toBe('octocat');
 
       db.close();
     });

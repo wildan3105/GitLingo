@@ -20,13 +20,13 @@ describe('SQLiteTopSearchAdapter', () => {
 
       adapter.upsert({
         provider: 'github',
-        username: 'torvalds',
+        username: 'octocat',
         avatarUrl: 'https://example.com/avatar.png',
       });
 
-      const row = db.prepare('SELECT * FROM topsearch WHERE username = ?').get('torvalds') as any;
+      const row = db.prepare('SELECT * FROM topsearch WHERE username = ?').get('octocat') as any;
       expect(row.hit).toBe(1);
-      expect(row.username).toBe('torvalds');
+      expect(row.username).toBe('octocat');
       expect(row.provider).toBe('github');
       expect(row.avatar_url).toBe('https://example.com/avatar.png');
       db.close();
@@ -35,11 +35,11 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should increment hit by 1 on subsequent upserts', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
-      const row = db.prepare('SELECT hit FROM topsearch WHERE username = ?').get('torvalds') as any;
+      const row = db.prepare('SELECT hit FROM topsearch WHERE username = ?').get('octocat') as any;
       expect(row.hit).toBe(3);
       db.close();
     });
@@ -47,12 +47,12 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should update avatar_url when a new non-null value is provided', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: 'https://old.png' });
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: 'https://new.png' });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: 'https://old.png' });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: 'https://new.png' });
 
       const row = db
         .prepare('SELECT avatar_url FROM topsearch WHERE username = ?')
-        .get('torvalds') as any;
+        .get('octocat') as any;
       expect(row.avatar_url).toBe('https://new.png');
       db.close();
     });
@@ -60,12 +60,12 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should keep existing avatar_url when new value is null (COALESCE)', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: 'https://keep.png' });
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: 'https://keep.png' });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
       const row = db
         .prepare('SELECT avatar_url FROM topsearch WHERE username = ?')
-        .get('torvalds') as any;
+        .get('octocat') as any;
       expect(row.avatar_url).toBe('https://keep.png');
       db.close();
     });
@@ -85,9 +85,9 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should update updated_at on each upsert', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
       const before = (
-        db.prepare('SELECT updated_at FROM topsearch WHERE username = ?').get('torvalds') as any
+        db.prepare('SELECT updated_at FROM topsearch WHERE username = ?').get('octocat') as any
       ).updated_at;
 
       // Ensure at least 1 second passes so unixepoch() changes
@@ -95,9 +95,9 @@ describe('SQLiteTopSearchAdapter', () => {
       jest.advanceTimersByTime(1100);
       jest.useRealTimers();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
       const after = (
-        db.prepare('SELECT updated_at FROM topsearch WHERE username = ?').get('torvalds') as any
+        db.prepare('SELECT updated_at FROM topsearch WHERE username = ?').get('octocat') as any
       ).updated_at;
 
       expect(after).toBeGreaterThanOrEqual(before);
@@ -107,11 +107,11 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should treat the same username under different providers as separate records', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
-      adapter.upsert({ provider: 'gitlab', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
+      adapter.upsert({ provider: 'gitlab', username: 'octocat', avatarUrl: null });
 
       const count = (
-        db.prepare('SELECT COUNT(*) AS c FROM topsearch WHERE username = ?').get('torvalds') as any
+        db.prepare('SELECT COUNT(*) AS c FROM topsearch WHERE username = ?').get('octocat') as any
       ).c;
       expect(count).toBe(2);
       db.close();
@@ -186,8 +186,8 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should filter by provider', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
-      adapter.upsert({ provider: 'gitlab', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
+      adapter.upsert({ provider: 'gitlab', username: 'octocat', avatarUrl: null });
 
       const result = adapter.findTopSearches({ provider: 'github', limit: 10, offset: 0 });
 
@@ -200,7 +200,7 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should return empty data and total=0 when no records match provider', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
       const result = adapter.findTopSearches({ provider: 'gitlab', limit: 10, offset: 0 });
 
@@ -212,13 +212,13 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should map DB rows to TopSearch domain model with camelCase fields', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: 'https://avatar.png' });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: 'https://avatar.png' });
 
       const result = adapter.findTopSearches({ provider: 'github', limit: 10, offset: 0 });
       const entry = result.data[0]!;
 
       expect(entry).toMatchObject({
-        username: 'torvalds',
+        username: 'octocat',
         provider: 'github',
         hit: 1,
         avatarUrl: 'https://avatar.png',
@@ -232,7 +232,7 @@ describe('SQLiteTopSearchAdapter', () => {
     it('should return empty data when offset exceeds total records', () => {
       const { adapter, db } = makeAdapter();
 
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
       const result = adapter.findTopSearches({ provider: 'github', limit: 10, offset: 100 });
 
