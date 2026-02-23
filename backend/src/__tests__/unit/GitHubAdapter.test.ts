@@ -921,7 +921,7 @@ describe('GitHubGraphQLAdapter', () => {
           login: 'octocat',
           name: 'The Octocat',
           id: '1024',
-          email: 'octocat@linux.com',
+          email: 'octocat@github.com.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: { name: 'C' }, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },
