@@ -2,7 +2,7 @@ name: Deploy Backend (api.gitlingo.app)
 
 on:
   push:
-    branches: ["master", "ci/deploy-backend"]
+    branches: ["master"]
     paths:
       - "backend/**"
       - ".github/workflows/deploy-backend.yml"
