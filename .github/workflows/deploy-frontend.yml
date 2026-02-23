@@ -43,7 +43,7 @@ jobs:
 
       - name: Package dist
         run: |
-          tar -czf frontend-dist.tgz -C frontend/dist .
+          tar -czf ../frontend-dist.tgz -C dist .
 
       - name: Upload dist tarball to server
         uses: appleboy/scp-action@v0.1.7
