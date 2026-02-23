@@ -98,7 +98,7 @@ jobs:
 
                 # Unpack release
                 tar -xzf "$PKG" -C "$REL"
-                test -f "$REL/docker-compose.yml"
+                test -f "$REL/docker-compose.yaml"
                 test -f "$REL/Dockerfile"
 
                 # Atomic switch current -> new release
