@@ -49,7 +49,6 @@ jobs:
                 set -Eeuo pipefail
                 set -x
 
-                # --- error handler: show exact failing line/command + some context
                 on_err() {
                 exit_code=$?
                 echo "==================== DEPLOY FAILED ===================="
@@ -90,21 +89,18 @@ jobs:
 
                 echo "TS=$TS BASE=$BASE REL=$REL PKG=$PKG SHARED=$SHARED"
 
-                # Preflight: show what we have
                 ls -la /tmp/gitlingo-deploy || true
                 test -f "$PKG"
 
                 mkdir -p "$BASE/releases" "$SHARED/router" "$REL"
 
-                # Unpack release
                 tar -xzf "$PKG" -C "$REL"
                 test -f "$REL/docker-compose.yaml"
                 test -f "$REL/Dockerfile"
 
-                # Atomic switch current -> new release
                 ln -sfn "$REL" "$BASE/current"
 
-                # Ensure shared files exist
+                # Required shared files
                 if [ ! -f "$SHARED/.env" ]; then
                 echo "ERROR: Missing $SHARED/.env"
                 exit 1
@@ -114,10 +110,10 @@ jobs:
                 exit 1
                 fi
 
-                # Ensure upstream exists (initialize on first deploy)
+                # Ensure upstream exists (but do NOT force api_blue; it may not exist yet)
                 if [ ! -f "$SHARED/router/upstream.conf" ]; then
-                echo "Initializing upstream.conf -> api_blue"
-                printf "upstream gitlingo_backend {\n  server api_blue:3001;\n}\n" > "$SHARED/router/upstream.conf"
+                echo "Initializing upstream.conf (temporary) -> api_green"
+                printf "upstream gitlingo_backend {\n  server api_green:3001;\n}\n" > "$SHARED/router/upstream.conf"
                 fi
 
                 # Link shared env + router configs into the current release
@@ -137,9 +133,7 @@ jobs:
                 export COMPOSE_PROJECT_NAME="gitlingo-backend"
                 export GITLINGO_IMAGE_TAG="$TS"
 
-                docker compose up -d --no-deps router
-
-                # Build + start NEXT service
+                # Build + start NEXT service first (router must not start with a non-existent upstream)
                 docker compose build "api_${NEXT}"
                 docker compose up -d --no-deps --force-recreate "api_${NEXT}"
 
@@ -172,18 +166,19 @@ jobs:
                 fi
                 done
 
-                # Switch router to NEXT and reload
+                # Switch router upstream to NEXT *before* starting/reloading router
                 printf "upstream gitlingo_backend {\n  server api_%s:3001;\n}\n" "$NEXT" > "$SHARED/router/upstream.conf"
+
+                # Ensure router is up and reload (safe for first deploy and later deploys)
+                docker compose up -d --no-deps router
                 docker compose exec -T router nginx -t
-                docker compose exec -T router nginx -s reload
+                docker compose exec -T router nginx -s reload || true
 
+                # Mark active and stop old after short drain
                 echo "$NEXT" > "$ACTIVE_FILE"
-
-                # Drain then stop old
                 sleep 8
                 docker compose stop "api_${ACTIVE}" || true
 
-                # Cleanup
                 rm -f "$PKG"
 
                 cd "$BASE/releases"
