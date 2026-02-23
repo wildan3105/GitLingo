@@ -10,7 +10,7 @@
 
 ## Demo
 
-![demo.mp4](https://github.com/user-attachments/assets/c4fa980d-4989-4348-b3dd-44a89d5c81c4)
+[demo.mp4](https://github.com/user-attachments/assets/c4fa980d-4989-4348-b3dd-44a89d5c81c4)
 
 ### Live Demo
 
