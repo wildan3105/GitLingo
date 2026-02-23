@@ -61,7 +61,7 @@ describe('TopSearchService', () => {
       const port = new MockTopSearchPort();
       const service = new TopSearchService(port);
 
-      service.record('TorVALds', 'github', null);
+      service.record('Octocat', 'github', null);
 
       expect(port.upsertCalls[0]!.username).toBe('octocat');
     });

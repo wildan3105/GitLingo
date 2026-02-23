@@ -57,18 +57,18 @@ describe('SQLiteCacheAdapter', () => {
 
       adapter.upsert(BASE_KEY, PAYLOAD);
 
-      const wrongKey: CacheKey = { ...BASE_KEY, username: 'octocat' };
+      const wrongKey: CacheKey = { ...BASE_KEY, username: 'torvalds' };
       expect(adapter.get(wrongKey)).toBeNull();
 
       db.close();
     });
 
-    it('should be case-insensitive for username — "Torvalds" and "octocat" resolve to the same entry', () => {
+    it('should be case-insensitive for username — "Octocat" and "octocat" resolve to the same entry', () => {
       const { adapter, db } = makeAdapter();
 
       adapter.upsert(BASE_KEY, PAYLOAD); // stored as "octocat"
 
-      const upperKey: CacheKey = { ...BASE_KEY, username: 'Torvalds' };
+      const upperKey: CacheKey = { ...BASE_KEY, username: 'Octocat' };
       const entry = adapter.get(upperKey);
 
       expect(entry).not.toBeNull();
@@ -111,7 +111,7 @@ describe('SQLiteCacheAdapter', () => {
     it('should normalize username to lowercase before storing', () => {
       const { adapter, db } = makeAdapter();
 
-      const upperKey: CacheKey = { ...BASE_KEY, username: 'Torvalds' };
+      const upperKey: CacheKey = { ...BASE_KEY, username: 'Octocat' };
       const stored = adapter.upsert(upperKey, PAYLOAD);
 
       expect(stored.username).toBe('octocat');

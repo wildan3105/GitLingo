@@ -251,9 +251,9 @@ describe('TopSearch Integration Tests', () => {
     });
 
     it('should normalize username to lowercase in topsearch', async () => {
-      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('Torvalds'));
+      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('Octocat'));
 
-      await request(app).get('/api/v1/search?username=Torvalds');
+      await request(app).get('/api/v1/search?username=Octocat');
 
       const res = await request(app).get('/api/v1/topsearch');
       expect(res.body.data[0].username).toBe('octocat');
