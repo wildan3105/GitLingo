@@ -1,0 +1,189 @@
+name: Deploy Backend (api.gitlingo.app)
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package backend source
+        run: |
+          set -euo pipefail
+          tar -czf backend-src.tgz -C backend .
+
+      - name: Upload backend tarball to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VULTR_SSH_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          port: ${{ secrets.VULTR_SSH_PORT }}
+          source: "backend-src.tgz"
+          target: "/tmp/gitlingo-deploy/"
+
+      - name: Deploy on server (blue/green + health gate)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VULTR_SSH_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          port: ${{ secrets.VULTR_SSH_PORT }}
+          script: |
+            bash -lc '
+                set -Eeuo pipefail
+                set -x
+
+                on_err() {
+                exit_code=$?
+                echo "==================== DEPLOY FAILED ===================="
+                echo "Exit code: ${exit_code}"
+                echo "Failed at line: ${BASH_LINENO[0]}"
+                echo "Command: ${BASH_COMMAND}"
+                echo "User: $(whoami)"
+                echo "PWD: $(pwd)"
+                echo "---- disk ----"
+                df -h || true
+                echo "---- perms (key paths) ----"
+                ls -ld /opt/gitlingo /opt/gitlingo/backend /opt/gitlingo/backend/shared 2>/dev/null || true
+                ls -ld /tmp/gitlingo-deploy 2>/dev/null || true
+                ls -ld /var/db/gitlingo.app 2>/dev/null || true
+                echo "---- docker ----"
+                docker version || true
+                docker compose version || true
+                docker ps -a || true
+                echo "---- compose state (if any) ----"
+                if [ -n "${BASE:-}" ] && [ -d "${BASE:-}/current" ]; then
+                    cd "$BASE/current" || true
+                    docker compose ps || true
+                    docker compose logs --tail=200 router || true
+                    docker compose logs --tail=200 api_blue || true
+                    docker compose logs --tail=200 api_green || true
+                fi
+                echo "======================================================="
+                exit "${exit_code}"
+                }
+                trap on_err ERR
+
+                TS="$(date +%Y%m%d-%H%M%S)"
+                BASE="/opt/gitlingo/backend"
+                REL="$BASE/releases/$TS"
+                PKG="/tmp/gitlingo-deploy/backend-src.tgz"
+                SHARED="$BASE/shared"
+                ACTIVE_FILE="$SHARED/active_color"
+
+                echo "TS=$TS BASE=$BASE REL=$REL PKG=$PKG SHARED=$SHARED"
+
+                ls -la /tmp/gitlingo-deploy || true
+                test -f "$PKG"
+
+                mkdir -p "$BASE/releases" "$SHARED/router" "$REL"
+
+                tar -xzf "$PKG" -C "$REL"
+                test -f "$REL/docker-compose.yaml"
+                test -f "$REL/Dockerfile"
+
+                ln -sfn "$REL" "$BASE/current"
+
+                # Required shared files
+                if [ ! -f "$SHARED/.env" ]; then
+                echo "ERROR: Missing $SHARED/.env"
+                exit 1
+                fi
+                if [ ! -f "$SHARED/router/nginx.conf" ]; then
+                echo "ERROR: Missing $SHARED/router/nginx.conf"
+                exit 1
+                fi
+
+                # Ensure upstream exists (but do NOT force api_blue; it may not exist yet)
+                if [ ! -f "$SHARED/router/upstream.conf" ]; then
+                echo "Initializing upstream.conf (temporary) -> api_green"
+                printf "upstream gitlingo_backend {\n  server api_green:3001;\n}\n" > "$SHARED/router/upstream.conf"
+                fi
+
+                # Link shared env + router configs into the current release
+                ln -sfn "$SHARED/.env" "$BASE/current/.env"
+                mkdir -p "$BASE/current/router"
+                ln -sfn "$SHARED/router/nginx.conf" "$BASE/current/router/nginx.conf"
+                ln -sfn "$SHARED/router/upstream.conf" "$BASE/current/router/upstream.conf"
+
+                # Decide active/next color
+                ACTIVE="blue"
+                if [ -f "$ACTIVE_FILE" ]; then ACTIVE="$(cat "$ACTIVE_FILE")"; fi
+                if [ "$ACTIVE" = "blue" ]; then NEXT="green"; else NEXT="blue"; fi
+                echo "ACTIVE=$ACTIVE NEXT=$NEXT"
+
+                cd "$BASE/current"
+
+                export COMPOSE_PROJECT_NAME="gitlingo-backend"
+                export GITLINGO_IMAGE_TAG="$TS"
+
+                # Build + start NEXT service first (router must not start with a non-existent upstream)
+                docker compose build "api_${NEXT}"
+                docker compose up -d --no-deps --force-recreate "api_${NEXT}"
+
+                # Wait for NEXT health
+                CID="$(docker compose ps -q "api_${NEXT}")"
+                if [ -z "$CID" ]; then
+                echo "ERROR: Could not get container id for api_${NEXT}"
+                docker compose ps || true
+                exit 1
+                fi
+
+                echo "Waiting for api_${NEXT} to be healthy... CID=$CID"
+                for i in $(seq 1 90); do
+                STATUS="$(docker inspect -f "{{.State.Health.Status}}" "$CID" 2>/dev/null || true)"
+                echo "health[$i]=${STATUS}"
+                if [ "$STATUS" = "healthy" ]; then
+                    echo "api_${NEXT} is healthy"
+                    break
+                fi
+                if [ "$STATUS" = "unhealthy" ]; then
+                    echo "api_${NEXT} became unhealthy"
+                    docker compose logs --tail=200 "api_${NEXT}" || true
+                    exit 1
+                fi
+                sleep 2
+                if [ "$i" -eq 90 ]; then
+                    echo "Timed out waiting for api_${NEXT} health"
+                    docker compose logs --tail=200 "api_${NEXT}" || true
+                    exit 1
+                fi
+                done
+
+                # Switch router upstream to NEXT *before* starting/reloading router
+                printf "upstream gitlingo_backend {\n  server api_%s:3001;\n}\n" "$NEXT" > "$SHARED/router/upstream.conf"
+
+                # Ensure router is up and reload (safe for first deploy and later deploys)
+                docker compose up -d --no-deps router
+                docker compose exec -T router nginx -t
+                docker compose exec -T router nginx -s reload || true
+
+                # Mark active and stop old after short drain
+                echo "$NEXT" > "$ACTIVE_FILE"
+                sleep 8
+                docker compose stop "api_${ACTIVE}" || true
+
+                rm -f "$PKG"
+
+                cd "$BASE/releases"
+                ls -1dt */ | tail -n +4 | xargs -r rm -rf || true
+                docker image prune -f >/dev/null 2>&1 || true
+
+                echo "Deployed backend release: $TS (active=$NEXT)"
+            '
