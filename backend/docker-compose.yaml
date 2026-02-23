@@ -1,0 +1,71 @@
+version: "3.9"
+
+name: gitlingo-backend
+
+services:
+  router:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./router/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./router/upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+    depends_on:
+      - api_blue
+      - api_green
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    networks:
+      - gitlingo
+
+  api_blue:
+    image: gitlingo-backend:${GITLINGO_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      - PORT=3001
+    volumes:
+      - /var/db/gitlingo.app:/data:rw
+    restart: unless-stopped
+    expose:
+      - "3001"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    networks:
+      - gitlingo
+
+  api_green:
+    image: gitlingo-backend:${GITLINGO_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      - PORT=3001
+    volumes:
+      - /var/db/gitlingo.app:/data:rw
+    restart: unless-stopped
+    expose:
+      - "3001"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    networks:
+      - gitlingo
+
+networks:
+  gitlingo:
+    driver: bridge
