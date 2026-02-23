@@ -247,8 +247,8 @@ Fetch language statistics for a GitHub user or organization.
   "ok": true,
   "provider": "github",
   "profile": {
-    "username": "torvalds",
-    "name": "Linus Torvalds",
+    "username": "octocat",
+    "name": "The Octocat",
     "type": "user",
     "providerUserId": "1024",
     "avatarUrl": "https://avatars.githubusercontent.com/u/1024?v=4",
@@ -358,7 +358,7 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
   "ok": true,
   "data": [
     {
-      "username": "torvalds",
+      "username": "octocat",
       "provider": "github",
       "hit": 42,
       "avatarUrl": "https://avatars.githubusercontent.com/u/1024?v=4",

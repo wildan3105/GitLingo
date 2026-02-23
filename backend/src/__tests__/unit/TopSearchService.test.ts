@@ -14,10 +14,10 @@ import { TopSearch } from '../../domain/models/TopSearch';
 
 function makeTopSearch(overrides: Partial<TopSearch> = {}): TopSearch {
   return {
-    username: 'torvalds',
+    username: 'octocat',
     provider: 'github',
     hit: 5,
-    avatarUrl: 'https://avatars.example.com/torvalds',
+    avatarUrl: 'https://avatars.example.com/octocat',
     createdAt: 1700000000,
     updatedAt: 1700000100,
     ...overrides,
@@ -47,11 +47,11 @@ describe('TopSearchService', () => {
       const port = new MockTopSearchPort();
       const service = new TopSearchService(port);
 
-      service.record('torvalds', 'github', 'https://avatar.png');
+      service.record('octocat', 'github', 'https://avatar.png');
 
       expect(port.upsertCalls).toHaveLength(1);
       expect(port.upsertCalls[0]).toEqual({
-        username: 'torvalds',
+        username: 'octocat',
         provider: 'github',
         avatarUrl: 'https://avatar.png',
       });
@@ -61,9 +61,9 @@ describe('TopSearchService', () => {
       const port = new MockTopSearchPort();
       const service = new TopSearchService(port);
 
-      service.record('TorVALds', 'github', null);
+      service.record('Octocat', 'github', null);
 
-      expect(port.upsertCalls[0]!.username).toBe('torvalds');
+      expect(port.upsertCalls[0]!.username).toBe('octocat');
     });
 
     it('should normalize username by trimming whitespace', () => {
@@ -88,7 +88,7 @@ describe('TopSearchService', () => {
       const port = new MockTopSearchPort();
       const service = new TopSearchService(port);
 
-      service.record('torvalds', 'github', 'https://specific-avatar.png');
+      service.record('octocat', 'github', 'https://specific-avatar.png');
 
       expect(port.upsertCalls[0]!.avatarUrl).toBe('https://specific-avatar.png');
     });
@@ -97,7 +97,7 @@ describe('TopSearchService', () => {
       const port = new MockTopSearchPort();
       const service = new TopSearchService(port);
 
-      service.record('torvalds', 'github', null);
+      service.record('octocat', 'github', null);
 
       expect(port.upsertCalls[0]!.avatarUrl).toBeNull();
     });
@@ -107,7 +107,7 @@ describe('TopSearchService', () => {
       port.upsertError = new Error('DB locked');
       const service = new TopSearchService(port);
 
-      expect(() => service.record('torvalds', 'github', null)).not.toThrow();
+      expect(() => service.record('octocat', 'github', null)).not.toThrow();
     });
   });
 

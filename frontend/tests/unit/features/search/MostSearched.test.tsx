@@ -95,14 +95,14 @@ describe('MostSearched', () => {
 
     it('chip click calls onSearch', async () => {
       const onSearch = vi.fn()
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('@torvalds'))
+      await waitFor(() => screen.getByText('@octocat'))
 
-      await userEvent.click(screen.getByRole('button', { name: /search for torvalds/i }))
+      await userEvent.click(screen.getByRole('button', { name: /search for octocat/i }))
 
       expect(onSearch).toHaveBeenCalledOnce()
-      expect(onSearch).toHaveBeenCalledWith('torvalds')
+      expect(onSearch).toHaveBeenCalledWith('octocat')
     })
   })
 
@@ -219,7 +219,7 @@ describe('MostSearched', () => {
 
   describe('chip rendering', () => {
     it('shows the section caption when data is present', async () => {
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched()
       await waitFor(() => {
         expect(screen.getByText(/most searched github users on gitlingo/i)).toBeInTheDocument()
@@ -238,7 +238,7 @@ describe('MostSearched', () => {
 
     it('shows avatar image when avatarUrl is provided', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: 'https://avatars.github.com/u/1024' })
+        makeResponse(['octocat'], { avatarUrl: 'https://avatars.github.com/u/1024' })
       )
       renderMostSearched()
       await waitFor(() => {
@@ -250,12 +250,12 @@ describe('MostSearched', () => {
 
     it('shows first-letter initial when avatarUrl is null', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: null })
+        makeResponse(['octocat'], { avatarUrl: null })
       )
       renderMostSearched()
       await waitFor(() => {
-        // Initial "T" displayed in the fallback span
-        expect(screen.getByText('T')).toBeInTheDocument()
+        // Initial "O" displayed in the fallback span
+        expect(screen.getByText('O')).toBeInTheDocument()
       })
     })
 
@@ -272,7 +272,7 @@ describe('MostSearched', () => {
         ok: true,
         data: [
           {
-            username: 'torvalds',
+            username: 'octocat',
             provider: 'github',
             hit: 1,
             avatarUrl: null,
@@ -293,7 +293,7 @@ describe('MostSearched', () => {
         ok: true,
         data: [
           {
-            username: 'torvalds',
+            username: 'octocat',
             provider: 'github',
             hit: 42,
             avatarUrl: null,
@@ -349,14 +349,14 @@ describe('MostSearched', () => {
   describe('interaction', () => {
     it('calls onSearch with the username when a chip is clicked', async () => {
       const onSearch = vi.fn()
-      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['torvalds']))
+      vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(makeResponse(['octocat']))
       renderMostSearched(onSearch)
-      await waitFor(() => screen.getByText('@torvalds'))
+      await waitFor(() => screen.getByText('@octocat'))
 
-      await userEvent.click(screen.getByRole('button', { name: /search for torvalds/i }))
+      await userEvent.click(screen.getByRole('button', { name: /search for octocat/i }))
 
       expect(onSearch).toHaveBeenCalledOnce()
-      expect(onSearch).toHaveBeenCalledWith('torvalds')
+      expect(onSearch).toHaveBeenCalledWith('octocat')
     })
 
     it('calls onSearch when Enter is pressed on a chip', async () => {
@@ -621,11 +621,11 @@ describe('MostSearched', () => {
   describe('avatar responsive sizing', () => {
     it('avatar uses smaller size classes on mobile (w-5 h-5) and larger on desktop (md:w-7 md:h-7)', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: 'https://avatars.github.com/u/1' })
+        makeResponse(['octocat'], { avatarUrl: 'https://avatars.github.com/u/1' })
       )
       // Desktop (default JSDOM) — check classes contain both breakpoint variants
       const { container } = renderMostSearched()
-      await waitFor(() => screen.getByText('@torvalds'))
+      await waitFor(() => screen.getByText('@octocat'))
 
       const img = container.querySelector('img[aria-hidden="true"]') as HTMLImageElement
       expect(img.className).toContain('w-5')
@@ -636,12 +636,12 @@ describe('MostSearched', () => {
 
     it('fallback initial span uses same responsive size classes as avatar img', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: null })
+        makeResponse(['octocat'], { avatarUrl: null })
       )
       renderMostSearched()
-      await waitFor(() => screen.getByText('T'))
+      await waitFor(() => screen.getByText('O'))
 
-      const initial = screen.getByText('T')
+      const initial = screen.getByText('O')
       expect(initial.className).toContain('w-5')
       expect(initial.className).toContain('md:w-7')
     })
@@ -650,10 +650,10 @@ describe('MostSearched', () => {
   describe('avatar border ring', () => {
     it('avatar image has a ring border', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: 'https://avatars.github.com/u/1' })
+        makeResponse(['octocat'], { avatarUrl: 'https://avatars.github.com/u/1' })
       )
       renderMostSearched()
-      await waitFor(() => screen.getByText('@torvalds'))
+      await waitFor(() => screen.getByText('@octocat'))
 
       const img = document.querySelector('img[aria-hidden="true"]') as HTMLImageElement
       expect(img.className).toContain('ring-2')
@@ -661,12 +661,12 @@ describe('MostSearched', () => {
 
     it('fallback initial span has a ring border', async () => {
       vi.mocked(gitlingoApi.getTopSearch).mockResolvedValue(
-        makeResponse(['torvalds'], { avatarUrl: null })
+        makeResponse(['octocat'], { avatarUrl: null })
       )
       renderMostSearched()
-      await waitFor(() => screen.getByText('T'))
+      await waitFor(() => screen.getByText('O'))
 
-      const initial = screen.getByText('T')
+      const initial = screen.getByText('O')
       expect(initial.className).toContain('ring-2')
     })
   })

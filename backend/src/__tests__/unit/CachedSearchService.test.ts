@@ -21,7 +21,7 @@ function makeSuccessResult(generatedAt = new Date().toISOString()): SearchResult
     ok: true,
     provider: 'github',
     profile: {
-      username: 'torvalds',
+      username: 'octocat',
       type: 'user',
       providerUserId: '1024',
       isVerified: true,
@@ -47,7 +47,7 @@ function makeCacheEntry(overrides: Partial<CacheEntry> = {}): CacheEntry {
   return {
     provider: 'github',
     providerBaseUrl: PROVIDER_BASE_URL,
-    username: 'torvalds',
+    username: 'octocat',
     schemaVersion: 'v1',
     optionsHash: 'default',
     payloadJson: JSON.stringify(payload),
@@ -88,7 +88,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner();
       const svc = makeService(inner, cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(inner.searchLanguageStatistics).not.toHaveBeenCalled();
       expect(cache.upsert).not.toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('CachedSearchService', () => {
       const entry = makeCacheEntry();
       const svc = makeService(makeMockInner(), makeMockCache(entry));
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -111,7 +111,7 @@ describe('CachedSearchService', () => {
       const entry = makeCacheEntry();
       const svc = makeService(makeMockInner(), makeMockCache(entry));
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -125,7 +125,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner();
       const svc = makeService(inner, cache);
 
-      await svc.searchLanguageStatistics('torvalds');
+      await svc.searchLanguageStatistics('octocat');
 
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(1);
       expect(cache.upsert).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('CachedSearchService', () => {
       cache.upsert.mockReturnValue(storedEntry);
       const svc = makeService(makeMockInner(), cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -154,7 +154,7 @@ describe('CachedSearchService', () => {
       cache.upsert.mockReturnValue(storedEntry);
       const svc = makeService(makeMockInner(makeSuccessResult(fetchTime)), cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -172,7 +172,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner();
       const svc = makeService(inner, cache);
 
-      await svc.searchLanguageStatistics('torvalds');
+      await svc.searchLanguageStatistics('octocat');
 
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(1);
       expect(cache.upsert).toHaveBeenCalledTimes(1);
@@ -186,7 +186,7 @@ describe('CachedSearchService', () => {
       cache.upsert.mockReturnValue(freshEntry);
       const svc = makeService(makeMockInner(), cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -205,7 +205,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner(makeErrorResult());
       const svc = makeService(inner, cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       // Should return the expired cached result, not the error
       expect(result.ok).toBe(true);
@@ -218,7 +218,7 @@ describe('CachedSearchService', () => {
       const cache = makeMockCache(expiredEntry);
       const svc = makeService(makeMockInner(makeErrorResult()), cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(true);
       if (!result.ok) return;
@@ -236,7 +236,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner(errorResult);
       const svc = makeService(inner, cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(false);
       expect(cache.upsert).not.toHaveBeenCalled();
@@ -246,7 +246,7 @@ describe('CachedSearchService', () => {
       const cache = makeMockCache(null);
       const svc = makeService(makeMockInner(makeErrorResult()), cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       expect(result.ok).toBe(false);
       // SearchError metadata has no cachedAt/cachedUntil (only generatedAt)
@@ -274,7 +274,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner();
       const svc = makeService(inner, cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       // Corrupt entry bypassed — inner was called for a fresh result
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(1);
@@ -289,7 +289,7 @@ describe('CachedSearchService', () => {
       const inner = makeMockInner(errorResult);
       const svc = makeService(inner, cache);
 
-      const result = await svc.searchLanguageStatistics('torvalds');
+      const result = await svc.searchLanguageStatistics('octocat');
 
       // Corrupt fallback discarded — error returned as-is
       expect(result.ok).toBe(false);
@@ -305,8 +305,8 @@ describe('CachedSearchService', () => {
 
       // Fire two concurrent requests before either resolves
       const [r1, r2] = await Promise.all([
-        svc.searchLanguageStatistics('torvalds'),
-        svc.searchLanguageStatistics('torvalds'),
+        svc.searchLanguageStatistics('octocat'),
+        svc.searchLanguageStatistics('octocat'),
       ]);
 
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(1);
@@ -320,8 +320,8 @@ describe('CachedSearchService', () => {
       // Second call sees null too (cache mock always returns null)
       const svc = makeService(inner, cache);
 
-      await svc.searchLanguageStatistics('torvalds'); // first completes
-      await svc.searchLanguageStatistics('torvalds'); // second is a new request
+      await svc.searchLanguageStatistics('octocat'); // first completes
+      await svc.searchLanguageStatistics('octocat'); // second is a new request
 
       // inner called twice — single-flight map is cleared after first resolves
       expect(inner.searchLanguageStatistics).toHaveBeenCalledTimes(2);
@@ -371,7 +371,7 @@ describe('CachedSearchService — options cache isolation', () => {
     inner.getProviderName.mockReturnValue('gitlab');
     const svc = makeService(inner, cache);
 
-    await svc.searchLanguageStatistics('torvalds');
+    await svc.searchLanguageStatistics('octocat');
 
     const key: CacheKey = cache.get.mock.calls[0]![0];
     expect(key.provider).toBe('gitlab');
@@ -382,7 +382,7 @@ describe('CachedSearchService — options cache isolation', () => {
     const inner = makeMockInner();
     const svc = makeService(inner, cache);
 
-    await svc.searchLanguageStatistics('torvalds');
+    await svc.searchLanguageStatistics('octocat');
 
     const key: CacheKey = cache.get.mock.calls[0]![0];
     expect(key.optionsHash).toBe('default');
@@ -393,7 +393,7 @@ describe('CachedSearchService — options cache isolation', () => {
     const inner = makeMockInner();
     const svc = makeService(inner, cache);
 
-    await svc.searchLanguageStatistics('torvalds', {} as SearchOptions);
+    await svc.searchLanguageStatistics('octocat', {} as SearchOptions);
 
     const key: CacheKey = cache.get.mock.calls[0]![0];
     expect(key.optionsHash).toBe('default');
@@ -409,8 +409,8 @@ describe('CachedSearchService — options cache isolation', () => {
     const opts1 = { includeForks: true } as SearchOptions & Record<string, unknown>;
     const opts2 = { includeForks: false } as SearchOptions & Record<string, unknown>;
 
-    await svc1.searchLanguageStatistics('torvalds', opts1);
-    await svc2.searchLanguageStatistics('torvalds', opts2);
+    await svc1.searchLanguageStatistics('octocat', opts1);
+    await svc2.searchLanguageStatistics('octocat', opts2);
 
     const key1: CacheKey = cache1.get.mock.calls[0]![0];
     const key2: CacheKey = cache2.get.mock.calls[0]![0];
@@ -423,8 +423,8 @@ describe('CachedSearchService — options cache isolation', () => {
     const svc = makeService(inner, cache);
 
     const opts = { includeForks: true } as SearchOptions & Record<string, unknown>;
-    await svc.searchLanguageStatistics('torvalds', opts);
+    await svc.searchLanguageStatistics('octocat', opts);
 
-    expect(inner.searchLanguageStatistics).toHaveBeenCalledWith('torvalds', opts);
+    expect(inner.searchLanguageStatistics).toHaveBeenCalledWith('octocat', opts);
   });
 });

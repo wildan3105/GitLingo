@@ -918,10 +918,10 @@ describe('GitHubGraphQLAdapter', () => {
 
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
-          login: 'torvalds',
-          name: 'Linus Torvalds',
+          login: 'octocat',
+          name: 'The Octocat',
           id: '1024',
-          email: 'torvalds@linux.com',
+          email: 'octocat@github.com.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: { name: 'C' }, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },
@@ -931,10 +931,10 @@ describe('GitHubGraphQLAdapter', () => {
         organization: null,
       });
 
-      const result = await adapter.fetchRepositories('torvalds');
+      const result = await adapter.fetchRepositories('octocat');
 
-      expect(result.profile.name).toBe('Linus Torvalds');
-      expect(result.profile.username).toBe('torvalds');
+      expect(result.profile.name).toBe('The Octocat');
+      expect(result.profile.username).toBe('octocat');
     });
 
     it('should not include name field for user when name is null', async () => {

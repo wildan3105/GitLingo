@@ -122,15 +122,15 @@ describe('TopSearch Integration Tests', () => {
 
     it('should return correct entries after manual upsert into DB', async () => {
       const adapter = new SQLiteTopSearchAdapter(db);
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: 'https://av.png' });
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: 'https://av.png' });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
       const res = await request(app).get('/api/v1/topsearch');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toHaveLength(1);
       expect(res.body.data[0]).toMatchObject({
-        username: 'torvalds',
+        username: 'octocat',
         provider: 'github',
         hit: 2,
         avatarUrl: 'https://av.png',
@@ -169,8 +169,8 @@ describe('TopSearch Integration Tests', () => {
 
     it('should filter results by provider query param', async () => {
       const adapter = new SQLiteTopSearchAdapter(db);
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
-      adapter.upsert({ provider: 'gitlab', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
+      adapter.upsert({ provider: 'gitlab', username: 'octocat', avatarUrl: null });
 
       const res = await request(app).get('/api/v1/topsearch?provider=github');
 
@@ -212,7 +212,7 @@ describe('TopSearch Integration Tests', () => {
 
     it('should return 200 with empty result when DB has no records for the requested provider', async () => {
       const adapter = new SQLiteTopSearchAdapter(db);
-      adapter.upsert({ provider: 'github', username: 'torvalds', avatarUrl: null });
+      adapter.upsert({ provider: 'github', username: 'octocat', avatarUrl: null });
 
       const res = await request(app).get('/api/v1/topsearch?provider=gitlab');
 
@@ -229,34 +229,34 @@ describe('TopSearch Integration Tests', () => {
 
   describe('Recording via GET /api/v1/search', () => {
     it('should appear in topsearch with hit=1 after one successful search', async () => {
-      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('torvalds'));
+      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('octocat'));
 
-      await request(app).get('/api/v1/search?username=torvalds');
+      await request(app).get('/api/v1/search?username=octocat');
 
       const res = await request(app).get('/api/v1/topsearch');
       expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0]).toMatchObject({ username: 'torvalds', hit: 1 });
+      expect(res.body.data[0]).toMatchObject({ username: 'octocat', hit: 1 });
     });
 
     it('should increment hit to 2 after two successful searches for the same username', async () => {
       mockGraphqlFn
-        .mockResolvedValueOnce(makeUserResponse('torvalds'))
-        .mockResolvedValueOnce(makeUserResponse('torvalds'));
+        .mockResolvedValueOnce(makeUserResponse('octocat'))
+        .mockResolvedValueOnce(makeUserResponse('octocat'));
 
-      await request(app).get('/api/v1/search?username=torvalds');
-      await request(app).get('/api/v1/search?username=torvalds');
+      await request(app).get('/api/v1/search?username=octocat');
+      await request(app).get('/api/v1/search?username=octocat');
 
       const res = await request(app).get('/api/v1/topsearch');
-      expect(res.body.data[0]).toMatchObject({ username: 'torvalds', hit: 2 });
+      expect(res.body.data[0]).toMatchObject({ username: 'octocat', hit: 2 });
     });
 
     it('should normalize username to lowercase in topsearch', async () => {
-      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('Torvalds'));
+      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('Octocat'));
 
-      await request(app).get('/api/v1/search?username=Torvalds');
+      await request(app).get('/api/v1/search?username=Octocat');
 
       const res = await request(app).get('/api/v1/topsearch');
-      expect(res.body.data[0].username).toBe('torvalds');
+      expect(res.body.data[0].username).toBe('octocat');
     });
 
     it('should NOT create a topsearch record when search returns user_not_found', async () => {
@@ -275,9 +275,9 @@ describe('TopSearch Integration Tests', () => {
 
     it('should store avatarUrl from the search result in topsearch', async () => {
       const avatarUrl = 'https://avatars.githubusercontent.com/u/99999?v=4';
-      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('torvalds', { avatarUrl }));
+      mockGraphqlFn.mockResolvedValueOnce(makeUserResponse('octocat', { avatarUrl }));
 
-      await request(app).get('/api/v1/search?username=torvalds');
+      await request(app).get('/api/v1/search?username=octocat');
 
       const res = await request(app).get('/api/v1/topsearch');
       expect(res.body.data[0].avatarUrl).toBe(avatarUrl);

@@ -25,10 +25,10 @@ describe('TopSearchController', () => {
     ok: true as const,
     data: [
       {
-        username: 'torvalds',
+        username: 'octocat',
         provider: 'github',
         hit: 42,
-        avatarUrl: 'https://avatars.example.com/torvalds',
+        avatarUrl: 'https://avatars.example.com/octocat',
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-06-01T12:00:00.000Z',
       },

@@ -788,10 +788,10 @@ describe('API Integration Tests', () => {
     it('should return name field for user with valid name', async () => {
       mockGraphqlFn.mockResolvedValueOnce({
         user: {
-          login: 'torvalds',
-          name: 'Linus Torvalds',
+          login: 'octocat',
+          name: 'The Octocat',
           id: '1024',
-          email: 'torvalds@linux.com',
+          email: 'octocat@github.com.com',
           repositories: {
             nodes: [{ name: 'repo1', primaryLanguage: { name: 'C' }, isFork: false }],
             pageInfo: { hasNextPage: false, endCursor: null },
@@ -801,12 +801,12 @@ describe('API Integration Tests', () => {
         organization: null,
       });
 
-      const response = await request(app).get('/api/v1/search?username=torvalds');
+      const response = await request(app).get('/api/v1/search?username=octocat');
 
       expect(response.status).toBe(200);
       expect(response.body.profile).toMatchObject({
-        username: 'torvalds',
-        name: 'Linus Torvalds',
+        username: 'octocat',
+        name: 'The Octocat',
         type: 'user',
       });
     });

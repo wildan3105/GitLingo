@@ -713,10 +713,10 @@ describe('useSearch', () => {
       })
 
       act(() => {
-        result.current.handleSearchFor('torvalds')
+        result.current.handleSearchFor('octocat')
       })
 
-      expect(result.current.username).toBe('torvalds')
+      expect(result.current.username).toBe('octocat')
     })
 
     it('clears any existing validation error', () => {
@@ -732,7 +732,7 @@ describe('useSearch', () => {
 
       // handleSearchFor should clear it
       act(() => {
-        result.current.handleSearchFor('torvalds')
+        result.current.handleSearchFor('octocat')
       })
       expect(result.current.validationError).toBeNull()
     })
@@ -771,7 +771,7 @@ describe('useSearch', () => {
         ok: true,
         provider: 'github',
         profile: {
-          username: 'torvalds',
+          username: 'octocat',
           name: null,
           avatarUrl: 'https://example.com/avatar.png',
           type: 'user',
@@ -786,7 +786,7 @@ describe('useSearch', () => {
       })
 
       act(() => {
-        result.current.handleSearchFor('torvalds')
+        result.current.handleSearchFor('octocat')
       })
 
       await waitFor(() => {
@@ -901,7 +901,7 @@ describe('useSearch', () => {
       ok: true,
       provider: 'github',
       profile: {
-        username: 'torvalds',
+        username: 'octocat',
         name: null,
         type: 'user',
         providerUserId: '1024',
@@ -927,7 +927,7 @@ describe('useSearch', () => {
       const { result } = renderHook(() => useSearch(), { wrapper })
 
       act(() => {
-        result.current.handleSearchFor('torvalds')
+        result.current.handleSearchFor('octocat')
       })
 
       await waitFor(() => {
@@ -963,7 +963,7 @@ describe('useSearch', () => {
       const { result } = renderHook(() => useSearch(), { wrapper })
 
       act(() => {
-        result.current.setUsername('torvalds')
+        result.current.setUsername('octocat')
       })
       act(() => {
         result.current.handleSearch()
