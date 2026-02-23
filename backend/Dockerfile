@@ -1,60 +1,54 @@
 # GitLingo Backend - Multi-stage Dockerfile
-# Optimized for production with minimal image size
 
 # Stage 1: Build
 FROM node:24-alpine AS builder
-
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies (including dev dependencies for building)
 RUN npm ci
 
-# Copy source code
 COPY . .
-
-# Build TypeScript
 RUN npm run build
 
-# Stage 2: Production
-FROM node:24-alpine AS production
+# Stage 2: Distribution
+FROM node:24-alpine AS distribution
 
-# Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 WORKDIR /app
 
-# Copy package files
+ENV NODE_ENV=production
+ENV PORT=3001
+
 COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Install only production dependencies
-RUN npm ci --omit=dev && \
-    npm cache clean --force
-
-# Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
-
-# Switch to non-root user
 USER nodejs
 
-# Expose port
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Health check: must be HTTP 200 AND JSON body must match:
+# { ok: true, data: { services: { database: "ok", github: "ok" } } }
+HEALTHCHECK --interval=15s --timeout=4s --start-period=10s --retries=10 \
+  CMD node -e "\
+    const u='http://127.0.0.1:3001/api/v1/health';\
+    const ac=new AbortController();\
+    const t=setTimeout(()=>ac.abort(),2500);\
+    fetch(u,{signal:ac.signal}).then(async r=>{\
+      if(r.status!==200) process.exit(1);\
+      let j; try{ j=await r.json(); }catch{ process.exit(1); }\
+      const ok = j && j.ok===true && j.data && j.data.services;\
+      const s = ok ? j.data.services : {};\
+      const good = ok && s.database==='ok' && s.github==='ok';\
+      process.exit(good?0:1);\
+    }).catch(()=>process.exit(1)).finally(()=>clearTimeout(t));\
+  "
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["node", "dist/index.js"]
