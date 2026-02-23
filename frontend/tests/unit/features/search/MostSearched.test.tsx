@@ -254,8 +254,8 @@ describe('MostSearched', () => {
       )
       renderMostSearched()
       await waitFor(() => {
-        // Initial "T" displayed in the fallback span
-        expect(screen.getByText('T')).toBeInTheDocument()
+        // Initial "O" displayed in the fallback span
+        expect(screen.getByText('O')).toBeInTheDocument()
       })
     })
 
@@ -639,9 +639,9 @@ describe('MostSearched', () => {
         makeResponse(['octocat'], { avatarUrl: null })
       )
       renderMostSearched()
-      await waitFor(() => screen.getByText('T'))
+      await waitFor(() => screen.getByText('O'))
 
-      const initial = screen.getByText('T')
+      const initial = screen.getByText('O')
       expect(initial.className).toContain('w-5')
       expect(initial.className).toContain('md:w-7')
     })
@@ -664,9 +664,9 @@ describe('MostSearched', () => {
         makeResponse(['octocat'], { avatarUrl: null })
       )
       renderMostSearched()
-      await waitFor(() => screen.getByText('T'))
+      await waitFor(() => screen.getByText('O'))
 
-      const initial = screen.getByText('T')
+      const initial = screen.getByText('O')
       expect(initial.className).toContain('ring-2')
     })
   })
