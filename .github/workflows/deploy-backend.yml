@@ -45,112 +45,151 @@ jobs:
           key: ${{ secrets.VULTR_SSH_KEY }}
           port: ${{ secrets.VULTR_SSH_PORT }}
           script: |
-            set -euo pipefail
+            bash -lc '
+                set -Eeuo pipefail
+                set -x
 
-            TS="$(date +%Y%m%d-%H%M%S)"
-            BASE="/opt/gitlingo/backend"
-            REL="$BASE/releases/$TS"
-            PKG="/tmp/gitlingo-deploy/backend-src.tgz"
-            SHARED="$BASE/shared"
-            ACTIVE_FILE="$SHARED/active_color"
+                # --- error handler: show exact failing line/command + some context
+                on_err() {
+                exit_code=$?
+                echo "==================== DEPLOY FAILED ===================="
+                echo "Exit code: ${exit_code}"
+                echo "Failed at line: ${BASH_LINENO[0]}"
+                echo "Command: ${BASH_COMMAND}"
+                echo "User: $(whoami)"
+                echo "PWD: $(pwd)"
+                echo "---- disk ----"
+                df -h || true
+                echo "---- perms (key paths) ----"
+                ls -ld /opt/gitlingo /opt/gitlingo/backend /opt/gitlingo/backend/shared 2>/dev/null || true
+                ls -ld /tmp/gitlingo-deploy 2>/dev/null || true
+                ls -ld /var/db/gitlingo.app 2>/dev/null || true
+                echo "---- docker ----"
+                docker version || true
+                docker compose version || true
+                docker ps -a || true
+                echo "---- compose state (if any) ----"
+                if [ -n "${BASE:-}" ] && [ -d "${BASE:-}/current" ]; then
+                    cd "$BASE/current" || true
+                    docker compose ps || true
+                    docker compose logs --tail=200 router || true
+                    docker compose logs --tail=200 api_blue || true
+                    docker compose logs --tail=200 api_green || true
+                fi
+                echo "======================================================="
+                exit "${exit_code}"
+                }
+                trap on_err ERR
 
-            mkdir -p "$BASE/releases" "$SHARED/router" "$REL"
-            test -f "$PKG"
+                TS="$(date +%Y%m%d-%H%M%S)"
+                BASE="/opt/gitlingo/backend"
+                REL="$BASE/releases/$TS"
+                PKG="/tmp/gitlingo-deploy/backend-src.tgz"
+                SHARED="$BASE/shared"
+                ACTIVE_FILE="$SHARED/active_color"
 
-            # Unpack release
-            tar -xzf "$PKG" -C "$REL"
-            test -f "$REL/docker-compose.yml"
-            test -f "$REL/Dockerfile"
+                echo "TS=$TS BASE=$BASE REL=$REL PKG=$PKG SHARED=$SHARED"
 
-            # Atomic switch current -> new release
-            ln -sfn "$REL" "$BASE/current"
+                # Preflight: show what we have
+                ls -la /tmp/gitlingo-deploy || true
+                test -f "$PKG"
 
-            # Ensure shared .env exists (kept outside releases)
-            if [ ! -f "$SHARED/.env" ]; then
-              echo "ERROR: Missing $SHARED/.env"
-              exit 1
-            fi
+                mkdir -p "$BASE/releases" "$SHARED/router" "$REL"
 
-            # Link shared env + router configs into the current release
-            ln -sfn "$SHARED/.env" "$BASE/current/.env"
-            ln -sfn "$SHARED/router/nginx.conf" "$BASE/current/router/nginx.conf"
-            ln -sfn "$SHARED/router/upstream.conf" "$BASE/current/router/upstream.conf"
+                # Unpack release
+                tar -xzf "$PKG" -C "$REL"
+                test -f "$REL/docker-compose.yml"
+                test -f "$REL/Dockerfile"
 
-            # Decide active/next color
-            ACTIVE="blue"
-            if [ -f "$ACTIVE_FILE" ]; then ACTIVE="$(cat "$ACTIVE_FILE")"; fi
-            if [ "$ACTIVE" = "blue" ]; then NEXT="green"; else NEXT="blue"; fi
+                # Atomic switch current -> new release
+                ln -sfn "$REL" "$BASE/current"
 
-            echo "ACTIVE=$ACTIVE NEXT=$NEXT"
-
-            cd "$BASE/current"
-
-            # Ensure router configs exist (first deploy)
-            if [ ! -f "$SHARED/router/nginx.conf" ]; then
-              echo "ERROR: Missing $SHARED/router/nginx.conf"
-              exit 1
-            fi
-            if [ ! -f "$SHARED/router/upstream.conf" ]; then
-              echo "Initializing upstream.conf to api_${ACTIVE}"
-              printf "upstream gitlingo_backend {\n  server api_%s:3001;\n}\n" "$ACTIVE" > "$SHARED/router/upstream.conf"
-            fi
-
-            # Build/start NEXT with a new image tag
-            export COMPOSE_PROJECT_NAME="gitlingo-backend"
-            export GITLINGO_IMAGE_TAG="$TS"
-
-            # Always ensure router is up (it will just reload later)
-            docker compose up -d router
-
-            # Build + start NEXT service only (keep ACTIVE running)
-            docker compose build "api_${NEXT}"
-            docker compose up -d --no-deps --force-recreate "api_${NEXT}"
-
-            # Wait for NEXT to become healthy
-            CID="$(docker compose ps -q "api_${NEXT}")"
-            if [ -z "$CID" ]; then
-              echo "ERROR: Could not get container id for api_${NEXT}"
-              exit 1
-            fi
-
-            echo "Waiting for api_${NEXT} to be healthy..."
-            for i in $(seq 1 90); do
-              STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || true)"
-              if [ "$STATUS" = "healthy" ]; then
-                echo "api_${NEXT} is healthy"
-                break
-              fi
-              if [ "$STATUS" = "unhealthy" ]; then
-                echo "api_${NEXT} became unhealthy"
-                docker compose logs --tail=200 "api_${NEXT}" || true
+                # Ensure shared files exist
+                if [ ! -f "$SHARED/.env" ]; then
+                echo "ERROR: Missing $SHARED/.env"
                 exit 1
-              fi
-              sleep 2
-              if [ "$i" -eq 90 ]; then
-                echo "Timed out waiting for api_${NEXT} health"
-                docker compose logs --tail=200 "api_${NEXT}" || true
+                fi
+                if [ ! -f "$SHARED/router/nginx.conf" ]; then
+                echo "ERROR: Missing $SHARED/router/nginx.conf"
                 exit 1
-              fi
-            done
+                fi
 
-            # Switch router upstream to NEXT and reload router (near-zero downtime)
-            printf "upstream gitlingo_backend {\n  server api_%s:3001;\n}\n" "$NEXT" > "$SHARED/router/upstream.conf"
-            docker compose exec -T router nginx -s reload
+                # Ensure upstream exists (initialize on first deploy)
+                if [ ! -f "$SHARED/router/upstream.conf" ]; then
+                echo "Initializing upstream.conf -> api_blue"
+                printf "upstream gitlingo_backend {\n  server api_blue:3001;\n}\n" > "$SHARED/router/upstream.conf"
+                fi
 
-            echo "$NEXT" > "$ACTIVE_FILE"
+                # Link shared env + router configs into the current release
+                ln -sfn "$SHARED/.env" "$BASE/current/.env"
+                mkdir -p "$BASE/current/router"
+                ln -sfn "$SHARED/router/nginx.conf" "$BASE/current/router/nginx.conf"
+                ln -sfn "$SHARED/router/upstream.conf" "$BASE/current/router/upstream.conf"
 
-            # Give existing connections a brief chance to drain, then stop old ACTIVE
-            sleep 8
-            docker compose stop "api_${ACTIVE}" || true
+                # Decide active/next color
+                ACTIVE="blue"
+                if [ -f "$ACTIVE_FILE" ]; then ACTIVE="$(cat "$ACTIVE_FILE")"; fi
+                if [ "$ACTIVE" = "blue" ]; then NEXT="green"; else NEXT="blue"; fi
+                echo "ACTIVE=$ACTIVE NEXT=$NEXT"
 
-            # Cleanup tarball
-            rm -f "$PKG"
+                cd "$BASE/current"
 
-            # Keep last 3 releases
-            cd "$BASE/releases"
-            ls -1dt */ | tail -n +4 | xargs -r rm -rf
+                export COMPOSE_PROJECT_NAME="gitlingo-backend"
+                export GITLINGO_IMAGE_TAG="$TS"
 
-            # Prune dangling images
-            docker image prune -f >/dev/null 2>&1 || true
+                # Make sure router is up
+                docker compose up -d router
 
-            echo "Deployed backend release: $TS (active=$NEXT)"
+                # Build + start NEXT service
+                docker compose build "api_${NEXT}"
+                docker compose up -d --no-deps --force-recreate "api_${NEXT}"
+
+                # Wait for NEXT health
+                CID="$(docker compose ps -q "api_${NEXT}")"
+                if [ -z "$CID" ]; then
+                echo "ERROR: Could not get container id for api_${NEXT}"
+                docker compose ps || true
+                exit 1
+                fi
+
+                echo "Waiting for api_${NEXT} to be healthy... CID=$CID"
+                for i in $(seq 1 90); do
+                STATUS="$(docker inspect -f "{{.State.Health.Status}}" "$CID" 2>/dev/null || true)"
+                echo "health[$i]=${STATUS}"
+                if [ "$STATUS" = "healthy" ]; then
+                    echo "api_${NEXT} is healthy"
+                    break
+                fi
+                if [ "$STATUS" = "unhealthy" ]; then
+                    echo "api_${NEXT} became unhealthy"
+                    docker compose logs --tail=200 "api_${NEXT}" || true
+                    exit 1
+                fi
+                sleep 2
+                if [ "$i" -eq 90 ]; then
+                    echo "Timed out waiting for api_${NEXT} health"
+                    docker compose logs --tail=200 "api_${NEXT}" || true
+                    exit 1
+                fi
+                done
+
+                # Switch router to NEXT and reload
+                printf "upstream gitlingo_backend {\n  server api_%s:3001;\n}\n" "$NEXT" > "$SHARED/router/upstream.conf"
+                docker compose exec -T router nginx -t
+                docker compose exec -T router nginx -s reload
+
+                echo "$NEXT" > "$ACTIVE_FILE"
+
+                # Drain then stop old
+                sleep 8
+                docker compose stop "api_${ACTIVE}" || true
+
+                # Cleanup
+                rm -f "$PKG"
+
+                cd "$BASE/releases"
+                ls -1dt */ | tail -n +4 | xargs -r rm -rf || true
+                docker image prune -f >/dev/null 2>&1 || true
+
+                echo "Deployed backend release: $TS (active=$NEXT)"
+            '
