@@ -27,4 +27,8 @@ export interface TopSearchResult {
     /** Limit used in the query */
     limit: number;
   };
+  metadata?: {
+    /** ISO 8601 timestamp of when this response was generated */
+    generatedAt?: string;
+  };
 }
