@@ -741,13 +741,21 @@ describe('useSearch', () => {
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
       // First search — success, URL becomes /github/octocat
-      act(() => { result.current.setUsername('octocat') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(window.location.pathname).toBe('/github/octocat'))
 
       // Second search — error, URL must reset to /
-      act(() => { result.current.setUsername('notexist') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('notexist')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(window.location.pathname).toBe('/'))
     })
 
@@ -763,8 +771,12 @@ describe('useSearch', () => {
 
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
-      act(() => { result.current.setUsername('notexist') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('notexist')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
 
       await waitFor(() => expect(result.current.error).not.toBeNull())
       expect(window.location.pathname).toBe('/')
@@ -1060,8 +1072,12 @@ describe('useSearch', () => {
 
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
-      act(() => { result.current.setUsername('octocat') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
 
       await waitFor(() => {
         expect(document.title).toBe('GitLingo • github • octocat')
@@ -1097,13 +1113,21 @@ describe('useSearch', () => {
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
       // First search — success
-      act(() => { result.current.setUsername('octocat') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
 
       // Second search — error
-      act(() => { result.current.setUsername('notexist') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('notexist')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(document.title).toBe(DEFAULT_TITLE))
     })
 
@@ -1126,11 +1150,17 @@ describe('useSearch', () => {
 
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
-      act(() => { result.current.setUsername('octocat') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
 
-      act(() => { result.current.handleReset() })
+      act(() => {
+        result.current.handleReset()
+      })
       expect(document.title).toBe(DEFAULT_TITLE)
     })
 
@@ -1153,12 +1183,18 @@ describe('useSearch', () => {
 
       const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
 
-      act(() => { result.current.setUsername('octocat') })
-      act(() => { result.current.handleSearch() })
+      act(() => {
+        result.current.setUsername('octocat')
+      })
+      act(() => {
+        result.current.handleSearch()
+      })
       await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
 
       window.history.pushState({}, '', '/github/octocat')
-      act(() => { result.current.setUsername('') })
+      act(() => {
+        result.current.setUsername('')
+      })
       expect(document.title).toBe(DEFAULT_TITLE)
     })
   })
