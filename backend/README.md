@@ -14,7 +14,7 @@ A TypeScript backend API that:
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js >=24.3.0
 - GitHub Personal Access Token (optional but recommended)
 
 ### Installation
@@ -72,6 +72,9 @@ DB_PATH=./data/gitlingo.db
 # Result Caching (OPTIONAL)
 ENABLE_CACHE=false
 CACHE_TTL_HOURS=12
+
+# Concurrency limit for simultaneous in-flight GitHub requests (OPTIONAL)
+CONCURRENCY_LIMIT=20
 ```
 
 ### GitHub Token
@@ -138,7 +141,7 @@ Set `ENABLE_CACHE=true` in your `.env`:
 
 ```env
 ENABLE_CACHE=true
-CACHE_TTL_HOURS=12   # optional — default is 12 hours
+CACHE_TTL_HOURS=12   # optional — default is 12 hours, maximum is 24 hours
 ```
 
 When enabled, results are stored in the local SQLite database. Subsequent requests for the same username skip the GitHub API call entirely and are served from the cache until the TTL expires.
@@ -308,7 +311,7 @@ Fetch language statistics for a GitHub user or organization.
 | `value` | `number` | Number of repositories |
 | `color` | `string` | Hex color for charts (e.g. `"#f1e05a"`) |
 
-> **Ordering:** sorted by `value` descending. The `__forks__` entry is always last.
+> **Ordering:** sorted by `value` descending. The `__forks__` entry is sorted like any other item and may appear anywhere in the list.
 
 **Metadata fields:**
 
@@ -330,7 +333,7 @@ Fetch language statistics for a GitHub user or organization.
     "details": {},
     "retryAfterSeconds": 60
   },
-  "meta": {
+  "metadata": {
     "generatedAt": "2026-02-19T01:16:28.050Z"
   }
 }
@@ -424,7 +427,7 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
     "message": "GitHub API rate limit exceeded. Please wait before retrying.",
     "retryAfterSeconds": 187
   },
-  "meta": { "generatedAt": "2026-02-19T01:16:28.050Z" }
+  "metadata": { "generatedAt": "2026-02-19T01:16:28.050Z" }
 }
 ```
 
@@ -442,7 +445,7 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
       ]
     }
   },
-  "meta": { "generatedAt": "2026-02-19T01:16:28.050Z" }
+  "metadata": { "generatedAt": "2026-02-19T01:16:28.050Z" }
 }
 ```
 
