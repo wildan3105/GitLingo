@@ -10,6 +10,8 @@ import { validateUsername } from '../utils/validation'
 import type { ApiResponse, SuccessResponse, ErrorResponse } from '../../../contracts/api'
 import { isSuccessResponse } from '../../../contracts/api'
 
+const DEFAULT_TITLE = 'GitLingo - Visualize GitHub Language Statistics'
+
 export type UseSearchReturn = {
   /** Current username input value */
   username: string
@@ -110,6 +112,7 @@ export function useSearch(): UseSearchReturn {
     // linger at /github/<username> while the empty-state UI is showing.
     if (!value && window.location.pathname !== '/') {
       window.history.pushState({}, '', '/')
+      document.title = DEFAULT_TITLE
     }
   }
 
@@ -167,8 +170,9 @@ export function useSearch(): UseSearchReturn {
     setIncludeUnknownLanguage(false)
     setValidationError(null)
     mutation.reset()
-    // Reset URL to root
+    // Reset URL and title to root/default
     window.history.pushState({}, '', '/')
+    document.title = DEFAULT_TITLE
   }
 
   // Split API response into success/error for easier consumption
@@ -183,14 +187,19 @@ export function useSearch(): UseSearchReturn {
     }
   }
 
-  // Update URL when search succeeds
+  // Update URL and document title when search result changes
   useEffect(() => {
     if (data && username) {
-      const newUrl = `/github/${username}`
-      // Update URL without reloading the page
-      window.history.pushState({}, '', newUrl)
+      window.history.pushState({}, '', `/github/${username}`)
+      document.title = `GitLingo • github • ${username}`
+    } else if (error) {
+      // Reset URL when search fails so it doesn't linger at a previous result
+      if (window.location.pathname !== '/') {
+        window.history.pushState({}, '', '/')
+      }
+      document.title = DEFAULT_TITLE
     }
-  }, [data, username])
+  }, [data, error, username])
 
   // Read from URL on initial load (deep linking support)
   useEffect(() => {
