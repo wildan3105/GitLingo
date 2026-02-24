@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act } from '../../../src/test/test-utils'
+import { render, screen, act } from '../../../src/test/testUtils'
 import { ErrorState } from '../../../src/shared/components/ErrorState'
 import { formatDuration } from '../../../src/shared/utils/formatDuration'
 

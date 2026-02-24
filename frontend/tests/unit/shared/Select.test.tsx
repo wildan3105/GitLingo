@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '../../../src/test/test-utils'
+import { render, screen } from '../../../src/test/testUtils'
 import { Select } from '../../../src/shared/components/Select'
 import userEvent from '@testing-library/user-event'
 
