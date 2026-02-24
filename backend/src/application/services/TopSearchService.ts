@@ -56,6 +56,7 @@ export class TopSearchService {
           offset: params.offset,
           limit: params.limit,
         },
+        metadata: { generatedAt: new Date().toISOString() },
       };
     } catch (error) {
       logger.error({ error, params }, 'Failed to fetch top searches');
@@ -79,6 +80,7 @@ export class TopSearchService {
       ok: true,
       data: [],
       pagination: { total: 0, count: 0, offset: params.offset, limit: params.limit },
+      metadata: { generatedAt: new Date().toISOString() },
     };
   }
 }

@@ -117,6 +117,7 @@ describe('TopSearch Integration Tests', () => {
           offset: 0,
           limit: 10,
         },
+        metadata: { generatedAt: expect.any(String) },
       });
     });
 

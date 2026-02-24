@@ -125,6 +125,7 @@ describe('TopSearchService', () => {
       expect(result.ok).toBe(true);
       expect(result.data).toHaveLength(2);
       expect(result.pagination).toEqual({ total: 2, count: 2, offset: 0, limit: 10 });
+      expect(result.metadata?.generatedAt).toEqual(expect.any(String));
     });
 
     it('should convert unix epoch timestamps to ISO 8601 strings', () => {
@@ -180,6 +181,7 @@ describe('TopSearchService', () => {
       expect(result!.ok).toBe(true);
       expect(result!.data).toHaveLength(0);
       expect(result!.pagination.total).toBe(0);
+      expect(result!.metadata?.generatedAt).toEqual(expect.any(String));
     });
 
     it('should preserve pagination params in empty error result', () => {

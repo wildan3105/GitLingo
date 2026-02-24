@@ -374,6 +374,9 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
     "count": 10,
     "offset": 0,
     "limit": 10
+  },
+  "metadata": {
+    "generatedAt": "2026-02-19T01:16:28.050Z"
   }
 }
 ```
@@ -397,6 +400,13 @@ Paginated leaderboard of the most-searched usernames. A record is created (or it
 | `count` | `number` | Records in this response page |
 | `offset` | `number` | Offset used in this query |
 | `limit` | `number` | Limit used in this query |
+
+**Metadata fields:**
+
+| Field | Type | Always present | Description |
+|---|---|---|---|
+| `metadata` | `object` | ❌ | Response metadata |
+| `metadata.generatedAt` | `string` | ❌ | ISO 8601 timestamp of when this response was generated |
 
 > **Ordering:** by `hit` descending, then `username` ascending for ties.
 
