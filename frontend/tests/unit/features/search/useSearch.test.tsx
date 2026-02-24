@@ -2,12 +2,14 @@
  * useSearch Hook Tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useSearch } from '../../../../src/features/search/hooks/useSearch'
 import * as gitlingoApi from '../../../../src/services/gitlingoApi'
 import type { ApiResponse } from '../../../../src/contracts/api'
+
+const DEFAULT_TITLE = 'GitLingo - Visualize GitHub Language Statistics'
 
 // Create a wrapper with QueryClient for testing hooks that use React Query
 function createWrapper() {
@@ -44,8 +46,13 @@ function createWrapperWithClient() {
 describe('useSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Reset URL to root before each test
+    // Reset URL and document title before each test
     window.history.pushState({}, '', '/')
+    document.title = DEFAULT_TITLE
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   describe('initial state', () => {
@@ -704,6 +711,64 @@ describe('useSearch', () => {
       // Should stay on root
       expect(window.location.pathname).toBe('/')
     })
+
+    it('resets URL to / when error occurs after a previous successful search', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      }
+
+      const mockErrorResponse: ApiResponse = {
+        ok: false,
+        provider: 'github',
+        error: { code: 'user_not_found', message: 'User not found' },
+        meta: { generatedAt: '2024-01-01T00:00:00Z' },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+        .mockResolvedValueOnce(mockSuccessResponse)
+        .mockResolvedValueOnce(mockErrorResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      // First search — success, URL becomes /github/octocat
+      act(() => { result.current.setUsername('octocat') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(window.location.pathname).toBe('/github/octocat'))
+
+      // Second search — error, URL must reset to /
+      act(() => { result.current.setUsername('notexist') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(window.location.pathname).toBe('/'))
+    })
+
+    it('keeps URL at / when first search returns an error', async () => {
+      const mockErrorResponse: ApiResponse = {
+        ok: false,
+        provider: 'github',
+        error: { code: 'user_not_found', message: 'User not found' },
+        meta: { generatedAt: '2024-01-01T00:00:00Z' },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(mockErrorResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      act(() => { result.current.setUsername('notexist') })
+      act(() => { result.current.handleSearch() })
+
+      await waitFor(() => expect(result.current.error).not.toBeNull())
+      expect(window.location.pathname).toBe('/')
+    })
   })
 
   describe('handleSearchFor', () => {
@@ -935,7 +1000,7 @@ describe('useSearch', () => {
       })
     })
 
-    it('does NOT invalidate topSearch cache when the search returns an error', async () => {
+    it('does not invalidate topSearch cache when the search returns an error', async () => {
       const { queryClient, wrapper } = createWrapperWithClient()
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
@@ -972,6 +1037,129 @@ describe('useSearch', () => {
       await waitFor(() => {
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['topSearch'] })
       })
+    })
+  })
+
+  describe('document.title', () => {
+    it('sets dynamic title on successful search', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(mockSuccessResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      act(() => { result.current.setUsername('octocat') })
+      act(() => { result.current.handleSearch() })
+
+      await waitFor(() => {
+        expect(document.title).toBe('GitLingo • github • octocat')
+      })
+    })
+
+    it('resets title to default when error occurs after a successful search', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      }
+
+      const mockErrorResponse: ApiResponse = {
+        ok: false,
+        provider: 'github',
+        error: { code: 'user_not_found', message: 'User not found' },
+        meta: { generatedAt: '2024-01-01T00:00:00Z' },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics')
+        .mockResolvedValueOnce(mockSuccessResponse)
+        .mockResolvedValueOnce(mockErrorResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      // First search — success
+      act(() => { result.current.setUsername('octocat') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
+
+      // Second search — error
+      act(() => { result.current.setUsername('notexist') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(document.title).toBe(DEFAULT_TITLE))
+    })
+
+    it('resets title to default when handleReset is called', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(mockSuccessResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      act(() => { result.current.setUsername('octocat') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
+
+      act(() => { result.current.handleReset() })
+      expect(document.title).toBe(DEFAULT_TITLE)
+    })
+
+    it('resets title to default when username field is cleared after a successful search', async () => {
+      const mockSuccessResponse: ApiResponse = {
+        ok: true,
+        provider: 'github',
+        profile: {
+          username: 'octocat',
+          name: 'The Octocat',
+          avatarUrl: 'https://example.com/avatar.png',
+          type: 'user',
+          providerUserId: '123',
+        },
+        data: [],
+        metadata: { generatedAt: '2024-01-01T00:00:00Z', unit: 'repos', limit: 100 },
+      }
+
+      vi.spyOn(gitlingoApi, 'searchLanguageStatistics').mockResolvedValue(mockSuccessResponse)
+
+      const { result } = renderHook(() => useSearch(), { wrapper: createWrapper() })
+
+      act(() => { result.current.setUsername('octocat') })
+      act(() => { result.current.handleSearch() })
+      await waitFor(() => expect(document.title).toBe('GitLingo • github • octocat'))
+
+      window.history.pushState({}, '', '/github/octocat')
+      act(() => { result.current.setUsername('') })
+      expect(document.title).toBe(DEFAULT_TITLE)
     })
   })
 })

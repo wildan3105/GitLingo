@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '../../../src/test/test-utils'
+import { render, screen } from '../../../src/test/testUtils'
 import { Card } from '../../../src/shared/components/Card'
 
 describe('Card', () => {

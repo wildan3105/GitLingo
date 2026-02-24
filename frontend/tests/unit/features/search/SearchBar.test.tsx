@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '../../../../src/test/test-utils'
+import { render, screen, waitFor } from '../../../../src/test/testUtils'
 import { SearchBar } from '../../../../src/features/search/components/SearchBar'
 import userEvent from '@testing-library/user-event'
 
