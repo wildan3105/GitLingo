@@ -84,6 +84,42 @@ describe('LoadingState', () => {
     })
   })
 
+  describe('profile variant — responsive action buttons', () => {
+    it('action buttons are icon-sized on mobile (w-9)', () => {
+      const { container } = render(<LoadingState variant="profile" />)
+      const buttons = container.querySelectorAll('.rounded-lg')
+      buttons.forEach((btn) => {
+        expect(btn.className).toContain('w-9')
+      })
+    })
+
+    it('action buttons expand on sm+ (sm:w-28)', () => {
+      const { container } = render(<LoadingState variant="profile" />)
+      const buttons = container.querySelectorAll('.rounded-lg')
+      buttons.forEach((btn) => {
+        expect(btn.className).toContain('sm:w-28')
+      })
+    })
+  })
+
+  describe('chartPanel variant — responsive subtitle', () => {
+    it('subtitle bar is full-width on mobile (w-full)', () => {
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const header = status.querySelector('.space-y-1')
+      const subtitle = header?.children[1]
+      expect(subtitle?.className).toContain('w-full')
+    })
+
+    it('subtitle bar is constrained on sm+ (sm:w-72)', () => {
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const header = status.querySelector('.space-y-1')
+      const subtitle = header?.children[1]
+      expect(subtitle?.className).toContain('sm:w-72')
+    })
+  })
+
   describe('profile variant — responsive row 2', () => {
     it('metadata row stacks vertically on mobile (flex-col base)', () => {
       const { container } = render(<LoadingState variant="profile" />)

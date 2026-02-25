@@ -3,7 +3,7 @@
  * Handles timeouts, error transformation, and logging
  */
 
-const DEFAULT_TIMEOUT = 30000 // 30 seconds
+const DEFAULT_TIMEOUT = 75000 // 75 seconds
 const isDev = import.meta.env.MODE === 'development'
 
 /**
