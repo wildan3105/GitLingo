@@ -104,7 +104,7 @@ function ProfileSkeleton() {
       </div>
 
       {/* Row 2: @username + joined + stat | location + website + last updated */}
-      <div className="flex items-center justify-between gap-4 pt-2 border-t border-secondary-100">
+      <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-2 md:gap-4 pt-2 border-t border-secondary-100">
         <div className="flex items-center gap-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-20" />
@@ -126,7 +126,7 @@ function ProfileSkeleton() {
 function KpiCardsSkeleton() {
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       role="status"
       aria-live="polite"
       aria-label="Loading metrics"
@@ -161,7 +161,7 @@ function ChartPanelSkeleton() {
       </div>
 
       {/* Unified toolbar: left (chart types) | middle (top-N) | right (dropdowns) */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-secondary-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-secondary-200">
         {/* Left: 3 chart type buttons */}
         <div className="flex gap-1.5">
           {[1, 2, 3].map((i) => (

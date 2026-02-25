@@ -41,4 +41,67 @@ describe('LoadingState', () => {
     render(<LoadingState variant="default" />)
     expect(screen.getByText('Loading...')).toHaveClass('sr-only')
   })
+
+  describe('kpiCards variant — responsive grid', () => {
+    it('uses 2-column grid on mobile (not 1-column)', () => {
+      render(<LoadingState variant="kpiCards" />)
+      const grid = screen.getByLabelText('Loading metrics')
+      expect(grid).toHaveClass('grid-cols-2')
+      expect(grid).not.toHaveClass('grid-cols-1')
+    })
+
+    it('expands to 4-column grid on desktop (lg+)', () => {
+      render(<LoadingState variant="kpiCards" />)
+      const grid = screen.getByLabelText('Loading metrics')
+      expect(grid.className).toContain('lg:grid-cols-4')
+    })
+
+    it('renders exactly 4 skeleton cards', () => {
+      const { container } = render(<LoadingState variant="kpiCards" />)
+      const cards = container.querySelectorAll('[aria-label="Loading metrics"] > div')
+      expect(cards).toHaveLength(4)
+    })
+  })
+
+  describe('chartPanel variant — responsive toolbar', () => {
+    it('toolbar stacks vertically on mobile (flex-col base)', () => {
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const toolbar = status.querySelector('.border-b')
+
+      expect(toolbar).not.toBeNull()
+      expect(toolbar).toHaveClass('flex-col')
+    })
+
+    it('toolbar goes horizontal at sm breakpoint (not lg)', () => {
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const toolbar = status.querySelector('.border-b')
+
+      expect(toolbar).not.toBeNull()
+      expect(toolbar).toHaveClass('sm:flex-row')
+      expect(toolbar).not.toHaveClass('lg:flex-row')
+    })
+  })
+
+  describe('profile variant — responsive row 2', () => {
+    it('metadata row stacks vertically on mobile (flex-col base)', () => {
+      const { container } = render(<LoadingState variant="profile" />)
+      const row2 = container.querySelector('.border-t')
+      expect(row2).toHaveClass('flex-col')
+    })
+
+    it('metadata row goes horizontal at md breakpoint (md:flex-row)', () => {
+      const { container } = render(<LoadingState variant="profile" />)
+      const row2 = container.querySelector('.border-t')
+      expect(row2?.className).toContain('md:flex-row')
+    })
+
+    it('metadata row alignment is unchanged on desktop (md:items-center md:justify-between)', () => {
+      const { container } = render(<LoadingState variant="profile" />)
+      const row2 = container.querySelector('.border-t')
+      expect(row2?.className).toContain('md:items-center')
+      expect(row2?.className).toContain('md:justify-between')
+    })
+  })
 })
