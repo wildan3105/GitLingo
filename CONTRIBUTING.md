@@ -10,10 +10,10 @@ Here are the steps to contribute to this project :
 ## Contribute :
 - **IMPORTANT** : Please claim the issue you want to solve first
 - Fork the repository
-- Create a branch with prefix: `feature / bugfix / refactor / config` from `master` branch
+- Create a branch with prefix: `feature / bugfix / refactor / config` from `main` branch
 - Commit the change
 - Push the change to your branch
-- Create a pull request to the `master` branch
+- Create a pull request to the `main` branch
 - Make sure the unit tests are passed
 
 ## Contributor(s)
