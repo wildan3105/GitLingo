@@ -10,7 +10,11 @@
     @apply box-border;
   }
 
+  html {
+    @apply overflow-x-hidden;
+  }
+
   body {
-    @apply m-0 font-sans antialiased;
+    @apply m-0 font-sans antialiased overflow-x-hidden;
   }
 }

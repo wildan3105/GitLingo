@@ -13,6 +13,7 @@ import { EmptyState } from '../../shared/components/EmptyState'
 import { ErrorState } from '../../shared/components/ErrorState'
 import { Button } from '../../shared/components/Button'
 import { LoadingState } from '../../shared/components/LoadingState'
+import { SearchLoadingIndicator } from './components/SearchLoadingIndicator'
 import { KPICard } from '../../shared/components/KPICard'
 import type { LanguageData } from '../../contracts/api'
 
@@ -318,19 +319,25 @@ export function SearchPage() {
             </div>
           </Card>
 
-          {/* Loading Skeletons - Show during loading after a search */}
-          {isLoading && username && (
-            <>
-              <Card padding="lg">
-                <LoadingState variant="profile" />
-              </Card>
+          {/* Loading indicator + skeletons — grouped to control inner spacing */}
+          {isLoading && (
+            <div className="space-y-4">
+              <SearchLoadingIndicator />
 
-              <LoadingState variant="kpiCards" />
+              {username && (
+                <div className="space-y-4">
+                  <Card padding="lg">
+                    <LoadingState variant="profile" />
+                  </Card>
 
-              <Card padding="lg">
-                <LoadingState variant="chartPanel" />
-              </Card>
-            </>
+                  <LoadingState variant="kpiCards" />
+
+                  <Card padding="lg">
+                    <LoadingState variant="chartPanel" />
+                  </Card>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Profile Header - Show for any successful search */}

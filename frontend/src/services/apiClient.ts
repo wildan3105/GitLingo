@@ -3,7 +3,10 @@
  * Handles timeouts, error transformation, and logging
  */
 
-const DEFAULT_TIMEOUT = 30000 // 30 seconds
+// Default timeout for API requests
+// We set it to 100s at the moment to accommodate large accounts
+// In the future, we can use a background job to handle long-running tasks and return a job ID for polling instead of waiting for the request to complete
+const DEFAULT_TIMEOUT = 100000 // 100 seconds
 const isDev = import.meta.env.MODE === 'development'
 
 /**

@@ -67,6 +67,49 @@
   opacity: 0;
 }
 
+/* Slow-search indicator: equalizer bar bounce */
+@keyframes waveBar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Cycling message slide-up when text changes */
+@keyframes messageCycle {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-cycle {
+  animation: messageCycle 0.25s ease-out forwards;
+}
+
+/* Slow-search indicator: container fade-in + slide down */
+@keyframes slowSearchEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slow-search-enter {
+  animation: slowSearchEnter 0.35s ease-out forwards;
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
@@ -81,6 +124,13 @@
   .animate-delay-200,
   .animate-delay-300 {
     animation-delay: 0ms !important;
+  }
+
+  .slow-search-enter,
+  .animate-message-cycle {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   /* Disable all micro-interactions for reduced motion */

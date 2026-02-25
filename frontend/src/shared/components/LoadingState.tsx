@@ -90,16 +90,16 @@ function ProfileSkeleton() {
     <div className="space-y-3" role="status" aria-live="polite" aria-label="Loading profile">
       {/* Row 1: Avatar + Name + Badge | Action Buttons */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <Skeleton className="h-14 w-14 rounded-full flex-shrink-0" />
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-36" />
-            <Skeleton className="h-5 w-16 rounded-full" />
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <Skeleton className="h-6 w-24 sm:w-36 min-w-0" />
+            <Skeleton className="h-5 w-16 rounded-full flex-shrink-0" />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-28 rounded-lg" />
-          <Skeleton className="h-9 w-28 rounded-lg" />
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Skeleton className="h-9 w-9 sm:w-28 rounded-lg" />
+          <Skeleton className="h-9 w-9 sm:w-28 rounded-lg" />
         </div>
       </div>
 
@@ -157,7 +157,7 @@ function ChartPanelSkeleton() {
       {/* Header */}
       <div className="space-y-1">
         <Skeleton className="h-7 w-44" />
-        <Skeleton className="h-4 w-72" />
+        <Skeleton className="h-4 w-full sm:w-72" />
       </div>
 
       {/* Unified toolbar: left (chart types) | middle (top-N) | right (dropdowns) */}
