@@ -2,7 +2,7 @@ name: Deploy Frontend (gitlingo.app)
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     paths:
       - "frontend/**" 
       - ".github/workflows/deploy-frontend.yml"
