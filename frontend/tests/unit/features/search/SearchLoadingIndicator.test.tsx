@@ -50,7 +50,9 @@ describe('SearchLoadingIndicator', () => {
     it('advances to the next message after MESSAGE_INTERVAL_MS', () => {
       render(<SearchLoadingIndicator />)
 
-      act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+      act(() => {
+        vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+      })
 
       expect(screen.getByText(LOADING_MESSAGES[1])).toBeInTheDocument()
     })
@@ -60,14 +62,18 @@ describe('SearchLoadingIndicator', () => {
 
       LOADING_MESSAGES.forEach((_, i) => {
         expect(screen.getByText(LOADING_MESSAGES[i])).toBeInTheDocument()
-        act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+        act(() => {
+          vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+        })
       })
     })
 
     it('does not show two messages simultaneously', () => {
       render(<SearchLoadingIndicator />)
 
-      act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+      act(() => {
+        vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+      })
 
       expect(screen.queryByText(LOADING_MESSAGES[0])).not.toBeInTheDocument()
       expect(screen.getByText(LOADING_MESSAGES[1])).toBeInTheDocument()
@@ -78,13 +84,17 @@ describe('SearchLoadingIndicator', () => {
 
       // Each step needs its own act so the re-render schedules the next setTimeout
       for (let i = 0; i < LOADING_MESSAGES.length - 1; i++) {
-        act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+        act(() => {
+          vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+        })
       }
 
       expect(screen.getByText(LOADING_MESSAGES[LOADING_MESSAGES.length - 1])).toBeInTheDocument()
 
       // Further advancement must NOT loop back to the first message
-      act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS * 3) })
+      act(() => {
+        vi.advanceTimersByTime(MESSAGE_INTERVAL_MS * 3)
+      })
 
       expect(screen.getByText(LOADING_MESSAGES[LOADING_MESSAGES.length - 1])).toBeInTheDocument()
       expect(screen.queryByText(LOADING_MESSAGES[0])).not.toBeInTheDocument()
@@ -96,7 +106,9 @@ describe('SearchLoadingIndicator', () => {
       STEP_PROGRESS.forEach((pct, i) => {
         expect(screen.getByTestId('progress-value')).toHaveTextContent(`${pct}%`)
         if (i < STEP_PROGRESS.length - 1) {
-          act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+          act(() => {
+            vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+          })
         }
       })
     })
@@ -105,7 +117,9 @@ describe('SearchLoadingIndicator', () => {
       render(<SearchLoadingIndicator />)
 
       for (let i = 0; i < LOADING_MESSAGES.length - 1; i++) {
-        act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+        act(() => {
+          vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+        })
       }
 
       expect(screen.getByTestId('progress-value')).toHaveTextContent('95%')
@@ -115,10 +129,14 @@ describe('SearchLoadingIndicator', () => {
       render(<SearchLoadingIndicator />)
 
       for (let i = 0; i < LOADING_MESSAGES.length - 1; i++) {
-        act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS) })
+        act(() => {
+          vi.advanceTimersByTime(MESSAGE_INTERVAL_MS)
+        })
       }
       // Extra advancement past all steps
-      act(() => { vi.advanceTimersByTime(MESSAGE_INTERVAL_MS * 10) })
+      act(() => {
+        vi.advanceTimersByTime(MESSAGE_INTERVAL_MS * 10)
+      })
 
       expect(screen.queryByText('100%')).not.toBeInTheDocument()
     })
