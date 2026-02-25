@@ -65,16 +65,22 @@ describe('LoadingState', () => {
 
   describe('chartPanel variant — responsive toolbar', () => {
     it('toolbar stacks vertically on mobile (flex-col base)', () => {
-      const { container } = render(<LoadingState variant="chartPanel" />)
-      const toolbar = container.querySelector('.border-b')
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const toolbar = status.querySelector('.border-b')
+
+      expect(toolbar).not.toBeNull()
       expect(toolbar).toHaveClass('flex-col')
     })
 
     it('toolbar goes horizontal at sm breakpoint (not lg)', () => {
-      const { container } = render(<LoadingState variant="chartPanel" />)
-      const toolbar = container.querySelector('.border-b')
-      expect(toolbar?.className).toContain('sm:flex-row')
-      expect(toolbar?.className).not.toContain('lg:flex-row')
+      render(<LoadingState variant="chartPanel" />)
+      const status = screen.getByRole('status')
+      const toolbar = status.querySelector('.border-b')
+
+      expect(toolbar).not.toBeNull()
+      expect(toolbar).toHaveClass('sm:flex-row')
+      expect(toolbar).not.toHaveClass('lg:flex-row')
     })
   })
 
