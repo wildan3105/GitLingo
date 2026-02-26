@@ -132,8 +132,7 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contrib
 
 ## Similar Projects
 - [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) - A popular project that generates GitHub stats as images for README files.
-- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown
-) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
+- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
 - [github-profile-languages](https://github.com/IonicaBizau/github-profile-languages) - A project that visualizes the programming languages used in a GitHub profile.
 - [metrics](https://github.com/lowlighter/metrics) - A project that provides insights into GitHub repositories and user activity via GitHub Actions and generates a profile README.
 
