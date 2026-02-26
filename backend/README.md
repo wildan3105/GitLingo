@@ -116,9 +116,9 @@ LOG_LEVEL=info
 # GitHub Token (OPTIONAL - see note below)
 GITHUB_TOKEN=your_token_here
 
-# CORS — comma-separated list of allowed frontend origins
-# Default: http://localhost:5173  (must be set explicitly in production) - usually the app actual URL i.e. https://gitlingo.app
-ALLOWED_ORIGINS=http://localhost:5173
+# CORS - comma-separated list of allowed frontend origins
+# Default: http://localhost:5173 (must be set explicitly in production)
+# In production, use your actual app URL (e.g., https://gitlingo.app)
 
 # SQLite database path (relative to project root)
 DB_PATH=./data/gitlingo.db
