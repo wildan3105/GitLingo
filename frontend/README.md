@@ -86,47 +86,22 @@ npm run preview
 ```
 frontend/
 ├── src/
-│   ├── app/              # App-level components and providers
-│   │   ├── App.tsx
-│   │   └── providers.tsx
-│   ├── features/         # Feature-based modules
-│   │   ├── search/       # Search feature
-│   │   │   ├── SearchPage.tsx
-│   │   │   ├── components/   # SearchBar, ProviderSelect, ResultHeader, MostSearched
-│   │   │   ├── hooks/        # useSearch
-│   │   │   └── utils/        # validation, pyramidRows
-│   │   ├── charts/       # Charts feature
-│   │   │   ├── components/   # ChartPanel, ChartTypeSelect, BarChartView, PieChartView, PolarAreaChartView
-│   │   │   ├── config/       # chartDefaults
-│   │   │   └── utils/        # normalizeData, aggregateTopN, downloadChart
-│   │   └── export/       # Export feature (CSV)
-│   │       └── utils/        # exportToCSV
-│   ├── services/         # API clients
-│   ├── contracts/        # API types (mirrors backend)
-│   ├── shared/           # Shared components, hooks, utils
-│   │   ├── components/   # Button, Card, Checkbox, Dropdown, EmptyState, ErrorBoundary,
-│   │   │                 # ErrorState, KPICard, LoadingState, SegmentedControl, Select, Toast
-│   │   ├── hooks/        # useToast
-│   │   ├── styles/       # animations.css
-│   │   └── utils/        # formatDuration
-│   ├── styles/           # Global styles
-│   └── test/             # Test utilities and setup
+│   ├── app/          # App entry, providers
+│   ├── features/     # Feature modules (search, charts, export)
+│   │   └── <feature>/
+│   │       ├── components/
+│   │       ├── hooks/
+│   │       └── utils/
+│   ├── shared/       # Reusable components, hooks, styles, utils
+│   ├── services/     # API clients
+│   ├── contracts/    # API types (mirrors backend)
+│   ├── styles/       # Global styles
+│   └── test/         # Test utilities and setup
 ├── tests/
-│   ├── unit/             # Unit tests (features, services, shared)
-│   └── integration/      # Integration tests
-└── public/               # Static assets
+│   ├── unit/         # Unit tests
+│   └── integration/  # Integration tests
+└── public/           # Static assets
 ```
-
-## Git Hooks
-
-Pre-commit hooks automatically run:
-- Code formatting (Prettier)
-- Linting with auto-fix (ESLint)
-- Type checking (TypeScript)
-
-Pre-push hooks run:
-- All tests
-- Type checking
 
 ## Testing
 
@@ -135,9 +110,6 @@ We use Vitest and React Testing Library for testing:
 ```bash
 # Run tests in watch mode
 npm test
-
-# Run tests once
-npm test -- --run
 
 # Run tests with coverage
 npm run test:coverage
@@ -149,22 +121,6 @@ npm run test:coverage
 - **Linting**: ESLint with React and TypeScript rules
 - **Type Safety**: TypeScript strict mode
 
-## Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `dev` | Start development server |
-| `build` | Build for production |
-| `preview` | Preview production build |
-| `test` | Run tests in watch mode |
-| `test:ui` | Run tests with UI |
-| `test:coverage` | Run tests with coverage |
-| `typecheck` | Run TypeScript type checking |
-| `lint` | Lint code |
-| `lint:fix` | Fix linting issues |
-| `format` | Format code with Prettier |
-| `format:check` | Check code formatting |
-
 ## Environment Variables
 
 Create a `.env` file in the frontend directory:
@@ -172,12 +128,3 @@ Create a `.env` file in the frontend directory:
 ```env
 VITE_API_BASE_URL=http://localhost:3001
 ```
-
-## Documentation
-
-- [Frontend Specification](../internal-docs/spec/frontend-spec.md)
-- [Product Specification](../internal-docs/spec/product-spec.md)
-
-## License
-
-MIT

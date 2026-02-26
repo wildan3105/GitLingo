@@ -8,9 +8,9 @@
 
 > Visualize your GitHub programming language statistics with beautiful interactive charts
 
-## Demo
+## Overview
 
-[demo.mp4](https://github.com/user-attachments/assets/c4fa980d-4989-4348-b3dd-44a89d5c81c4)
+[demo.mp4](https://github.com/user-attachments/assets/ba651b03-92b9-4c12-8531-1d4bc9dbfa48)
 
 ### Live Demo
 
@@ -21,7 +21,7 @@ Access the demo [here](https://gitlingo.app)
 | | Feature | Description |
 |---|---|---|
 | 🔍 | **Username Search** | Search any public GitHub user or organization by username and instantly visualize their programming language distribution. |
-| 🏢 | **Private GitHub Enterprise (GHE)** | Works with any self-hosted GHE instance — GitLingo auto-derives the correct profile URLs directly from the API response. (See [here](./backend/README.md) for details on setup) |
+| 🏢 | **Private GitHub Enterprise (GHE)** | Works with any self-hosted GHE instance — GitLingo auto-derives the profile details and language distribution from the API. (See [here](./backend/README.md#configuration) for details on setup) |
 | 📊 | **Three Interactive Chart Types** | Switch between Bar, Pie, and Polar Area charts in one click without re-triggering the API or losing your filter state. |
 | 🎯 | **Top-N Language Aggregation** | Slice results to Top 10, Top 25, or all detected languages, with overflow automatically folded into a unified "Others" slice. |
 | 🔧 | **Fork & Unknown Language Filtering** | Toggle forked repos and repositories with no detected language independently, isolating only the signal that matters. |
@@ -53,7 +53,6 @@ Access the demo [here](https://gitlingo.app)
 
 - **Node.js**: v24 or higher — or **Bun**: v1.3.9 or higher
 - **GitHub Token**: Personal access token with `read:org, read:user, user:email` scopes
-- **Git**: For cloning the repository
 
 ### Installation
 
@@ -123,50 +122,9 @@ npm run test:coverage # Coverage report
 **Frontend Tests**:
 ```bash
 cd frontend
-npm test              # Run all tests
-npm run test:watch   # Watch mode
+npm test              # Run all tests in watch mode
 npm run test:coverage # Coverage report
 ```
-
-## Deployment
-
-### Backend Deployment
-
-**Docker**:
-```bash
-cd backend
-docker build -t gitlingo-backend .
-docker run -p 3001:3001 --env-file .env gitlingo-backend
-```
-
-**Environment Variables**: Ensure all variables from `.env.example` are set in your deployment platform.
-
-### Frontend Deployment
-
-**Build for Production**:
-```bash
-cd frontend
-npm run build       # Creates dist/ folder
-npm run preview     # Preview production build locally
-```
-
-**Environment Variables**: Set `VITE_API_BASE_URL` to your deployed backend URL.
-
-## Architecture Highlights
-
-### Backend (DDD Architecture)
-- **Domain Layer** (`domain/`): Core entities and outbound port interfaces
-- **Application Layer** (`application/`): Use cases, service orchestration, inbound ports
-- **Infrastructure Layer** (`infrastructure/`): GitHub API provider, SQLite persistence, error handling
-- **Interface Layer** (`interfaces/`): HTTP controllers, routes, middleware, request validation
-- **Shared Layer** (`shared/`): Config, constants, shared types and utilities
-
-### Frontend (Feature-Based Architecture)
-- **App** (`app/`): Root providers and application entry point
-- **Feature Modules** (`features/`): Self-contained features — `search`, `charts`, `export`
-- **Services** (`services/`): API client and data-fetching layer
-- **Contracts** (`contracts/`): API response types and type guards
-- **Shared** (`shared/`): Reusable components, hooks, styles, and utilities
 
 ## Contributing
 
@@ -174,9 +132,9 @@ Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contrib
 
 ## Similar Projects
 - [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) - A popular project that generates GitHub stats as images for README files.
-- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown
-) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
+- [github-user-language-breakdown](https://github.com/TraceLD/github-user-language-breakdown) - A project that provides a breakdown of a GitHub user's languages in a simple format (but looks like the app is no longer maintained and has some issues with the GitHub API).
 - [github-profile-languages](https://github.com/IonicaBizau/github-profile-languages) - A project that visualizes the programming languages used in a GitHub profile.
+- [metrics](https://github.com/lowlighter/metrics) - A project that provides insights into GitHub repositories and user activity via GitHub Actions and generates a profile README.
 
 ## License
 
