@@ -10,6 +10,12 @@
 
 ## Overview
 
+### Screenshot
+
+![Language stats](./images/gitlingo-lang-stats.png)
+
+### Demo Video
+
 [demo.mp4](https://github.com/user-attachments/assets/ba651b03-92b9-4c12-8531-1d4bc9dbfa48)
 
 ### Live Demo
